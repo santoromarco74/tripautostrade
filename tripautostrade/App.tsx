@@ -4,11 +4,13 @@ import HomeScreen from './screens/HomeScreen';
 import ReviewsScreen from './screens/ReviewsScreen';
 import AddReviewScreen from './screens/AddReviewScreen';
 import { RootStackParamList } from './types/navigation';
+import { ReviewsProvider } from './context/ReviewsContext';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
+    <ReviewsProvider>
     <NavigationContainer>
       <Stack.Navigator>
         <Stack.Screen
@@ -28,5 +30,6 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </ReviewsProvider>
   );
 }

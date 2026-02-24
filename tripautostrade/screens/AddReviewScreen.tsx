@@ -12,9 +12,11 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { AddReviewScreenProps } from '../types/navigation';
+import { useReviews } from '../context/ReviewsContext';
 
 export default function AddReviewScreen({ route, navigation }: AddReviewScreenProps) {
   const { area } = route.params;
+  const { addReview } = useReviews();
   const [stelle, setStelle] = useState(0);
   const [commento, setCommento] = useState('');
   const [foto, setFoto] = useState<string | null>(null);
@@ -45,6 +47,18 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       Alert.alert('Commento troppo corto', 'Scrivi almeno 10 caratteri.');
       return;
     }
+    const oggi = new Date();
+    const data = oggi.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
+
+    addReview({
+      areaId: area.id,
+      autore: 'Tu',
+      stelle,
+      testo: commento.trim(),
+      data,
+      ...(foto ? { fotoUri: foto } : {}),
+    });
+
     Alert.alert('Recensione inviata con successo!', undefined, [
       { text: 'OK', onPress: () => navigation.goBack() },
     ]);

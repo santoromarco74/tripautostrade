@@ -1,45 +1,7 @@
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { ReviewScreenProps } from '../types/navigation';
 import { Ionicons } from '@expo/vector-icons';
-
-interface Recensione {
-  id: string;
-  autore: string;
-  stelle: number;
-  testo: string;
-  data: string;
-}
-
-const RECENSIONI_MOCK: Recensione[] = [
-  {
-    id: '1',
-    autore: 'Marco R.',
-    stelle: 5,
-    testo: 'Ottimo bar, caffè eccellente e personale gentile. Bagni puliti.',
-    data: '12 feb 2026',
-  },
-  {
-    id: '2',
-    autore: 'Laura M.',
-    stelle: 3,
-    testo: 'Nella norma per un autogrill. Code alla cassa abbastanza lunghe.',
-    data: '5 feb 2026',
-  },
-  {
-    id: '3',
-    autore: 'Giorgio P.',
-    stelle: 4,
-    testo: 'Buona selezione di panini e tavoli disponibili. Prezzi ok.',
-    data: '28 gen 2026',
-  },
-  {
-    id: '4',
-    autore: 'Silvia T.',
-    stelle: 2,
-    testo: 'Parcheggio sovraffollato, lunga attesa al banco.',
-    data: '20 gen 2026',
-  },
-];
+import { ReviewScreenProps } from '../types/navigation';
+import { useReviews } from '../context/ReviewsContext';
 
 function Stelle({ numero }: { numero: number }) {
   return (
@@ -51,27 +13,41 @@ function Stelle({ numero }: { numero: number }) {
 
 export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) {
   const { area } = route.params;
+  const { recensioni } = useReviews();
 
-  const mediaValutazione = (
-    RECENSIONI_MOCK.reduce((acc, r) => acc + r.stelle, 0) / RECENSIONI_MOCK.length
-  ).toFixed(1);
+  const recensioniArea = recensioni.filter((r) => r.areaId === area.id);
+
+  const mediaValutazione =
+    recensioniArea.length > 0
+      ? (recensioniArea.reduce((acc, r) => acc + r.stelle, 0) / recensioniArea.length).toFixed(1)
+      : null;
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.nomeArea}>{area.nome}</Text>
         <Text style={styles.brandArea}>{area.brand} · {area.autostrada}</Text>
-        <View style={styles.mediaRow}>
-          <Text style={styles.mediaNumero}>{mediaValutazione}</Text>
-          <Stelle numero={Math.round(Number(mediaValutazione))} />
-          <Text style={styles.mediaContegg}>({RECENSIONI_MOCK.length} recensioni)</Text>
-        </View>
+        {mediaValutazione ? (
+          <View style={styles.mediaRow}>
+            <Text style={styles.mediaNumero}>{mediaValutazione}</Text>
+            <Stelle numero={Math.round(Number(mediaValutazione))} />
+            <Text style={styles.mediaContegg}>({recensioniArea.length} recensioni)</Text>
+          </View>
+        ) : (
+          <Text style={styles.nessunaRecensione}>Nessuna recensione ancora</Text>
+        )}
       </View>
 
       <FlatList
-        data={RECENSIONI_MOCK}
+        data={recensioniArea}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.lista}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Ionicons name="chatbubble-outline" size={48} color="#ccc" />
+            <Text style={styles.emptyTesto}>Sii il primo a recensire quest'area!</Text>
+          </View>
+        }
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
@@ -137,9 +113,23 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#888',
   },
+  nessunaRecensione: {
+    fontSize: 14,
+    color: '#aaa',
+    fontStyle: 'italic',
+  },
   lista: {
     padding: 16,
     gap: 12,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingTop: 60,
+    gap: 12,
+  },
+  emptyTesto: {
+    fontSize: 15,
+    color: '#aaa',
   },
   card: {
     backgroundColor: '#fff',
