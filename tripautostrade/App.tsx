@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import * as Location from 'expo-location';
-import MapView from 'react-native-maps';
+import MapView, { Marker, Callout } from 'react-native-maps';
+import { AREE_SERVIZIO } from './data/areeServizio';
 
 export default function App() {
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
@@ -42,7 +43,24 @@ export default function App() {
         latitudeDelta: 0.05,
         longitudeDelta: 0.05,
       }}
-    />
+    >
+      {AREE_SERVIZIO.map((area) => (
+        <Marker key={area.id} coordinate={area.coordinate}>
+          <Callout>
+            <View style={styles.callout}>
+              <Text style={styles.calloutNome}>{area.nome}</Text>
+              <Text style={styles.calloutBrand}>{area.brand}</Text>
+              <Text style={styles.calloutInfo}>
+                {area.autostrada} · {area.direzione}
+              </Text>
+              <Text style={styles.calloutStelle}>
+                {area.stelle} {area.valutazione}
+              </Text>
+            </View>
+          </Callout>
+        </Marker>
+      ))}
+    </MapView>
   );
 }
 
@@ -54,5 +72,27 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  callout: {
+    width: 200,
+    padding: 8,
+  },
+  calloutNome: {
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginBottom: 2,
+  },
+  calloutBrand: {
+    fontSize: 14,
+    color: '#555',
+    marginBottom: 4,
+  },
+  calloutInfo: {
+    fontSize: 13,
+    color: '#333',
+    marginBottom: 4,
+  },
+  calloutStelle: {
+    fontSize: 14,
   },
 });
