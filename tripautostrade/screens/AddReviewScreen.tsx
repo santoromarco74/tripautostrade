@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   ScrollView,
@@ -20,6 +21,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
   const [stelle, setStelle] = useState(0);
   const [commento, setCommento] = useState('');
   const [foto, setFoto] = useState<string | null>(null);
+  const [publishing, setPublishing] = useState(false);
 
   const sceglieFoto = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -38,7 +40,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
     }
   };
 
-  const pubblica = () => {
+  const pubblica = async () => {
     if (stelle === 0) {
       Alert.alert('Valutazione mancante', 'Seleziona almeno una stella.');
       return;
@@ -47,21 +49,22 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       Alert.alert('Commento troppo corto', 'Scrivi almeno 10 caratteri.');
       return;
     }
-    const oggi = new Date();
-    const data = oggi.toLocaleDateString('it-IT', { day: 'numeric', month: 'short', year: 'numeric' });
-
-    addReview({
-      areaId: area.id,
-      autore: 'Tu',
-      stelle,
-      testo: commento.trim(),
-      data,
-      ...(foto ? { fotoUri: foto } : {}),
-    });
-
-    Alert.alert('Recensione inviata con successo!', undefined, [
-      { text: 'OK', onPress: () => navigation.goBack() },
-    ]);
+    setPublishing(true);
+    try {
+      await addReview({
+        areaId: area.id,
+        stelle,
+        testo: commento.trim(),
+        ...(foto ? { fotoUri: foto } : {}),
+      });
+      Alert.alert('Recensione inviata con successo!', undefined, [
+        { text: 'OK', onPress: () => navigation.goBack() },
+      ]);
+    } catch {
+      Alert.alert('Errore', 'Impossibile inviare la recensione. Riprova.');
+    } finally {
+      setPublishing(false);
+    }
   };
 
   return (
@@ -128,8 +131,11 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       </View>
 
       {/* Pubblica */}
-      <TouchableOpacity style={styles.btnPubblica} onPress={pubblica}>
-        <Text style={styles.btnPubblicaTesto}>Pubblica</Text>
+      <TouchableOpacity style={[styles.btnPubblica, publishing && { opacity: 0.7 }]} onPress={pubblica} disabled={publishing}>
+        {publishing
+          ? <ActivityIndicator color="#fff" />
+          : <Text style={styles.btnPubblicaTesto}>Pubblica</Text>
+        }
       </TouchableOpacity>
     </ScrollView>
   );

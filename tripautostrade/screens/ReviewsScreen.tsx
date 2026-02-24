@@ -1,4 +1,4 @@
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ReviewScreenProps } from '../types/navigation';
 import { useReviews } from '../context/ReviewsContext';
@@ -13,7 +13,7 @@ function Stelle({ numero }: { numero: number }) {
 
 export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) {
   const { area } = route.params;
-  const { recensioni } = useReviews();
+  const { recensioni, isLoading } = useReviews();
 
   const recensioniArea = recensioni.filter((r) => r.areaId === area.id);
 
@@ -43,10 +43,14 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.lista}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Ionicons name="chatbubble-outline" size={48} color="#ccc" />
-            <Text style={styles.emptyTesto}>Sii il primo a recensire quest'area!</Text>
-          </View>
+          isLoading ? (
+            <ActivityIndicator size="large" color="#1a73e8" style={{ marginTop: 60 }} />
+          ) : (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="chatbubble-outline" size={48} color="#ccc" />
+              <Text style={styles.emptyTesto}>Sii il primo a recensire quest'area!</Text>
+            </View>
+          )
         }
         renderItem={({ item }) => (
           <View style={styles.card}>
