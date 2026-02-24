@@ -1,5 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import TabNavigator from './navigation/TabNavigator';
 import ReviewsScreen from './screens/ReviewsScreen';
 import AddReviewScreen from './screens/AddReviewScreen';
@@ -10,6 +11,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
+    <SafeAreaProvider>
     <ReviewsProvider>
       <NavigationContainer>
         <Stack.Navigator>
@@ -31,5 +33,6 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer>
     </ReviewsProvider>
+    </SafeAreaProvider>
   );
 }
