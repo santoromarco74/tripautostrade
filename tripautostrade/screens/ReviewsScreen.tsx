@@ -25,8 +25,8 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.nomeArea}>{area.nome}</Text>
-        <Text style={styles.brandArea}>{area.brand} · {area.autostrada}</Text>
+        <Text style={styles.nomeArea}>{area.name}</Text>
+        <Text style={styles.brandArea}>{area.brand} · {area.highway} Km {area.km}</Text>
         {mediaValutazione ? (
           <View style={styles.mediaRow}>
             <Text style={styles.mediaNumero}>{mediaValutazione}</Text>

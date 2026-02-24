@@ -1,10 +1,10 @@
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { AreaServizio } from '../data/areeServizio';
+import { ServiceArea } from '../data/serviceAreas';
 
 export type RootStackParamList = {
   Home: undefined;
-  Reviews: { area: AreaServizio };
-  AddReview: { area: AreaServizio };
+  Reviews: { area: ServiceArea };
+  AddReview: { area: ServiceArea };
 };
 
 export type HomeScreenProps = NativeStackScreenProps<RootStackParamList, 'Home'>;

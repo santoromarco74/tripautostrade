@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Alert, Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
-import { AREE_SERVIZIO, AreaServizio } from '../data/areeServizio';
+import { serviceAreasData, ServiceArea } from '../data/serviceAreas';
 import { HomeScreenProps } from '../types/navigation';
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
-  const [selectedArea, setSelectedArea] = useState<AreaServizio | null>(null);
+  const [selectedArea, setSelectedArea] = useState<ServiceArea | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -23,21 +23,20 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     })();
   }, []);
 
-  const apriNavigazione = (area: AreaServizio) => {
-    const { latitude, longitude } = area.coordinate;
+  const apriNavigazione = (area: ServiceArea) => {
     const url =
       Platform.OS === 'ios'
-        ? `maps://?daddr=${latitude},${longitude}`
-        : `google.navigation:q=${latitude},${longitude}`;
+        ? `maps://?daddr=${area.latitude},${area.longitude}`
+        : `google.navigation:q=${area.latitude},${area.longitude}`;
     Linking.openURL(url).catch(() => {
-      Linking.openURL(`https://maps.google.com/?q=${latitude},${longitude}`);
+      Linking.openURL(`https://maps.google.com/?q=${area.latitude},${area.longitude}`);
     });
   };
 
   if (permissionGranted === false) {
     return (
       <View style={styles.fallback}>
-        <Text>Permesso GPS negato. Impossibile trovare i ristori vicini.</Text>
+        <Text style={styles.fallbackTesto}>Permesso GPS negato. Impossibile trovare le aree di servizio vicine.</Text>
       </View>
     );
   }
@@ -54,14 +53,16 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         initialRegion={{
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
-          latitudeDelta: 0.05,
-          longitudeDelta: 0.05,
+          latitudeDelta: 2.5,
+          longitudeDelta: 2.5,
         }}
       >
-        {AREE_SERVIZIO.map((area) => (
+        {serviceAreasData.map((area) => (
           <Marker
             key={area.id}
-            coordinate={area.coordinate}
+            coordinate={{ latitude: area.latitude, longitude: area.longitude }}
+            title={area.name}
+            description={`${area.highway} · ${area.direction}`}
             onPress={() => setSelectedArea(area)}
           />
         ))}
@@ -73,13 +74,13 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <Text style={styles.btnChiudiTesto}>✕</Text>
           </TouchableOpacity>
 
-          <Text style={styles.pannelloNome}>{selectedArea.nome}</Text>
+          <Text style={styles.pannelloNome}>{selectedArea.name}</Text>
           <Text style={styles.pannelloBrand}>{selectedArea.brand}</Text>
           <Text style={styles.pannelloInfo}>
-            {selectedArea.autostrada} · {selectedArea.direzione}
+            {selectedArea.highway} · Km {selectedArea.km}
           </Text>
-          <Text style={styles.pannelloStelle}>
-            {selectedArea.stelle} {selectedArea.valutazione}
+          <Text style={styles.pannelloDirezione}>
+            Direzione: {selectedArea.direction}
           </Text>
 
           <View style={styles.bottoniera}>
@@ -113,6 +114,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 24,
+  },
+  fallbackTesto: {
+    fontSize: 15,
+    color: '#666',
+    textAlign: 'center',
   },
   pannello: {
     position: 'absolute',
@@ -157,10 +164,12 @@ const styles = StyleSheet.create({
   pannelloInfo: {
     fontSize: 14,
     color: '#444',
-    marginBottom: 6,
+    marginBottom: 2,
   },
-  pannelloStelle: {
-    fontSize: 16,
+  pannelloDirezione: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a73e8',
     marginBottom: 20,
   },
   bottoniera: {
