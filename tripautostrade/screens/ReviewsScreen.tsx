@@ -1,4 +1,4 @@
-import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ReviewScreenProps } from '../types/navigation';
 import { useReviews } from '../context/ReviewsContext';
@@ -61,6 +61,13 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
             </View>
             <Stelle numero={item.stelle} />
             <Text style={styles.testo}>{item.testo}</Text>
+            {item.imageUrl && (
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={styles.cardImmagine}
+                resizeMode="cover"
+              />
+            )}
           </View>
         )}
       />
@@ -165,6 +172,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#444',
     lineHeight: 20,
+  },
+  cardImmagine: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    marginTop: 10,
   },
   footer: {
     padding: 16,

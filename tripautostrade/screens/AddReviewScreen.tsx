@@ -21,7 +21,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
   const { addReview } = useReviews();
   const [stelle, setStelle] = useState(0);
   const [commento, setCommento] = useState('');
-  const [foto, setFoto] = useState<string | null>(null);
+  const [foto, setFoto] = useState<{ uri: string; base64: string } | null>(null);
   const [publishing, setPublishing] = useState(false);
 
   const sceglieFoto = async () => {
@@ -34,10 +34,11 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.8,
+      quality: 0.5,
+      base64: true,
     });
-    if (!result.canceled) {
-      setFoto(result.assets[0].uri);
+    if (!result.canceled && result.assets[0].base64) {
+      setFoto({ uri: result.assets[0].uri, base64: result.assets[0].base64 });
     }
   };
 
@@ -56,7 +57,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
         areaId: area.id,
         stelle,
         testo: commento.trim(),
-        ...(foto ? { fotoUri: foto } : {}),
+        ...(foto ? { fotoBase64: foto.base64 } : {}),
       });
       Alert.alert('Recensione inviata con successo!', undefined, [
         { text: 'OK', onPress: () => navigation.goBack() },
@@ -118,7 +119,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
         <Text style={styles.label}>Foto (opzionale)</Text>
         {foto ? (
           <View style={styles.fotoContainer}>
-            <Image source={{ uri: foto }} style={styles.anteprima} />
+            <Image source={{ uri: foto.uri }} style={styles.anteprima} />
             <TouchableOpacity style={styles.btnRimuoviFoto} onPress={() => setFoto(null)}>
               <Ionicons name="close-circle" size={28} color="#e53935" />
             </TouchableOpacity>

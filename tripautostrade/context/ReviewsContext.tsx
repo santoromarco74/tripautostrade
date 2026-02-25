@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { decode } from 'base64-arraybuffer';
 import { supabase } from '../lib/supabase';
 
 export interface Recensione {
@@ -8,7 +9,7 @@ export interface Recensione {
   stelle: number;
   testo: string;
   data: string;
-  fotoUri?: string;
+  imageUrl?: string;
 }
 
 interface DbRow {
@@ -17,6 +18,7 @@ interface DbRow {
   rating: number;
   comment: string;
   created_at: string;
+  image_url?: string;
 }
 
 function dbToRecensione(row: DbRow): Recensione {
@@ -32,6 +34,7 @@ function dbToRecensione(row: DbRow): Recensione {
     stelle: row.rating,
     testo: row.comment,
     data,
+    imageUrl: row.image_url ?? undefined,
   };
 }
 
@@ -42,7 +45,7 @@ interface ReviewsContextValue {
     areaId: string;
     stelle: number;
     testo: string;
-    fotoUri?: string;
+    fotoBase64?: string;
   }) => Promise<void>;
 }
 
@@ -73,14 +76,29 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
     areaId: string;
     stelle: number;
     testo: string;
-    fotoUri?: string;
+    fotoBase64?: string;
   }) => {
+    let imageUrl: string | undefined;
+
+    if (params.fotoBase64) {
+      const fileName = `review_${Date.now()}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('review-photos')
+        .upload(fileName, decode(params.fotoBase64), { contentType: 'image/jpeg' });
+      if (uploadError) throw new Error(uploadError.message);
+      const { data: urlData } = supabase.storage
+        .from('review-photos')
+        .getPublicUrl(fileName);
+      imageUrl = urlData.publicUrl;
+    }
+
     const { data, error } = await supabase
       .from('reviews')
       .insert({
         service_area_id: params.areaId,
         rating: params.stelle,
         comment: params.testo,
+        ...(imageUrl ? { image_url: imageUrl } : {}),
       })
       .select()
       .single();
