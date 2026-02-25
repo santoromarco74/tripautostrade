@@ -14,6 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { AddReviewScreenProps } from '../types/navigation';
 import { useReviews } from '../context/ReviewsContext';
+import { Colors } from '../constants/Colors';
 
 export default function AddReviewScreen({ route, navigation }: AddReviewScreenProps) {
   const { area } = route.params;
@@ -124,7 +125,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
           </View>
         ) : (
           <TouchableOpacity style={styles.btnFoto} onPress={sceglieFoto}>
-            <Ionicons name="image-outline" size={28} color="#1a73e8" />
+            <Ionicons name="image-outline" size={28} color={Colors.primary} />
             <Text style={styles.btnFotoTesto}>Aggiungi Foto</Text>
           </TouchableOpacity>
         )}
@@ -208,14 +209,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 12,
     borderWidth: 1.5,
-    borderColor: '#1a73e8',
+    borderColor: Colors.primary,
     borderStyle: 'dashed',
     padding: 18,
     justifyContent: 'center',
   },
   btnFotoTesto: {
     fontSize: 15,
-    color: '#1a73e8',
+    color: Colors.primary,
     fontWeight: '600',
   },
   fotoContainer: {
@@ -235,7 +236,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
   },
   btnPubblica: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: Colors.primary,
     borderRadius: 12,
     paddingVertical: 16,
     alignItems: 'center',

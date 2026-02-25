@@ -5,6 +5,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ActivityScreen from '../screens/ActivityScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { TabParamList } from '../types/navigation';
+import { Colors } from '../constants/Colors';
 
 const Tab = createBottomTabNavigator<TabParamList>();
 
@@ -24,7 +25,7 @@ export default function TabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: '#1a73e8',
+        tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: '#9e9e9e',
         tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
         tabBarStyle: {

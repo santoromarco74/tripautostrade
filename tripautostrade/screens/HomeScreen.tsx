@@ -2,8 +2,21 @@ import { useEffect, useState } from 'react';
 import { Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
+import { Ionicons } from '@expo/vector-icons';
 import { serviceAreasData, ServiceArea } from '../data/serviceAreas';
 import { HomeScreenProps } from '../types/navigation';
+import { Colors } from '../constants/Colors';
+
+function BrandPin({ brand }: { brand: string }) {
+  const bgColor = Colors.brand[brand] ?? Colors.brand.Default;
+  return (
+    <View
+      style={[styles.pin, { backgroundColor: bgColor }]}
+    >
+      <Ionicons name="restaurant" size={18} color="#fff" />
+    </View>
+  );
+}
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
@@ -64,7 +77,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             title={area.name}
             description={`${area.highway} · ${area.direction}`}
             onPress={() => setSelectedArea(area)}
-          />
+          >
+            <BrandPin brand={area.brand} />
+          </Marker>
         ))}
       </MapView>
 
@@ -109,6 +124,20 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  pin: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 2,
+    borderColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 3,
   },
   fallback: {
     flex: 1,
@@ -178,7 +207,7 @@ const styles = StyleSheet.create({
   },
   btnNaviga: {
     flex: 1,
-    backgroundColor: '#1a73e8',
+    backgroundColor: Colors.primary,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',

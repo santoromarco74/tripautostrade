@@ -2,6 +2,7 @@ import { ActivityIndicator, FlatList, StyleSheet, Text, TouchableOpacity, View }
 import { Ionicons } from '@expo/vector-icons';
 import { ReviewScreenProps } from '../types/navigation';
 import { useReviews } from '../context/ReviewsContext';
+import { Colors } from '../constants/Colors';
 
 function Stelle({ numero }: { numero: number }) {
   return (
@@ -44,7 +45,7 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
         contentContainerStyle={styles.lista}
         ListEmptyComponent={
           isLoading ? (
-            <ActivityIndicator size="large" color="#1a73e8" style={{ marginTop: 60 }} />
+            <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 60 }} />
           ) : (
             <View style={styles.emptyContainer}>
               <Ionicons name="chatbubble-outline" size={48} color="#ccc" />
@@ -173,7 +174,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#e0e0e0',
   },
   btnScrivi: {
-    backgroundColor: '#1a73e8',
+    backgroundColor: Colors.primary,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: 'center',
