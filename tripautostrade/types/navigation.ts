@@ -4,6 +4,7 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { ServiceArea } from '../data/serviceAreas';
 
 export type RootStackParamList = {
+  Login: undefined;
   Main: undefined;
   Reviews: { area: ServiceArea };
   AddReview: { area: ServiceArea };

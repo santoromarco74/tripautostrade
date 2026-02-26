@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 export interface Recensione {
   id: string;
   areaId: string;
+  userId?: string;
   autore: string;
   stelle: number;
   testo: string;
@@ -15,6 +16,8 @@ export interface Recensione {
 interface DbRow {
   id: string;
   service_area_id: string;
+  user_id?: string;
+  author_name?: string;
   rating: number;
   comment: string;
   created_at: string;
@@ -30,7 +33,8 @@ function dbToRecensione(row: DbRow): Recensione {
   return {
     id: row.id,
     areaId: row.service_area_id,
-    autore: 'Anonimo',
+    userId: row.user_id,
+    autore: row.author_name ?? 'Anonimo',
     stelle: row.rating,
     testo: row.comment,
     data,
@@ -78,6 +82,9 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
     testo: string;
     fotoBase64?: string;
   }) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    const authorName = user?.email?.split('@')[0] ?? 'Anonimo';
+
     let imageUrl: string | undefined;
 
     if (params.fotoBase64) {
@@ -96,6 +103,8 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       .from('reviews')
       .insert({
         service_area_id: params.areaId,
+        user_id: user?.id,
+        author_name: authorName,
         rating: params.stelle,
         comment: params.testo,
         ...(imageUrl ? { image_url: imageUrl } : {}),
