@@ -121,7 +121,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
           <View style={styles.fotoContainer}>
             <Image source={{ uri: foto.uri }} style={styles.anteprima} />
             <TouchableOpacity style={styles.btnRimuoviFoto} onPress={() => setFoto(null)}>
-              <Ionicons name="close-circle" size={28} color="#e53935" />
+              <Ionicons name="close" size={18} color="#fff" />
             </TouchableOpacity>
           </View>
         ) : (
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   },
   fotoContainer: {
     position: 'relative',
-    alignSelf: 'flex-start',
+    marginHorizontal: 2,
   },
   anteprima: {
     width: '100%',
@@ -231,10 +231,14 @@ const styles = StyleSheet.create({
   },
   btnRimuoviFoto: {
     position: 'absolute',
-    top: 8,
-    right: 8,
-    backgroundColor: '#fff',
-    borderRadius: 14,
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   btnPubblica: {
     backgroundColor: Colors.primary,
