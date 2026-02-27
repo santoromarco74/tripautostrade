@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Linking,
-  Platform,
+  Alert,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { showLocation } from 'react-native-map-link';
 import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
@@ -59,14 +59,23 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     });
   }, [searchQuery, selectedBrand]);
 
-  const apriNavigazione = (area: ServiceArea) => {
-    const url =
-      Platform.OS === 'ios'
-        ? `maps://?daddr=${area.latitude},${area.longitude}`
-        : `google.navigation:q=${area.latitude},${area.longitude}`;
-    Linking.openURL(url).catch(() => {
-      Linking.openURL(`https://maps.google.com/?q=${area.latitude},${area.longitude}`);
-    });
+  const handleNavigation = async (area: ServiceArea) => {
+    try {
+      await showLocation({
+        latitude: area.latitude,
+        longitude: area.longitude,
+        title: area.name,
+        dialogTitle: 'Apri con...',
+        dialogMessage: 'Scegli l\'app di navigazione',
+        cancelText: 'Annulla',
+      });
+    } catch {
+      Alert.alert(
+        'Nessuna app trovata',
+        'Non è stata trovata nessuna app di navigazione installata.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   if (permissionGranted === false) {
@@ -175,7 +184,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <View style={styles.bottoniera}>
             <TouchableOpacity
               style={styles.btnNaviga}
-              onPress={() => apriNavigazione(selectedArea)}
+              onPress={() => handleNavigation(selectedArea)}
             >
               <Text style={styles.btnTestoPrimario}>Naviga</Text>
             </TouchableOpacity>
