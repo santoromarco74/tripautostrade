@@ -6,6 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { serviceAreasData, ServiceArea } from '../data/serviceAreas';
 import { HomeScreenProps } from '../types/navigation';
 import { Colors } from '../constants/Colors';
+import { haversineDistance, formatDistance } from '../utils/distance';
 
 function BrandPin({ brand }: { brand: string }) {
   const bgColor = Colors.brand[brand] ?? Colors.brand.Default;
@@ -97,6 +98,17 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           <Text style={styles.pannelloDirezione}>
             Direzione: {selectedArea.direction}
           </Text>
+
+          {location && (
+            <Text style={styles.pannelloDistanza}>
+              a {formatDistance(haversineDistance(
+                location.coords.latitude,
+                location.coords.longitude,
+                selectedArea.latitude,
+                selectedArea.longitude
+              ))} da te
+            </Text>
+          )}
 
           <View style={styles.bottoniera}>
             <TouchableOpacity
@@ -200,6 +212,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#1a73e8',
     marginBottom: 20,
+  },
+  pannelloDistanza: {
+    fontSize: 13,
+    color: '#888',
+    marginBottom: 16,
   },
   bottoniera: {
     flexDirection: 'row',
