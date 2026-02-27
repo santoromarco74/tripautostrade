@@ -78,6 +78,9 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
     testo: string;
     fotoBase64?: string;
   }) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('Devi essere loggato per inviare una recensione.');
+
     let imageUrl: string | undefined;
 
     if (params.fotoBase64) {
@@ -98,6 +101,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
         service_area_id: params.areaId,
         rating: params.stelle,
         comment: params.testo,
+        user_id: user.id,
         ...(imageUrl ? { image_url: imageUrl } : {}),
       })
       .select()

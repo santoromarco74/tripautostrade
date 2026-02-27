@@ -14,11 +14,13 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { AddReviewScreenProps } from '../types/navigation';
 import { useReviews } from '../context/ReviewsContext';
+import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 
 export default function AddReviewScreen({ route, navigation }: AddReviewScreenProps) {
   const { area } = route.params;
   const { addReview } = useReviews();
+  const { user } = useAuth();
   const [stelle, setStelle] = useState(0);
   const [commento, setCommento] = useState('');
   const [foto, setFoto] = useState<{ uri: string; base64: string } | null>(null);
@@ -43,6 +45,10 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
   };
 
   const pubblica = async () => {
+    if (!user) {
+      Alert.alert('Non autenticato', 'Devi essere loggato per inviare una recensione.');
+      return;
+    }
     if (stelle === 0) {
       Alert.alert('Valutazione mancante', 'Seleziona almeno una stella.');
       return;
