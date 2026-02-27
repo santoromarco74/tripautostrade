@@ -19,6 +19,7 @@ interface DbRow {
   comment: string;
   created_at: string;
   image_url?: string;
+  author_name?: string;
 }
 
 function dbToRecensione(row: DbRow): Recensione {
@@ -30,7 +31,7 @@ function dbToRecensione(row: DbRow): Recensione {
   return {
     id: row.id,
     areaId: row.service_area_id,
-    autore: 'Anonimo',
+    autore: row.author_name ?? 'Anonimo',
     stelle: row.rating,
     testo: row.comment,
     data,
@@ -81,6 +82,11 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Devi essere loggato per inviare una recensione.');
 
+    const authorName: string =
+      (user.user_metadata?.full_name as string | undefined) ??
+      user.email?.split('@')[0] ??
+      'Utente';
+
     let imageUrl: string | undefined;
 
     if (params.fotoBase64) {
@@ -102,6 +108,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
         rating: params.stelle,
         comment: params.testo,
         user_id: user.id,
+        author_name: authorName,
         ...(imageUrl ? { image_url: imageUrl } : {}),
       })
       .select()
