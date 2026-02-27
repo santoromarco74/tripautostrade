@@ -1,28 +1,41 @@
-import { useEffect, useState } from 'react';
-import { Linking, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  Linking,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { serviceAreasData, ServiceArea } from '../data/serviceAreas';
 import { HomeScreenProps } from '../types/navigation';
 import { Colors } from '../constants/Colors';
 import { haversineDistance, formatDistance } from '../utils/distance';
 
+const BRANDS = ['Tutti', 'Autogrill', 'Chef Express', 'Sarni'];
+
 function BrandPin({ brand }: { brand: string }) {
   const bgColor = Colors.brand[brand] ?? Colors.brand.Default;
   return (
-    <View
-      style={[styles.pin, { backgroundColor: bgColor }]}
-    >
+    <View style={[styles.pin, { backgroundColor: bgColor }]}>
       <Ionicons name="restaurant" size={18} color="#fff" />
     </View>
   );
 }
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
+  const insets = useSafeAreaInsets();
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
   const [selectedArea, setSelectedArea] = useState<ServiceArea | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('Tutti');
 
   useEffect(() => {
     (async () => {
@@ -37,6 +50,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     })();
   }, []);
 
+  const filteredAreas = useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+    return serviceAreasData.filter((area) => {
+      const matchesName = query === '' || area.name.toLowerCase().includes(query);
+      const matchesBrand = selectedBrand === 'Tutti' || area.brand === selectedBrand;
+      return matchesName && matchesBrand;
+    });
+  }, [searchQuery, selectedBrand]);
+
   const apriNavigazione = (area: ServiceArea) => {
     const url =
       Platform.OS === 'ios'
@@ -50,7 +72,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   if (permissionGranted === false) {
     return (
       <View style={styles.fallback}>
-        <Text style={styles.fallbackTesto}>Permesso GPS negato. Impossibile trovare le aree di servizio vicine.</Text>
+        <Text style={styles.fallbackTesto}>
+          Permesso GPS negato. Impossibile trovare le aree di servizio vicine.
+        </Text>
       </View>
     );
   }
@@ -71,7 +95,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           longitudeDelta: 2.5,
         }}
       >
-        {serviceAreasData.map((area) => (
+        {filteredAreas.map((area) => (
           <Marker
             key={area.id}
             coordinate={{ latitude: area.latitude, longitude: area.longitude }}
@@ -83,6 +107,44 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           </Marker>
         ))}
       </MapView>
+
+      {/* Barra di ricerca + filtri brand */}
+      <View style={[styles.searchContainer, { top: insets.top + 12 }]}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={18} color="#888" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Cerca area di servizio..."
+            placeholderTextColor="#aaa"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            returnKeyType="search"
+            clearButtonMode="while-editing"
+          />
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsRow}
+        >
+          {BRANDS.map((brand) => {
+            const active = brand === selectedBrand;
+            return (
+              <TouchableOpacity
+                key={brand}
+                style={[styles.chip, active && styles.chipActive]}
+                onPress={() => setSelectedBrand(brand)}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                  {brand}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       {selectedArea && (
         <View style={styles.pannello}>
@@ -162,6 +224,65 @@ const styles = StyleSheet.create({
     color: '#666',
     textAlign: 'center',
   },
+
+  // ── Ricerca e filtri ──────────────────────────────────────────────────────
+  searchContainer: {
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    zIndex: 10,
+  },
+  searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 6,
+    marginBottom: 8,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1a1a1a',
+    padding: 0,
+  },
+  chipsRow: {
+    gap: 8,
+    paddingRight: 4,
+  },
+  chip: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  chipActive: {
+    backgroundColor: Colors.primary,
+  },
+  chipText: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#444',
+  },
+  chipTextActive: {
+    color: '#fff',
+  },
+
+  // ── Pannello dettaglio ────────────────────────────────────────────────────
   pannello: {
     position: 'absolute',
     bottom: 0,
@@ -211,7 +332,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: '#1a73e8',
-    marginBottom: 20,
+    marginBottom: 4,
   },
   pannelloDistanza: {
     fontSize: 13,
