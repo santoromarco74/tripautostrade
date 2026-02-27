@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -13,10 +14,11 @@ import * as Location from 'expo-location';
 import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { serviceAreasData, ServiceArea } from '../data/serviceAreas';
+import { ServiceArea } from '../data/serviceAreas';
 import { HomeScreenProps } from '../types/navigation';
 import { Colors } from '../constants/Colors';
 import { haversineDistance, formatDistance } from '../utils/distance';
+import { supabase } from '../lib/supabase';
 
 const BRANDS = ['Tutti', 'Autogrill', 'Chef Express', 'Sarni'];
 
@@ -33,10 +35,13 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
   const [permissionGranted, setPermissionGranted] = useState<boolean | null>(null);
   const [location, setLocation] = useState<Location.LocationObject | null>(null);
+  const [areas, setAreas] = useState<ServiceArea[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedArea, setSelectedArea] = useState<ServiceArea | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Tutti');
 
+  // Richiesta permesso GPS
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -50,14 +55,30 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     })();
   }, []);
 
+  // Fetch aree di servizio da Supabase
+  useEffect(() => {
+    async function fetchServiceAreas() {
+      setIsLoading(true);
+      const { data, error } = await supabase.from('service_areas').select('*');
+      if (error) {
+        Alert.alert('Errore', 'Impossibile caricare le aree di servizio.');
+        console.error(error);
+      } else {
+        setAreas(data as ServiceArea[]);
+      }
+      setIsLoading(false);
+    }
+    fetchServiceAreas();
+  }, []);
+
   const filteredAreas = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
-    return serviceAreasData.filter((area) => {
+    return areas.filter((area) => {
       const matchesName = query === '' || area.name.toLowerCase().includes(query);
       const matchesBrand = selectedBrand === 'Tutti' || area.brand === selectedBrand;
       return matchesName && matchesBrand;
     });
-  }, [searchQuery, selectedBrand]);
+  }, [areas, searchQuery, selectedBrand]);
 
   const handleNavigation = async (area: ServiceArea) => {
     try {
@@ -109,7 +130,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             key={area.id}
             coordinate={{ latitude: area.latitude, longitude: area.longitude }}
             title={area.name}
-            description={`${area.highway} · ${area.direction}`}
+            description={area.brand}
             onPress={() => setSelectedArea(area)}
           >
             <BrandPin brand={area.brand} />
@@ -130,6 +151,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             returnKeyType="search"
             clearButtonMode="while-editing"
           />
+          {isLoading && (
+            <ActivityIndicator size="small" color={Colors.primary} style={styles.loadingIndicator} />
+          )}
         </View>
 
         <ScrollView
@@ -163,12 +187,20 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
           <Text style={styles.pannelloNome}>{selectedArea.name}</Text>
           <Text style={styles.pannelloBrand}>{selectedArea.brand}</Text>
-          <Text style={styles.pannelloInfo}>
-            {selectedArea.highway} · Km {selectedArea.km}
-          </Text>
-          <Text style={styles.pannelloDirezione}>
-            Direzione: {selectedArea.direction}
-          </Text>
+
+          {(selectedArea.highway || selectedArea.km != null) && (
+            <Text style={styles.pannelloInfo}>
+              {[selectedArea.highway, selectedArea.km != null ? `Km ${selectedArea.km}` : null]
+                .filter(Boolean)
+                .join(' · ')}
+            </Text>
+          )}
+
+          {selectedArea.direction && (
+            <Text style={styles.pannelloDirezione}>
+              Direzione: {selectedArea.direction}
+            </Text>
+          )}
 
           {location && (
             <Text style={styles.pannelloDistanza}>
@@ -263,6 +295,9 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#1a1a1a',
     padding: 0,
+  },
+  loadingIndicator: {
+    marginLeft: 8,
   },
   chipsRow: {
     gap: 8,

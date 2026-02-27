@@ -15,7 +15,7 @@ export interface Recensione {
 
 interface DbRow {
   id: string;
-  service_area_id: string;
+  service_area_id: number;
   rating: number;
   comment: string;
   created_at: string;
@@ -32,7 +32,7 @@ function dbToRecensione(row: DbRow): Recensione {
   });
   return {
     id: row.id,
-    areaId: row.service_area_id,
+    areaId: String(row.service_area_id),
     autore: row.author_name ?? 'Anonimo',
     stelle: row.rating,
     testo: row.comment,
@@ -46,7 +46,7 @@ interface ReviewsContextValue {
   recensioni: Recensione[];
   isLoading: boolean;
   addReview: (params: {
-    areaId: string;
+    areaId: string | number;
     stelle: number;
     testo: string;
     fotoBase64?: string;
@@ -84,7 +84,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
   };
 
   const addReview = async (params: {
-    areaId: string;
+    areaId: string | number;
     stelle: number;
     testo: string;
     fotoBase64?: string;

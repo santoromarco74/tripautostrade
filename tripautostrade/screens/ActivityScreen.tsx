@@ -15,12 +15,12 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useReviews } from '../context/ReviewsContext';
 import { Colors } from '../constants/Colors';
-import { serviceAreasData } from '../data/serviceAreas';
+import { ServiceArea } from '../data/serviceAreas';
 import { ActivityScreenProps } from '../types/navigation';
 
 interface MiaRecensione {
   id: string;
-  service_area_id: string;
+  service_area_id: number;
   rating: number;
   comment: string;
   created_at: string;
@@ -66,11 +66,15 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
     ]);
   };
 
-  const handleEdit = (item: MiaRecensione) => {
-    const area = serviceAreasData.find((a) => a.id === item.service_area_id);
-    if (!area) return;
+  const handleEdit = async (item: MiaRecensione) => {
+    const { data, error } = await supabase
+      .from('service_areas')
+      .select('*')
+      .eq('id', item.service_area_id)
+      .single();
+    if (error || !data) return;
     navigation.navigate('AddReview', {
-      area,
+      area: data as ServiceArea,
       recensioneEsistente: {
         id: item.id,
         stelle: item.rating,

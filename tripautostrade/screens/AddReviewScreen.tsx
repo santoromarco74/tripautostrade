@@ -101,7 +101,11 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.headerArea}>
         <Text style={styles.nomeArea}>{area.name}</Text>
-        <Text style={styles.brandArea}>{area.brand} · {area.highway} Km {area.km}</Text>
+        <Text style={styles.brandArea}>
+          {area.brand}
+          {area.highway ? ` · ${area.highway}` : ''}
+          {area.km != null ? ` Km ${area.km}` : ''}
+        </Text>
       </View>
 
       {/* Stelle */}

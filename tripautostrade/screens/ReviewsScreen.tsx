@@ -18,7 +18,7 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
   const { recensioni, isLoading, deleteReview } = useReviews();
   const { user } = useAuth();
 
-  const recensioniArea = recensioni.filter((r) => r.areaId === area.id);
+  const recensioniArea = recensioni.filter((r) => r.areaId === String(area.id));
 
   const mediaValutazione =
     recensioniArea.length > 0
@@ -46,7 +46,11 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.nomeArea}>{area.name}</Text>
-        <Text style={styles.brandArea}>{area.brand} · {area.highway} Km {area.km}</Text>
+        <Text style={styles.brandArea}>
+          {area.brand}
+          {area.highway ? ` · ${area.highway}` : ''}
+          {area.km != null ? ` Km ${area.km}` : ''}
+        </Text>
         {mediaValutazione ? (
           <View style={styles.mediaRow}>
             <Text style={styles.mediaNumero}>{mediaValutazione}</Text>
