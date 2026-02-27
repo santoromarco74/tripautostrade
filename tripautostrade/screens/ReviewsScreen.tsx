@@ -1,7 +1,8 @@
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ReviewScreenProps } from '../types/navigation';
 import { useReviews } from '../context/ReviewsContext';
+import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 
 function Stelle({ numero }: { numero: number }) {
@@ -14,7 +15,8 @@ function Stelle({ numero }: { numero: number }) {
 
 export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) {
   const { area } = route.params;
-  const { recensioni, isLoading } = useReviews();
+  const { recensioni, isLoading, deleteReview } = useReviews();
+  const { user } = useAuth();
 
   const recensioniArea = recensioni.filter((r) => r.areaId === area.id);
 
@@ -22,6 +24,23 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
     recensioniArea.length > 0
       ? (recensioniArea.reduce((acc, r) => acc + r.stelle, 0) / recensioniArea.length).toFixed(1)
       : null;
+
+  const handleDelete = (id: string) => {
+    Alert.alert('Elimina recensione', 'Vuoi davvero eliminare questa recensione?', [
+      { text: 'Annulla', style: 'cancel' },
+      {
+        text: 'Elimina',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteReview(id);
+          } catch {
+            Alert.alert('Errore', 'Impossibile eliminare la recensione.');
+          }
+        },
+      },
+    ]);
+  };
 
   return (
     <View style={styles.container}>
@@ -57,7 +76,35 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.autore}>{item.autore}</Text>
-              <Text style={styles.data}>{item.data}</Text>
+              <View style={styles.cardHeaderRight}>
+                <Text style={styles.data}>{item.data}</Text>
+                {user && item.userId === user.id && (
+                  <View style={styles.azioniRow}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate('AddReview', {
+                          area,
+                          recensioneEsistente: {
+                            id: item.id,
+                            stelle: item.stelle,
+                            testo: item.testo,
+                            imageUrl: item.imageUrl,
+                          },
+                        })
+                      }
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}
+                    >
+                      <Ionicons name="pencil-outline" size={16} color={Colors.primary} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleDelete(item.id)}
+                      hitSlop={{ top: 8, bottom: 8, left: 4, right: 8 }}
+                    >
+                      <Ionicons name="trash-outline" size={16} color="#d32f2f" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
             </View>
             <Stelle numero={item.stelle} />
             <Text style={styles.testo}>{item.testo}</Text>
@@ -156,12 +203,23 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 4,
+  },
+  cardHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  azioniRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
   autore: {
     fontWeight: '600',
     fontSize: 14,
     color: '#1a1a1a',
+    flex: 1,
   },
   data: {
     fontSize: 12,

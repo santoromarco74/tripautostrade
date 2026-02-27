@@ -18,12 +18,18 @@ import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 
 export default function AddReviewScreen({ route, navigation }: AddReviewScreenProps) {
-  const { area } = route.params;
-  const { addReview } = useReviews();
+  const { area, recensioneEsistente } = route.params;
+  const isEditing = !!recensioneEsistente;
+
+  const { addReview, updateReview } = useReviews();
   const { user } = useAuth();
-  const [stelle, setStelle] = useState(0);
-  const [commento, setCommento] = useState('');
+
+  const [stelle, setStelle] = useState(recensioneEsistente?.stelle ?? 0);
+  const [commento, setCommento] = useState(recensioneEsistente?.testo ?? '');
   const [foto, setFoto] = useState<{ uri: string; base64: string } | null>(null);
+  const [fotoUrlEsistente, setFotoUrlEsistente] = useState<string | undefined>(
+    recensioneEsistente?.imageUrl
+  );
   const [publishing, setPublishing] = useState(false);
 
   const sceglieFoto = async () => {
@@ -41,6 +47,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
     });
     if (!result.canceled && result.assets[0].base64) {
       setFoto({ uri: result.assets[0].uri, base64: result.assets[0].base64 });
+      setFotoUrlEsistente(undefined);
     }
   };
 
@@ -57,23 +64,38 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       Alert.alert('Commento troppo corto', 'Scrivi almeno 10 caratteri.');
       return;
     }
+
     setPublishing(true);
     try {
-      await addReview({
-        areaId: area.id,
-        stelle,
-        testo: commento.trim(),
-        ...(foto ? { fotoBase64: foto.base64 } : {}),
-      });
-      Alert.alert('Recensione inviata con successo!', undefined, [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      if (isEditing) {
+        await updateReview({
+          id: recensioneEsistente.id,
+          stelle,
+          testo: commento.trim(),
+          ...(foto ? { fotoBase64: foto.base64 } : {}),
+        });
+        Alert.alert('Recensione aggiornata!', undefined, [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
+      } else {
+        await addReview({
+          areaId: area.id,
+          stelle,
+          testo: commento.trim(),
+          ...(foto ? { fotoBase64: foto.base64 } : {}),
+        });
+        Alert.alert('Recensione inviata con successo!', undefined, [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
+      }
     } catch {
       Alert.alert('Errore', 'Impossibile inviare la recensione. Riprova.');
     } finally {
       setPublishing(false);
     }
   };
+
+  const fotoUri = foto?.uri ?? fotoUrlEsistente;
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
@@ -123,10 +145,13 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       {/* Foto */}
       <View style={styles.sezione}>
         <Text style={styles.label}>Foto (opzionale)</Text>
-        {foto ? (
+        {fotoUri ? (
           <View style={styles.fotoContainer}>
-            <Image source={{ uri: foto.uri }} style={styles.anteprima} />
-            <TouchableOpacity style={styles.btnRimuoviFoto} onPress={() => setFoto(null)}>
+            <Image source={{ uri: fotoUri }} style={styles.anteprima} />
+            <TouchableOpacity
+              style={styles.btnRimuoviFoto}
+              onPress={() => { setFoto(null); setFotoUrlEsistente(undefined); }}
+            >
               <Ionicons name="close" size={18} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -142,7 +167,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       <TouchableOpacity style={[styles.btnPubblica, publishing && { opacity: 0.7 }]} onPress={pubblica} disabled={publishing}>
         {publishing
           ? <ActivityIndicator color="#fff" />
-          : <Text style={styles.btnPubblicaTesto}>Pubblica</Text>
+          : <Text style={styles.btnPubblicaTesto}>{isEditing ? 'Aggiorna' : 'Pubblica'}</Text>
         }
       </TouchableOpacity>
     </ScrollView>

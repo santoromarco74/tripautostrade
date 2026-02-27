@@ -10,6 +10,7 @@ export interface Recensione {
   testo: string;
   data: string;
   imageUrl?: string;
+  userId?: string;
 }
 
 interface DbRow {
@@ -20,6 +21,7 @@ interface DbRow {
   created_at: string;
   image_url?: string;
   author_name?: string;
+  user_id?: string;
 }
 
 function dbToRecensione(row: DbRow): Recensione {
@@ -36,6 +38,7 @@ function dbToRecensione(row: DbRow): Recensione {
     testo: row.comment,
     data,
     imageUrl: row.image_url ?? undefined,
+    userId: row.user_id,
   };
 }
 
@@ -48,6 +51,13 @@ interface ReviewsContextValue {
     testo: string;
     fotoBase64?: string;
   }) => Promise<void>;
+  updateReview: (params: {
+    id: string;
+    stelle: number;
+    testo: string;
+    fotoBase64?: string;
+  }) => Promise<void>;
+  deleteReview: (id: string) => Promise<void>;
 }
 
 const ReviewsContext = createContext<ReviewsContextValue | null>(null);
@@ -88,7 +98,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       'Utente';
 
     let imageUrl: string | undefined;
-
     if (params.fotoBase64) {
       const fileName = `review_${Date.now()}.jpg`;
       const { error: uploadError } = await supabase.storage
@@ -115,12 +124,53 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       .single();
 
     if (error) throw new Error(error.message);
-
     setRecensioni((prev) => [dbToRecensione(data as DbRow), ...prev]);
   };
 
+  const updateReview = async (params: {
+    id: string;
+    stelle: number;
+    testo: string;
+    fotoBase64?: string;
+  }) => {
+    let imageUrl: string | undefined;
+    if (params.fotoBase64) {
+      const fileName = `review_${Date.now()}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('review-photos')
+        .upload(fileName, decode(params.fotoBase64), { contentType: 'image/jpeg' });
+      if (uploadError) throw new Error(uploadError.message);
+      const { data: urlData } = supabase.storage
+        .from('review-photos')
+        .getPublicUrl(fileName);
+      imageUrl = urlData.publicUrl;
+    }
+
+    const { data, error } = await supabase
+      .from('reviews')
+      .update({
+        rating: params.stelle,
+        comment: params.testo,
+        ...(imageUrl ? { image_url: imageUrl } : {}),
+      })
+      .eq('id', params.id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    setRecensioni((prev) =>
+      prev.map((r) => (r.id === params.id ? dbToRecensione(data as DbRow) : r))
+    );
+  };
+
+  const deleteReview = async (id: string) => {
+    const { error } = await supabase.from('reviews').delete().eq('id', id);
+    if (error) throw new Error(error.message);
+    setRecensioni((prev) => prev.filter((r) => r.id !== id));
+  };
+
   return (
-    <ReviewsContext.Provider value={{ recensioni, isLoading, addReview }}>
+    <ReviewsContext.Provider value={{ recensioni, isLoading, addReview, updateReview, deleteReview }}>
       {children}
     </ReviewsContext.Provider>
   );

@@ -8,10 +8,17 @@ export type AuthStackParamList = {
   Register: undefined;
 };
 
+export type RecensioneEsistente = {
+  id: string;
+  stelle: number;
+  testo: string;
+  imageUrl?: string;
+};
+
 export type RootStackParamList = {
   Main: undefined;
   Reviews: { area: ServiceArea };
-  AddReview: { area: ServiceArea };
+  AddReview: { area: ServiceArea; recensioneEsistente?: RecensioneEsistente };
 };
 
 export type TabParamList = {
@@ -22,6 +29,11 @@ export type TabParamList = {
 
 export type HomeScreenProps = CompositeScreenProps<
   BottomTabScreenProps<TabParamList, 'Esplora'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+export type ActivityScreenProps = CompositeScreenProps<
+  BottomTabScreenProps<TabParamList, 'Attività'>,
   NativeStackScreenProps<RootStackParamList>
 >;
 

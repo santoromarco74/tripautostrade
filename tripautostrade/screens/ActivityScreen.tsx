@@ -1,17 +1,22 @@
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   FlatList,
   Image,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useReviews } from '../context/ReviewsContext';
 import { Colors } from '../constants/Colors';
+import { serviceAreasData } from '../data/serviceAreas';
+import { ActivityScreenProps } from '../types/navigation';
 
 interface MiaRecensione {
   id: string;
@@ -22,8 +27,9 @@ interface MiaRecensione {
   image_url?: string;
 }
 
-export default function ActivityScreen() {
+export default function ActivityScreen({ navigation }: ActivityScreenProps) {
   const { user } = useAuth();
+  const { deleteReview } = useReviews();
   const insets = useSafeAreaInsets();
   const [recensioni, setRecensioni] = useState<MiaRecensione[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,6 +47,38 @@ export default function ActivityScreen() {
         setLoading(false);
       });
   }, [user]);
+
+  const handleDelete = (id: string) => {
+    Alert.alert('Elimina recensione', 'Vuoi davvero eliminare questa recensione?', [
+      { text: 'Annulla', style: 'cancel' },
+      {
+        text: 'Elimina',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteReview(id);
+            setRecensioni((prev) => prev.filter((r) => r.id !== id));
+          } catch {
+            Alert.alert('Errore', 'Impossibile eliminare la recensione.');
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleEdit = (item: MiaRecensione) => {
+    const area = serviceAreasData.find((a) => a.id === item.service_area_id);
+    if (!area) return;
+    navigation.navigate('AddReview', {
+      area,
+      recensioneEsistente: {
+        id: item.id,
+        stelle: item.rating,
+        testo: item.comment,
+        imageUrl: item.image_url,
+      },
+    });
+  };
 
   if (loading) {
     return (
@@ -79,15 +117,31 @@ export default function ActivityScreen() {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <Text style={styles.areaId} numberOfLines={1}>{item.service_area_id}</Text>
-            <View style={styles.stelleRow}>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <Ionicons
-                  key={n}
-                  name={n <= item.rating ? 'star' : 'star-outline'}
-                  size={14}
-                  color={n <= item.rating ? '#f4b400' : '#ccc'}
-                />
-              ))}
+            <View style={styles.cardHeaderRight}>
+              <View style={styles.stelleRow}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <Ionicons
+                    key={n}
+                    name={n <= item.rating ? 'star' : 'star-outline'}
+                    size={14}
+                    color={n <= item.rating ? '#f4b400' : '#ccc'}
+                  />
+                ))}
+              </View>
+              <View style={styles.azioniRow}>
+                <TouchableOpacity
+                  onPress={() => handleEdit(item)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}
+                >
+                  <Ionicons name="pencil-outline" size={16} color={Colors.primary} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleDelete(item.id)}
+                  hitSlop={{ top: 8, bottom: 8, left: 4, right: 8 }}
+                >
+                  <Ionicons name="trash-outline" size={16} color="#d32f2f" />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
           <Text style={styles.commento}>{item.comment}</Text>
@@ -154,6 +208,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8,
   },
+  cardHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
   areaId: {
     fontSize: 14,
     fontWeight: '600',
@@ -164,6 +223,10 @@ const styles = StyleSheet.create({
   stelleRow: {
     flexDirection: 'row',
     gap: 2,
+  },
+  azioniRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
   commento: {
     fontSize: 14,
