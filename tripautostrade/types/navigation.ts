@@ -3,6 +3,11 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { ServiceArea } from '../data/serviceAreas';
 
+export type AuthStackParamList = {
+  Login: undefined;
+  Register: undefined;
+};
+
 export type RootStackParamList = {
   Main: undefined;
   Reviews: { area: ServiceArea };
