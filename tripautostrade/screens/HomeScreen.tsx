@@ -11,7 +11,8 @@ import {
 } from 'react-native';
 import { showLocation } from 'react-native-map-link';
 import * as Location from 'expo-location';
-import MapView, { Marker } from 'react-native-maps';
+import MapView from 'react-native-map-clustering';
+import { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ServiceArea } from '../data/serviceAreas';
@@ -124,6 +125,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           latitudeDelta: 2.5,
           longitudeDelta: 2.5,
         }}
+        clusterColor={Colors.primary}
+        clusterTextColor="#fff"
+        clusterFontFamily="System"
+        radius={40}
       >
         {filteredAreas.map((area) => (
           <Marker
