@@ -35,19 +35,35 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
   const insets = useSafeAreaInsets();
   const [recensioni, setRecensioni] = useState<MiaRecensione[]>([]);
   const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!user) { setLoading(false); return; }
 
-    supabase
-      .from('reviews')
-      .select('*, service_areas(name)')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
-      .then(({ data }) => {
-        setRecensioni((data ?? []) as MiaRecensione[]);
+    console.log('ID Utente:', user.id);
+
+    const fetchRecensioni = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('reviews')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        console.log('Errore Supabase:', error);
+        console.log('Dati Recensioni:', data);
+
+        if (error) {
+          setFetchError(error.message);
+        } else {
+          setRecensioni((data ?? []) as MiaRecensione[]);
+        }
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchRecensioni();
   }, [user]);
 
   const handleDelete = (id: string) => {
@@ -105,6 +121,14 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
           title="Accedi per vedere le tue recensioni"
           subtitle="Effettua il login per gestire le tue recensioni"
         />
+      </View>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <View style={styles.centro}>
+        <Text style={styles.errore}>Errore Supabase:{'\n'}{fetchError}</Text>
       </View>
     );
   }
@@ -241,5 +265,14 @@ const styles = StyleSheet.create({
   data: {
     fontSize: 12,
     color: '#aaa',
+  },
+  errore: {
+    margin: 24,
+    padding: 16,
+    backgroundColor: '#fdecea',
+    borderRadius: 12,
+    fontSize: 13,
+    color: '#c62828',
+    lineHeight: 20,
   },
 });
