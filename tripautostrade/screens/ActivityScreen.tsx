@@ -170,11 +170,11 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
         <View style={styles.card}>
           <View style={styles.cardHeader}>
             <View style={styles.cardHeaderLeft}>
-              <Text style={styles.areaNome} numberOfLines={1}>
-                {item.service_areas?.name || 'Area Sconosciuta'}
-              </Text>
               <Text style={styles.autore} numberOfLines={1}>
                 {item.author_name ?? user.email?.split('@')[0] ?? 'Tu'}
+              </Text>
+              <Text style={styles.areaNome} numberOfLines={1}>
+                {item.service_areas?.name || 'Area Sconosciuta'}
               </Text>
             </View>
             <View style={styles.cardHeaderRight}>
@@ -261,12 +261,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  areaNome: {
+  autore: {
     fontSize: 14,
     fontWeight: '600',
-    color: Colors.primary,
+    color: '#1a1a1a',
   },
-  autore: {
+  areaNome: {
     fontSize: 12,
     color: '#888',
     marginTop: 2,
