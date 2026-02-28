@@ -44,15 +44,29 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
       try {
         const { data, error } = await supabase
           .from('reviews')
-          .select('*, service_areas(name)')
+          .select('*')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
 
         if (error) {
           setFetchError(error.message);
-        } else {
-          setRecensioni((data ?? []) as MiaRecensione[]);
+          return;
         }
+
+        const reviews = (data ?? []) as Omit<MiaRecensione, 'service_areas'>[];
+        const areaIds = [...new Set(reviews.map((r) => r.service_area_id))];
+
+        const { data: areas } = areaIds.length
+          ? await supabase.from('service_areas').select('id, name').in('id', areaIds)
+          : { data: [] };
+
+        const areaMap: Record<number, string> = Object.fromEntries(
+          (areas ?? []).map((a: { id: number; name: string }) => [a.id, a.name])
+        );
+
+        setRecensioni(
+          reviews.map((r) => ({ ...r, service_areas: { name: areaMap[r.service_area_id] ?? 'Area sconosciuta' } }))
+        );
       } finally {
         setLoading(false);
       }
