@@ -40,18 +40,13 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
   useEffect(() => {
     if (!user) { setLoading(false); return; }
 
-    console.log('ID Utente:', user.id);
-
     const fetchRecensioni = async () => {
       try {
         const { data, error } = await supabase
           .from('reviews')
-          .select('*')
+          .select('*, service_areas(name)')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false });
-
-        console.log('Errore Supabase:', error);
-        console.log('Dati Recensioni:', data);
 
         if (error) {
           setFetchError(error.message);
@@ -147,14 +142,16 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
 
   return (
     <FlatList
+      style={{ flex: 1 }}
       data={recensioni}
       keyExtractor={(item) => item.id}
       contentContainerStyle={[styles.lista, { paddingBottom: insets.bottom + 16 }]}
       ListHeaderComponent={<Text style={styles.intestazione}>Le mie recensioni</Text>}
-      renderItem={({ item }) => (
+      renderItem={({ item }) => {
+        return (
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.areaId} numberOfLines={1}>{item.service_areas?.name ?? `Area #${item.service_area_id}`}</Text>
+            <Text style={styles.areaId} numberOfLines={1}>{item.service_areas?.name || 'Area Sconosciuta'}</Text>
             <View style={styles.cardHeaderRight}>
               <View style={styles.stelleRow}>
                 {[1, 2, 3, 4, 5].map((n) => (
@@ -192,7 +189,8 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
             })}
           </Text>
         </View>
-      )}
+        );
+      }}
     />
   );
 }
