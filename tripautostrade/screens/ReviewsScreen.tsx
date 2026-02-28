@@ -1,9 +1,11 @@
-import { Alert, ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ReviewScreenProps } from '../types/navigation';
 import { useReviews } from '../context/ReviewsContext';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
+import { CardSkeleton } from '../components/SkeletonLoader';
+import { EmptyState } from '../components/EmptyState';
 
 function Stelle({ numero }: { numero: number }) {
   return (
@@ -68,12 +70,17 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
         contentContainerStyle={styles.lista}
         ListEmptyComponent={
           isLoading ? (
-            <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 60 }} />
-          ) : (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="chatbubble-outline" size={48} color="#ccc" />
-              <Text style={styles.emptyTesto}>Sii il primo a recensire quest'area!</Text>
+            <View style={{ paddingTop: 8 }}>
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
             </View>
+          ) : (
+            <EmptyState
+              icon="chatbubble-ellipses-outline"
+              title="Nessuna recensione ancora"
+              subtitle="Sii il primo a condividere la tua esperienza qui!"
+            />
           )
         }
         renderItem={({ item }) => (
@@ -127,6 +134,7 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
         <TouchableOpacity
           style={styles.btnScrivi}
           onPress={() => navigation.navigate('AddReview', { area })}
+          activeOpacity={0.8}
         >
           <Ionicons name="create-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
           <Text style={styles.btnScriviTesto}>Scrivi una recensione</Text>
@@ -185,24 +193,15 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
   },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingTop: 60,
-    gap: 12,
-  },
-  emptyTesto: {
-    fontSize: 15,
-    color: '#aaa',
-  },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -238,7 +237,7 @@ const styles = StyleSheet.create({
   cardImmagine: {
     width: '100%',
     height: 200,
-    borderRadius: 8,
+    borderRadius: 12,
     marginTop: 10,
   },
   footer: {
@@ -250,7 +249,7 @@ const styles = StyleSheet.create({
   },
   btnScrivi: {
     backgroundColor: Colors.primary,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 14,
     alignItems: 'center',
     flexDirection: 'row',

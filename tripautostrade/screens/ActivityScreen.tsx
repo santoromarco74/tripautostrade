@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   FlatList,
   Image,
@@ -17,6 +16,8 @@ import { useReviews } from '../context/ReviewsContext';
 import { Colors } from '../constants/Colors';
 import { ServiceArea } from '../data/serviceAreas';
 import { ActivityScreenProps } from '../types/navigation';
+import { CardSkeleton } from '../components/SkeletonLoader';
+import { EmptyState } from '../components/EmptyState';
 
 interface MiaRecensione {
   id: string;
@@ -86,8 +87,11 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
 
   if (loading) {
     return (
-      <View style={styles.centro}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+      <View style={styles.lista}>
+        <Text style={styles.intestazione}>Le mie recensioni</Text>
+        <CardSkeleton />
+        <CardSkeleton />
+        <CardSkeleton />
       </View>
     );
   }
@@ -95,8 +99,11 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
   if (!user) {
     return (
       <View style={styles.centro}>
-        <Ionicons name="person-outline" size={56} color="#d0d0d0" />
-        <Text style={styles.titolo}>Accedi per vedere le tue recensioni</Text>
+        <EmptyState
+          icon="person-outline"
+          title="Accedi per vedere le tue recensioni"
+          subtitle="Effettua il login per gestire le tue recensioni"
+        />
       </View>
     );
   }
@@ -104,9 +111,11 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
   if (recensioni.length === 0) {
     return (
       <View style={styles.centro}>
-        <Ionicons name="list-circle-outline" size={72} color="#d0d0d0" />
-        <Text style={styles.titolo}>Nessuna recensione ancora</Text>
-        <Text style={styles.sottotitolo}>Le recensioni che scrivi appariranno qui</Text>
+        <EmptyState
+          icon="document-text-outline"
+          title="Nessuna recensione ancora"
+          subtitle="Le recensioni che scrivi appariranno qui. Esplora le aree di servizio e condividi la tua esperienza!"
+        />
       </View>
     );
   }
@@ -167,22 +176,6 @@ const styles = StyleSheet.create({
   centro: {
     flex: 1,
     backgroundColor: '#f5f5f5',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 12,
-    padding: 40,
-  },
-  titolo: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#1a1a1a',
-    textAlign: 'center',
-  },
-  sottotitolo: {
-    fontSize: 14,
-    color: '#aaa',
-    textAlign: 'center',
-    lineHeight: 20,
   },
   lista: {
     padding: 16,
@@ -201,10 +194,10 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.07,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -241,7 +234,7 @@ const styles = StyleSheet.create({
   foto: {
     width: '100%',
     height: 160,
-    borderRadius: 10,
+    borderRadius: 12,
     marginBottom: 8,
   },
   data: {

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
   ScrollView,
   StyleSheet,
@@ -9,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { HomeLoadingOverlay } from '../components/SkeletonLoader';
 import { showLocation } from 'react-native-map-link';
 import * as Location from 'expo-location';
 import MapView from 'react-native-map-clustering';
@@ -111,7 +111,13 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }
 
   if (!location) {
-    return <View style={styles.fallback} />;
+    return (
+      <View style={{ flex: 1, backgroundColor: '#dde8d8' }}>
+        <View style={[styles.searchContainer, { top: insets.top + 12 }]}>
+          <HomeLoadingOverlay />
+        </View>
+      </View>
+    );
   }
 
   return (
@@ -157,7 +163,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             clearButtonMode="while-editing"
           />
           {isLoading && (
-            <ActivityIndicator size="small" color={Colors.primary} style={styles.loadingIndicator} />
+            <View style={styles.loadingDot} />
           )}
         </View>
 
@@ -301,8 +307,13 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
     padding: 0,
   },
-  loadingIndicator: {
+  loadingDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.primary,
     marginLeft: 8,
+    opacity: 0.6,
   },
   chipsRow: {
     gap: 8,
@@ -338,14 +349,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: '#fff',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: 20,
     paddingBottom: 40,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
     elevation: 12,
   },
   btnChiudi: {
@@ -395,14 +406,14 @@ const styles = StyleSheet.create({
   btnNaviga: {
     flex: 1,
     backgroundColor: Colors.primary,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 14,
     alignItems: 'center',
   },
   btnRecensioni: {
     flex: 1,
     backgroundColor: '#f1f3f4',
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 14,
     alignItems: 'center',
   },
