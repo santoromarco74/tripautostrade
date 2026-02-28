@@ -22,6 +22,7 @@ import { EmptyState } from '../components/EmptyState';
 interface MiaRecensione {
   id: string;
   service_area_id: number;
+  service_areas: { name: string } | null;
   rating: number;
   comment: string;
   created_at: string;
@@ -40,7 +41,7 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
 
     supabase
       .from('reviews')
-      .select('*')
+      .select('*, service_areas(name)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
       .then(({ data }) => {
@@ -129,7 +130,7 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
       renderItem={({ item }) => (
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.areaId} numberOfLines={1}>{item.service_area_id}</Text>
+            <Text style={styles.areaId} numberOfLines={1}>{item.service_areas?.name ?? `Area #${item.service_area_id}`}</Text>
             <View style={styles.cardHeaderRight}>
               <View style={styles.stelleRow}>
                 {[1, 2, 3, 4, 5].map((n) => (
