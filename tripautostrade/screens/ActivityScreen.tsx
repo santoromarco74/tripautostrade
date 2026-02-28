@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { supabase } from '../lib/supabase';
@@ -23,6 +24,7 @@ interface MiaRecensione {
   id: string;
   service_area_id: number;
   service_areas: { name: string } | null;
+  author_name: string | null;
   rating: number;
   comment: string;
   created_at: string;
@@ -37,43 +39,46 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchRecensioni = useCallback(async () => {
     if (!user) { setLoading(false); return; }
 
-    const fetchRecensioni = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('reviews')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
+    setLoading(true);
+    setFetchError(null);
+    try {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          setFetchError(error.message);
-          return;
-        }
-
-        const reviews = (data ?? []) as Omit<MiaRecensione, 'service_areas'>[];
-        const areaIds = [...new Set(reviews.map((r) => r.service_area_id))];
-
-        const { data: areas } = areaIds.length
-          ? await supabase.from('service_areas').select('id, name').in('id', areaIds)
-          : { data: [] };
-
-        const areaMap: Record<number, string> = Object.fromEntries(
-          (areas ?? []).map((a: { id: number; name: string }) => [a.id, a.name])
-        );
-
-        setRecensioni(
-          reviews.map((r) => ({ ...r, service_areas: { name: areaMap[r.service_area_id] ?? 'Area sconosciuta' } }))
-        );
-      } finally {
-        setLoading(false);
+      if (error) {
+        setFetchError(error.message);
+        return;
       }
-    };
 
-    fetchRecensioni();
+      const reviews = (data ?? []) as Omit<MiaRecensione, 'service_areas'>[];
+      const areaIds = [...new Set(reviews.map((r) => r.service_area_id))];
+
+      const { data: areas } = areaIds.length
+        ? await supabase.from('service_areas').select('id, name').in('id', areaIds)
+        : { data: [] };
+
+      const areaMap: Record<number, string> = Object.fromEntries(
+        (areas ?? []).map((a: { id: number; name: string }) => [a.id, a.name])
+      );
+
+      setRecensioni(
+        reviews.map((r) => ({
+          ...r,
+          service_areas: { name: areaMap[r.service_area_id] ?? 'Area sconosciuta' },
+        }))
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
+
+  useFocusEffect(useCallback(() => { fetchRecensioni(); }, [fetchRecensioni]));
 
   const handleDelete = (id: string) => {
     Alert.alert('Elimina recensione', 'Vuoi davvero eliminare questa recensione?', [
@@ -161,11 +166,17 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
       keyExtractor={(item) => item.id}
       contentContainerStyle={[styles.lista, { paddingBottom: insets.bottom + 16 }]}
       ListHeaderComponent={<Text style={styles.intestazione}>Le mie recensioni</Text>}
-      renderItem={({ item }) => {
-        return (
+      renderItem={({ item }) => (
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <Text style={styles.areaId} numberOfLines={1}>{item.service_areas?.name || 'Area Sconosciuta'}</Text>
+            <View style={styles.cardHeaderLeft}>
+              <Text style={styles.areaNome} numberOfLines={1}>
+                {item.service_areas?.name || 'Area Sconosciuta'}
+              </Text>
+              <Text style={styles.autore} numberOfLines={1}>
+                {item.author_name ?? user.email?.split('@')[0] ?? 'Tu'}
+              </Text>
+            </View>
             <View style={styles.cardHeaderRight}>
               <View style={styles.stelleRow}>
                 {[1, 2, 3, 4, 5].map((n) => (
@@ -203,8 +214,7 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
             })}
           </Text>
         </View>
-        );
-      }}
+      )}
     />
   );
 }
@@ -239,20 +249,27 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: 8,
+  },
+  cardHeaderLeft: {
+    flex: 1,
+    marginRight: 8,
   },
   cardHeaderRight: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  areaId: {
+  areaNome: {
     fontSize: 14,
     fontWeight: '600',
     color: Colors.primary,
-    flex: 1,
-    marginRight: 8,
+  },
+  autore: {
+    fontSize: 12,
+    color: '#888',
+    marginTop: 2,
   },
   stelleRow: {
     flexDirection: 'row',
