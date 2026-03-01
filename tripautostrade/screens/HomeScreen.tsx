@@ -20,6 +20,9 @@ import { HomeScreenProps } from '../types/navigation';
 import { Colors } from '../constants/Colors';
 import { haversineDistance, formatDistance } from '../utils/distance';
 import { supabase } from '../lib/supabase';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const CACHE_KEY = '@service_areas_cache';
 
 const BRANDS = ['Tutti', 'Autogrill', 'Chef Express', 'Sarni'];
 
@@ -56,17 +59,41 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     })();
   }, []);
 
-  // Fetch aree di servizio da Supabase
+  // Fetch aree di servizio con stale-while-revalidate
   useEffect(() => {
     async function fetchServiceAreas() {
-      setIsLoading(true);
-      const { data, error } = await supabase.from('service_areas').select('*');
-      if (error) {
-        Alert.alert('Errore', 'Impossibile caricare le aree di servizio.');
-        console.error(error);
-      } else {
-        setAreas(data as ServiceArea[]);
+      // Step A: leggi la cache
+      let hasCachedData = false;
+      try {
+        const cached = await AsyncStorage.getItem(CACHE_KEY);
+        if (cached) {
+          // Step B: mostra subito i dati cached, rimuovi il loader bloccante
+          setAreas(JSON.parse(cached) as ServiceArea[]);
+          setIsLoading(false);
+          hasCachedData = true;
+        }
+      } catch {
+        // cache corrotta o inaccessibile, continua normalmente
       }
+
+      // Step C: fetch in background da Supabase
+      const { data, error } = await supabase.from('service_areas').select('*');
+
+      if (error) {
+        // Step E: se fallisce ma abbiamo la cache, non bloccare l'utente
+        if (!hasCachedData) {
+          Alert.alert('Errore', 'Impossibile caricare le aree di servizio.');
+        }
+      } else {
+        // Step D: aggiorna lo stato e salva in cache
+        setAreas(data as ServiceArea[]);
+        try {
+          await AsyncStorage.setItem(CACHE_KEY, JSON.stringify(data));
+        } catch {
+          // errore di scrittura cache non critico
+        }
+      }
+
       setIsLoading(false);
     }
     fetchServiceAreas();
