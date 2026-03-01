@@ -11,6 +11,7 @@ import {
   View,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as Network from 'expo-network';
 import { Ionicons } from '@expo/vector-icons';
 import { AddReviewScreenProps } from '../types/navigation';
 import { useReviews } from '../context/ReviewsContext';
@@ -52,6 +53,15 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
   };
 
   const pubblica = async () => {
+    const networkState = await Network.getNetworkStateAsync();
+    if (!networkState.isConnected || !networkState.isInternetReachable) {
+      Alert.alert(
+        'Sei Offline 📶',
+        'Devi essere connesso a internet per poter pubblicare o modificare una recensione. Riprova quando avrai di nuovo campo.'
+      );
+      return;
+    }
+
     if (!user) {
       Alert.alert('Non autenticato', 'Devi essere loggato per inviare una recensione.');
       return;
