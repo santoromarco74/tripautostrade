@@ -24,8 +24,6 @@ interface DbRow {
   comment: string;
   created_at: string;
   image_url?: string;
-  author_name?: string;
-  user_id?: string;
 }
 
 function dbToRecensione(
@@ -61,6 +59,13 @@ interface ReviewsContextValue {
     testo: string;
     fotoBase64?: string;
   }) => Promise<void>;
+  updateReview: (params: {
+    id: string;
+    stelle: number;
+    testo: string;
+    fotoBase64?: string;
+  }) => Promise<void>;
+  deleteReview: (id: string) => Promise<void>;
   toggleLike: (reviewId: string) => Promise<void>;
 }
 
@@ -92,7 +97,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
 
     const reviewIds = (reviews as DbRow[]).map((r) => r.id);
 
-    // Fetch like counts per review
     const { data: likeCounts } = await supabase
       .from('review_likes')
       .select('review_id')
@@ -103,7 +107,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       countMap[like.review_id] = (countMap[like.review_id] ?? 0) + 1;
     }
 
-    // Fetch which reviews the current user has liked
     const myLikes = new Set<string>();
     if (currentUserId) {
       const { data: userLikes } = await supabase
@@ -134,7 +137,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
 
     const wasLiked = review.likedByMe;
 
-    // Optimistic UI update
     setRecensioni((prev) =>
       prev.map((r) =>
         r.id === reviewId
@@ -155,7 +157,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
         .eq('user_id', user.id);
 
       if (error) {
-        // Revert on failure
         setRecensioni((prev) =>
           prev.map((r) =>
             r.id === reviewId
@@ -170,7 +171,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
         .insert({ review_id: reviewId, user_id: user.id });
 
       if (error) {
-        // Revert on failure
         setRecensioni((prev) =>
           prev.map((r) =>
             r.id === reviewId
@@ -189,14 +189,10 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
     fotoBase64?: string;
   }) => {
     const { data: { user } } = await supabase.auth.getUser();
-    const authorName = user?.email?.split('@')[0] ?? 'Anonimo';
-
-    let imageUrl: string | undefined;
-
-    const authorName: string =
-      (user.user_metadata?.full_name as string | undefined) ??
-      user.email?.split('@')[0] ??
-      'Utente';
+    const authorName =
+      (user?.user_metadata?.full_name as string | undefined) ??
+      user?.email?.split('@')[0] ??
+      'Anonimo';
 
     let imageUrl: string | undefined;
     if (params.fotoBase64) {
@@ -219,8 +215,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
         author_name: authorName,
         rating: params.stelle,
         comment: params.testo,
-        user_id: user.id,
-        author_name: authorName,
         ...(imageUrl ? { image_url: imageUrl } : {}),
       })
       .select()
@@ -262,8 +256,14 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       .single();
 
     if (error) throw new Error(error.message);
+
+    const existing = recensioni.find((r) => r.id === params.id);
     setRecensioni((prev) =>
-      prev.map((r) => (r.id === params.id ? dbToRecensione(data as DbRow) : r))
+      prev.map((r) =>
+        r.id === params.id
+          ? dbToRecensione(data as DbRow, existing?.likeCount ?? 0, existing?.likedByMe ?? false)
+          : r,
+      ),
     );
   };
 
@@ -274,7 +274,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ReviewsContext.Provider value={{ recensioni, isLoading, addReview, toggleLike }}>
+    <ReviewsContext.Provider value={{ recensioni, isLoading, addReview, updateReview, deleteReview, toggleLike }}>
       {children}
     </ReviewsContext.Provider>
   );

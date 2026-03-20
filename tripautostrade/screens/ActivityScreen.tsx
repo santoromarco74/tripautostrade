@@ -1,9 +1,11 @@
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useReviews } from '../context/ReviewsContext';
 import { useAuth } from '../context/AuthContext';
-import { serviceAreasData } from '../data/serviceAreas';
+import { ServiceArea } from '../data/serviceAreas';
 import { Colors } from '../constants/Colors';
+import { supabase } from '../lib/supabase';
 
 function Stelle({ numero }: { numero: number }) {
   return (
@@ -13,11 +15,20 @@ function Stelle({ numero }: { numero: number }) {
   );
 }
 
-const areaMap = Object.fromEntries(serviceAreasData.map((a) => [a.id, a]));
-
 export default function ActivityScreen() {
   const { recensioni, isLoading } = useReviews();
   const { user } = useAuth();
+  const [areaMap, setAreaMap] = useState<Record<string, ServiceArea>>({});
+
+  useEffect(() => {
+    supabase.from('service_areas').select('*').then(({ data }) => {
+      if (data) {
+        const map: Record<string, ServiceArea> = {};
+        for (const a of data as ServiceArea[]) map[String(a.id)] = a;
+        setAreaMap(map);
+      }
+    });
+  }, []);
 
   const mieRecensioni = recensioni.filter((r) => r.userId === user?.id);
 
@@ -30,7 +41,7 @@ export default function ActivityScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.centro}>
       <View style={styles.headerBar}>
         <Text style={styles.headerTitolo}>Le mie recensioni</Text>
         <Text style={styles.headerConteggio}>
@@ -52,7 +63,7 @@ export default function ActivityScreen() {
           </View>
         }
         renderItem={({ item }) => {
-          const area = areaMap[item.areaId];
+          const area = areaMap[String(item.areaId)];
           return (
             <View style={styles.card}>
               <View style={styles.cardHeader}>

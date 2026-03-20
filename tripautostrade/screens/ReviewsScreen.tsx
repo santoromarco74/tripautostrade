@@ -48,7 +48,7 @@ function LikeButton({
 
 export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) {
   const { area } = route.params;
-  const { recensioni, isLoading, toggleLike } = useReviews();
+  const { recensioni, isLoading, toggleLike, deleteReview } = useReviews();
   const { user } = useAuth();
 
   const recensioniArea = recensioni.filter((r) => r.areaId === String(area.id));

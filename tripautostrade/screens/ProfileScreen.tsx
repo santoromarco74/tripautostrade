@@ -81,6 +81,13 @@ const styles = StyleSheet.create({
     gap: 16,
     padding: 40,
   },
+  titolo: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginTop: 12,
+    marginBottom: 16,
+  },
   email: {
     fontSize: 18,
     fontWeight: '700',
