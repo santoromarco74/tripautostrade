@@ -77,6 +77,14 @@ export default function ActivityScreen() {
                   resizeMode="cover"
                 />
               )}
+              {item.likeCount > 0 && (
+                <View style={styles.likeInfo}>
+                  <Ionicons name="thumbs-up" size={14} color="#999" />
+                  <Text style={styles.likeInfoTesto}>
+                    {item.likeCount} {item.likeCount === 1 ? 'persona' : 'persone'} ha trovato utile questa recensione
+                  </Text>
+                </View>
+              )}
             </View>
           );
         }}
@@ -183,5 +191,18 @@ const styles = StyleSheet.create({
     height: 180,
     borderRadius: 8,
     marginTop: 10,
+  },
+  likeInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  likeInfoTesto: {
+    fontSize: 12,
+    color: '#999',
   },
 });
