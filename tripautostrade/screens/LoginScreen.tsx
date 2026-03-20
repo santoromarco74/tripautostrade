@@ -1,135 +1,202 @@
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { supabase } from '../lib/supabase';
+import { Ionicons } from '@expo/vector-icons';
+import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
-import { AuthStackParamList } from '../types/navigation';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
-
-export default function LoginScreen({ navigation }: Props) {
+export default function LoginScreen() {
+  const { signIn, signUp } = useAuth();
+  const [isRegistrazione, setIsRegistrazione] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = async () => {
-    if (!email.trim() || !password) {
+  const gestisciSubmit = async () => {
+    const emailTrimmed = email.trim().toLowerCase();
+    if (!emailTrimmed || !password) {
       Alert.alert('Campi mancanti', 'Inserisci email e password.');
       return;
     }
-    setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    setLoading(false);
-    if (error) Alert.alert('Errore di accesso', error.message);
+    if (password.length < 6) {
+      Alert.alert('Password troppo corta', 'La password deve avere almeno 6 caratteri.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      if (isRegistrazione) {
+        await signUp(emailTrimmed, password);
+        Alert.alert(
+          'Registrazione completata',
+          "Controlla la tua email per confermare l'account, poi accedi."
+        );
+      } else {
+        await signIn(emailTrimmed, password);
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Errore sconosciuto';
+      Alert.alert('Errore', msg);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      <View style={styles.inner}>
-        <Text style={styles.titolo}>Benvenuto</Text>
-        <Text style={styles.sottotitolo}>Accedi per continuare</Text>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.header}>
+          <Ionicons name="car-outline" size={64} color={Colors.primary} />
+          <Text style={styles.titolo}>TripAutostrade</Text>
+          <Text style={styles.sottotitolo}>
+            {isRegistrazione ? 'Crea un account' : 'Accedi al tuo account'}
+          </Text>
+        </View>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          placeholderTextColor="#aaa"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Password"
-          placeholderTextColor="#aaa"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
+        <View style={styles.card}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="nome@esempio.it"
+            placeholderTextColor="#aaa"
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            autoCorrect={false}
+          />
+
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Minimo 6 caratteri"
+            placeholderTextColor="#aaa"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          <TouchableOpacity
+            style={[styles.btnPrimario, isLoading && { opacity: 0.7 }]}
+            onPress={gestisciSubmit}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.btnPrimarioTesto}>
+                {isRegistrazione ? 'Registrati' : 'Accedi'}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity
-          style={[styles.btnPrimario, loading && styles.btnDisabilitato]}
-          onPress={handleLogin}
-          disabled={loading}
+          style={styles.btnToggle}
+          onPress={() => setIsRegistrazione((v) => !v)}
         >
-          <Text style={styles.btnTestoPrimario}>{loading ? 'Accesso...' : 'Accedi'}</Text>
+          <Text style={styles.btnToggleTesto}>
+            {isRegistrazione
+              ? 'Hai già un account? Accedi'
+              : "Non hai un account? Registrati"}
+          </Text>
         </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.linkRegistrati}>Non hai un account? <Text style={styles.linkAccento}>Registrati</Text></Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  flex: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
   container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  inner: {
-    flex: 1,
+    flexGrow: 1,
+    alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 28,
+    padding: 24,
+    gap: 20,
   },
-  titolo: {
-    fontSize: 32,
-    fontWeight: '800',
-    color: '#1a1a1a',
+  header: {
+    alignItems: 'center',
+    gap: 8,
     marginBottom: 8,
   },
+  titolo: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#1a1a1a',
+    letterSpacing: -0.5,
+  },
   sottotitolo: {
-    fontSize: 16,
+    fontSize: 15,
     color: '#888',
-    marginBottom: 36,
+    textAlign: 'center',
+  },
+  card: {
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 20,
+    width: '100%',
+    gap: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  label: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#444',
+    marginTop: 4,
   },
   input: {
     borderWidth: 1,
     borderColor: '#e0e0e0',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
     fontSize: 15,
     color: '#1a1a1a',
-    marginBottom: 14,
     backgroundColor: '#fafafa',
+    marginBottom: 4,
   },
   btnPrimario: {
     backgroundColor: Colors.primary,
-    borderRadius: 12,
-    paddingVertical: 16,
+    borderRadius: 10,
+    paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
-    marginBottom: 24,
   },
-  btnDisabilitato: {
-    opacity: 0.6,
-  },
-  btnTestoPrimario: {
+  btnPrimarioTesto: {
     color: '#fff',
     fontWeight: '700',
     fontSize: 16,
   },
-  linkRegistrati: {
-    textAlign: 'center',
-    fontSize: 14,
-    color: '#888',
+  btnToggle: {
+    paddingVertical: 8,
   },
-  linkAccento: {
+  btnToggleTesto: {
     color: Colors.primary,
+    fontSize: 14,
     fontWeight: '600',
   },
 });

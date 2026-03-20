@@ -5,17 +5,21 @@ import { supabase } from '../lib/supabase';
 export interface Recensione {
   id: string;
   areaId: string;
+  userId?: string;
   autore: string;
   stelle: number;
   testo: string;
   data: string;
   imageUrl?: string;
-  userId?: string;
+  likeCount: number;
+  likedByMe: boolean;
 }
 
 interface DbRow {
   id: string;
-  service_area_id: number;
+  service_area_id: string;
+  user_id?: string;
+  author_name?: string;
   rating: number;
   comment: string;
   created_at: string;
@@ -24,7 +28,11 @@ interface DbRow {
   user_id?: string;
 }
 
-function dbToRecensione(row: DbRow): Recensione {
+function dbToRecensione(
+  row: DbRow,
+  likeCount: number,
+  likedByMe: boolean,
+): Recensione {
   const data = new Date(row.created_at).toLocaleDateString('it-IT', {
     day: 'numeric',
     month: 'short',
@@ -32,13 +40,15 @@ function dbToRecensione(row: DbRow): Recensione {
   });
   return {
     id: row.id,
-    areaId: String(row.service_area_id),
+    areaId: row.service_area_id,
+    userId: row.user_id,
     autore: row.author_name ?? 'Anonimo',
     stelle: row.rating,
     testo: row.comment,
     data,
     imageUrl: row.image_url ?? undefined,
-    userId: row.user_id,
+    likeCount,
+    likedByMe,
   };
 }
 
@@ -51,13 +61,7 @@ interface ReviewsContextValue {
     testo: string;
     fotoBase64?: string;
   }) => Promise<void>;
-  updateReview: (params: {
-    id: string;
-    stelle: number;
-    testo: string;
-    fotoBase64?: string;
-  }) => Promise<void>;
-  deleteReview: (id: string) => Promise<void>;
+  toggleLike: (reviewId: string) => Promise<void>;
 }
 
 const ReviewsContext = createContext<ReviewsContextValue | null>(null);
@@ -72,15 +76,110 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
 
   const fetchReviews = async () => {
     setIsLoading(true);
-    const { data, error } = await supabase
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const currentUserId = user?.id;
+
+    const { data: reviews, error } = await supabase
       .from('reviews')
       .select('*')
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      setRecensioni((data as DbRow[]).map(dbToRecensione));
+    if (error || !reviews) {
+      setIsLoading(false);
+      return;
     }
+
+    const reviewIds = (reviews as DbRow[]).map((r) => r.id);
+
+    // Fetch like counts per review
+    const { data: likeCounts } = await supabase
+      .from('review_likes')
+      .select('review_id')
+      .in('review_id', reviewIds);
+
+    const countMap: Record<string, number> = {};
+    for (const like of likeCounts ?? []) {
+      countMap[like.review_id] = (countMap[like.review_id] ?? 0) + 1;
+    }
+
+    // Fetch which reviews the current user has liked
+    const myLikes = new Set<string>();
+    if (currentUserId) {
+      const { data: userLikes } = await supabase
+        .from('review_likes')
+        .select('review_id')
+        .eq('user_id', currentUserId)
+        .in('review_id', reviewIds);
+
+      for (const like of userLikes ?? []) {
+        myLikes.add(like.review_id);
+      }
+    }
+
+    setRecensioni(
+      (reviews as DbRow[]).map((row) =>
+        dbToRecensione(row, countMap[row.id] ?? 0, myLikes.has(row.id)),
+      ),
+    );
     setIsLoading(false);
+  };
+
+  const toggleLike = async (reviewId: string) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const review = recensioni.find((r) => r.id === reviewId);
+    if (!review) return;
+
+    const wasLiked = review.likedByMe;
+
+    // Optimistic UI update
+    setRecensioni((prev) =>
+      prev.map((r) =>
+        r.id === reviewId
+          ? {
+              ...r,
+              likedByMe: !wasLiked,
+              likeCount: wasLiked ? r.likeCount - 1 : r.likeCount + 1,
+            }
+          : r,
+      ),
+    );
+
+    if (wasLiked) {
+      const { error } = await supabase
+        .from('review_likes')
+        .delete()
+        .eq('review_id', reviewId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        // Revert on failure
+        setRecensioni((prev) =>
+          prev.map((r) =>
+            r.id === reviewId
+              ? { ...r, likedByMe: true, likeCount: r.likeCount + 1 }
+              : r,
+          ),
+        );
+      }
+    } else {
+      const { error } = await supabase
+        .from('review_likes')
+        .insert({ review_id: reviewId, user_id: user.id });
+
+      if (error) {
+        // Revert on failure
+        setRecensioni((prev) =>
+          prev.map((r) =>
+            r.id === reviewId
+              ? { ...r, likedByMe: false, likeCount: r.likeCount - 1 }
+              : r,
+          ),
+        );
+      }
+    }
   };
 
   const addReview = async (params: {
@@ -90,7 +189,9 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
     fotoBase64?: string;
   }) => {
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) throw new Error('Devi essere loggato per inviare una recensione.');
+    const authorName = user?.email?.split('@')[0] ?? 'Anonimo';
+
+    let imageUrl: string | undefined;
 
     const authorName: string =
       (user.user_metadata?.full_name as string | undefined) ??
@@ -114,6 +215,8 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       .from('reviews')
       .insert({
         service_area_id: params.areaId,
+        user_id: user?.id,
+        author_name: authorName,
         rating: params.stelle,
         comment: params.testo,
         user_id: user.id,
@@ -124,7 +227,8 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       .single();
 
     if (error) throw new Error(error.message);
-    setRecensioni((prev) => [dbToRecensione(data as DbRow), ...prev]);
+
+    setRecensioni((prev) => [dbToRecensione(data as DbRow, 0, false), ...prev]);
   };
 
   const updateReview = async (params: {
@@ -170,7 +274,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ReviewsContext.Provider value={{ recensioni, isLoading, addReview, updateReview, deleteReview }}>
+    <ReviewsContext.Provider value={{ recensioni, isLoading, addReview, toggleLike }}>
       {children}
     </ReviewsContext.Provider>
   );

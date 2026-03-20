@@ -15,18 +15,20 @@
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
-        "NSLocationWhenInUseUsageDescription": "Questa app usa la tua posizione per trovare le aree di servizio vicine."
+        "NSLocationWhenInUseUsageDescription": "TripAutostrade utilizza la tua posizione per mostrarti le aree di servizio vicine."
       }
     },
     "android": {
-      "package": "com.santoromarco74.tripautostrade",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "permissions": ["android.permission.ACCESS_FINE_LOCATION"]
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"

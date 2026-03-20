@@ -1,7 +1,7 @@
 import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ReviewScreenProps } from '../types/navigation';
-import { useReviews } from '../context/ReviewsContext';
+import { useReviews, Recensione } from '../context/ReviewsContext';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 import { CardSkeleton } from '../components/SkeletonLoader';
@@ -15,9 +15,40 @@ function Stelle({ numero }: { numero: number }) {
   );
 }
 
+function LikeButton({
+  item,
+  currentUserId,
+  onToggle,
+}: {
+  item: Recensione;
+  currentUserId?: string;
+  onToggle: (id: string) => void;
+}) {
+  const isOwnReview = currentUserId != null && item.userId === currentUserId;
+
+  if (isOwnReview) return null;
+
+  return (
+    <TouchableOpacity
+      style={styles.likeRow}
+      onPress={() => onToggle(item.id)}
+      activeOpacity={0.6}
+    >
+      <Ionicons
+        name={item.likedByMe ? 'thumbs-up' : 'thumbs-up-outline'}
+        size={18}
+        color={item.likedByMe ? Colors.primary : '#999'}
+      />
+      <Text style={[styles.likeTesto, item.likedByMe && styles.likeTestoAttivo]}>
+        {item.likeCount > 0 ? `${item.likeCount} Utile` : 'Utile'}
+      </Text>
+    </TouchableOpacity>
+  );
+}
+
 export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) {
   const { area } = route.params;
-  const { recensioni, isLoading, deleteReview } = useReviews();
+  const { recensioni, isLoading, toggleLike } = useReviews();
   const { user } = useAuth();
 
   const recensioniArea = recensioni.filter((r) => r.areaId === String(area.id));
@@ -126,6 +157,7 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
                 resizeMode="cover"
               />
             )}
+            <LikeButton item={item} currentUserId={user?.id} onToggle={toggleLike} />
           </View>
         )}
       />
@@ -239,6 +271,23 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 12,
     marginTop: 10,
+  },
+  likeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  likeTesto: {
+    fontSize: 13,
+    color: '#999',
+    fontWeight: '500',
+  },
+  likeTestoAttivo: {
+    color: Colors.primary,
   },
   footer: {
     padding: 16,

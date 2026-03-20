@@ -16,6 +16,7 @@ export type RecensioneEsistente = {
 };
 
 export type RootStackParamList = {
+  Login: undefined;
   Main: undefined;
   Reviews: { area: ServiceArea };
   AddReview: { area: ServiceArea; recensioneEsistente?: RecensioneEsistente };

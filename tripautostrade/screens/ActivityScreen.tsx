@@ -1,221 +1,95 @@
-import { useCallback, useState } from 'react';
-import {
-  Alert,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { ActivityIndicator, FlatList, Image, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../context/AuthContext';
 import { useReviews } from '../context/ReviewsContext';
+import { useAuth } from '../context/AuthContext';
+import { serviceAreasData } from '../data/serviceAreas';
 import { Colors } from '../constants/Colors';
-import { ServiceArea } from '../data/serviceAreas';
-import { ActivityScreenProps } from '../types/navigation';
-import { CardSkeleton } from '../components/SkeletonLoader';
-import { EmptyState } from '../components/EmptyState';
 
-interface MiaRecensione {
-  id: string;
-  service_area_id: number;
-  service_areas: { name: string } | null;
-  author_name: string | null;
-  rating: number;
-  comment: string;
-  created_at: string;
-  image_url?: string;
+function Stelle({ numero }: { numero: number }) {
+  return (
+    <Text style={styles.stelle}>
+      {Array.from({ length: 5 }, (_, i) => (i < numero ? '★' : '☆')).join('')}
+    </Text>
+  );
 }
 
-export default function ActivityScreen({ navigation }: ActivityScreenProps) {
+const areaMap = Object.fromEntries(serviceAreasData.map((a) => [a.id, a]));
+
+export default function ActivityScreen() {
+  const { recensioni, isLoading } = useReviews();
   const { user } = useAuth();
-  const { deleteReview } = useReviews();
-  const insets = useSafeAreaInsets();
-  const [recensioni, setRecensioni] = useState<MiaRecensione[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [fetchError, setFetchError] = useState<string | null>(null);
 
-  const fetchRecensioni = useCallback(async () => {
-    if (!user) { setLoading(false); return; }
+  const mieRecensioni = recensioni.filter((r) => r.userId === user?.id);
 
-    setLoading(true);
-    setFetchError(null);
-    try {
-      const { data, error } = await supabase
-        .from('reviews')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        setFetchError(error.message);
-        return;
-      }
-
-      const reviews = (data ?? []) as Omit<MiaRecensione, 'service_areas'>[];
-      const areaIds = [...new Set(reviews.map((r) => r.service_area_id))];
-
-      const { data: areas } = areaIds.length
-        ? await supabase.from('service_areas').select('id, name').in('id', areaIds)
-        : { data: [] };
-
-      const areaMap: Record<number, string> = Object.fromEntries(
-        (areas ?? []).map((a: { id: number; name: string }) => [a.id, a.name])
-      );
-
-      setRecensioni(
-        reviews.map((r) => ({
-          ...r,
-          service_areas: { name: areaMap[r.service_area_id] ?? 'Area sconosciuta' },
-        }))
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [user]);
-
-  useFocusEffect(useCallback(() => { fetchRecensioni(); }, [fetchRecensioni]));
-
-  const handleDelete = (id: string) => {
-    Alert.alert('Elimina recensione', 'Vuoi davvero eliminare questa recensione?', [
-      { text: 'Annulla', style: 'cancel' },
-      {
-        text: 'Elimina',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await deleteReview(id);
-            setRecensioni((prev) => prev.filter((r) => r.id !== id));
-          } catch {
-            Alert.alert('Errore', 'Impossibile eliminare la recensione.');
-          }
-        },
-      },
-    ]);
-  };
-
-  const handleEdit = async (item: MiaRecensione) => {
-    const { data, error } = await supabase
-      .from('service_areas')
-      .select('*')
-      .eq('id', item.service_area_id)
-      .single();
-    if (error || !data) return;
-    navigation.navigate('AddReview', {
-      area: data as ServiceArea,
-      recensioneEsistente: {
-        id: item.id,
-        stelle: item.rating,
-        testo: item.comment,
-        imageUrl: item.image_url,
-      },
-    });
-  };
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <View style={styles.lista}>
-        <Text style={styles.intestazione}>Le mie recensioni</Text>
-        <CardSkeleton />
-        <CardSkeleton />
-        <CardSkeleton />
-      </View>
-    );
-  }
-
-  if (!user) {
-    return (
-      <View style={styles.centro}>
-        <EmptyState
-          icon="person-outline"
-          title="Accedi per vedere le tue recensioni"
-          subtitle="Effettua il login per gestire le tue recensioni"
-        />
-      </View>
-    );
-  }
-
-  if (fetchError) {
-    return (
-      <View style={styles.centro}>
-        <Text style={styles.errore}>Errore Supabase:{'\n'}{fetchError}</Text>
-      </View>
-    );
-  }
-
-  if (recensioni.length === 0) {
-    return (
-      <View style={styles.centro}>
-        <EmptyState
-          icon="document-text-outline"
-          title="Nessuna recensione ancora"
-          subtitle="Le recensioni che scrivi appariranno qui. Esplora le aree di servizio e condividi la tua esperienza!"
-        />
+      <View style={styles.centrato}>
+        <ActivityIndicator size="large" color={Colors.primary} />
       </View>
     );
   }
 
   return (
-    <FlatList
-      style={{ flex: 1 }}
-      data={recensioni}
-      keyExtractor={(item) => item.id}
-      contentContainerStyle={[styles.lista, { paddingBottom: insets.bottom + 16 }]}
-      ListHeaderComponent={<Text style={styles.intestazione}>Le mie recensioni</Text>}
-      renderItem={({ item }) => (
-        <View style={styles.card}>
-          <View style={styles.cardHeader}>
-            <View style={styles.cardHeaderLeft}>
-              <Text style={styles.autore} numberOfLines={1}>
-                {item.author_name ?? user.email?.split('@')[0] ?? 'Tu'}
-              </Text>
-              <Text style={styles.areaNome} numberOfLines={1}>
-                {item.service_areas?.name || 'Area Sconosciuta'}
-              </Text>
-            </View>
-            <View style={styles.cardHeaderRight}>
-              <View style={styles.stelleRow}>
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <Ionicons
-                    key={n}
-                    name={n <= item.rating ? 'star' : 'star-outline'}
-                    size={14}
-                    color={n <= item.rating ? '#f4b400' : '#ccc'}
-                  />
-                ))}
-              </View>
-              <View style={styles.azioniRow}>
-                <TouchableOpacity
-                  onPress={() => handleEdit(item)}
-                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}
-                >
-                  <Ionicons name="pencil-outline" size={16} color={Colors.primary} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => handleDelete(item.id)}
-                  hitSlop={{ top: 8, bottom: 8, left: 4, right: 8 }}
-                >
-                  <Ionicons name="trash-outline" size={16} color="#d32f2f" />
-                </TouchableOpacity>
-              </View>
-            </View>
+    <View style={styles.container}>
+      <View style={styles.headerBar}>
+        <Text style={styles.headerTitolo}>Le mie recensioni</Text>
+        <Text style={styles.headerConteggio}>
+          {mieRecensioni.length} {mieRecensioni.length === 1 ? 'recensione' : 'recensioni'}
+        </Text>
+      </View>
+
+      <FlatList
+        data={mieRecensioni}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.lista}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Ionicons name="chatbubble-outline" size={48} color="#ccc" />
+            <Text style={styles.emptyTitolo}>Nessuna recensione ancora</Text>
+            <Text style={styles.emptySottotitolo}>
+              Le recensioni che scrivi appariranno qui
+            </Text>
           </View>
-          <Text style={styles.commento}>{item.comment}</Text>
-          {item.image_url && (
-            <Image source={{ uri: item.image_url }} style={styles.foto} />
-          )}
-          <Text style={styles.data}>
-            {new Date(item.created_at).toLocaleDateString('it-IT', {
-              day: 'numeric', month: 'short', year: 'numeric',
-            })}
-          </Text>
-        </View>
-      )}
-    />
+        }
+        renderItem={({ item }) => {
+          const area = areaMap[item.areaId];
+          return (
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <View style={styles.cardTitleGroup}>
+                  <Text style={styles.areaName} numberOfLines={1}>
+                    {area?.name ?? item.areaId}
+                  </Text>
+                  {area && (
+                    <Text style={styles.areaBrand}>
+                      {area.brand} · {area.highway} Km {area.km}
+                    </Text>
+                  )}
+                </View>
+                <Text style={styles.data}>{item.data}</Text>
+              </View>
+              <Stelle numero={item.stelle} />
+              <Text style={styles.testo}>{item.testo}</Text>
+              {item.imageUrl && (
+                <Image
+                  source={{ uri: item.imageUrl }}
+                  style={styles.cardImmagine}
+                  resizeMode="cover"
+                />
+              )}
+              {item.likeCount > 0 && (
+                <View style={styles.likeInfo}>
+                  <Ionicons name="thumbs-up" size={14} color="#999" />
+                  <Text style={styles.likeInfoTesto}>
+                    {item.likeCount} {item.likeCount === 1 ? 'persona' : 'persone'} ha trovato utile questa recensione
+                  </Text>
+                </View>
+              )}
+            </View>
+          );
+        }}
+      />
+    </View>
   );
 }
 
@@ -224,84 +98,111 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
+  centrato: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerBar: {
+    backgroundColor: '#fff',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  headerTitolo: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1a1a1a',
+  },
+  headerConteggio: {
+    fontSize: 13,
+    color: '#888',
+  },
   lista: {
     padding: 16,
-    backgroundColor: '#f5f5f5',
+    gap: 12,
   },
-  intestazione: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#1a1a1a',
-    marginBottom: 16,
-    marginTop: 8,
+  emptyContainer: {
+    alignItems: 'center',
+    paddingTop: 80,
+    gap: 10,
+  },
+  emptyTitolo: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#888',
+  },
+  emptySottotitolo: {
+    fontSize: 13,
+    color: '#aaa',
+    textAlign: 'center',
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 16,
-    marginBottom: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 4,
+    gap: 8,
   },
-  cardHeaderLeft: {
+  cardTitleGroup: {
     flex: 1,
-    marginRight: 8,
   },
-  cardHeaderRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  autore: {
+  areaName: {
+    fontWeight: '700',
     fontSize: 14,
-    fontWeight: '600',
     color: '#1a1a1a',
   },
-  areaNome: {
+  areaBrand: {
     fontSize: 12,
     color: '#888',
-    marginTop: 2,
-  },
-  stelleRow: {
-    flexDirection: 'row',
-    gap: 2,
-  },
-  azioniRow: {
-    flexDirection: 'row',
-    gap: 10,
-  },
-  commento: {
-    fontSize: 14,
-    color: '#444',
-    lineHeight: 20,
-    marginBottom: 8,
-  },
-  foto: {
-    width: '100%',
-    height: 160,
-    borderRadius: 12,
-    marginBottom: 8,
+    marginTop: 1,
   },
   data: {
     fontSize: 12,
     color: '#aaa',
+    flexShrink: 0,
   },
-  errore: {
-    margin: 24,
-    padding: 16,
-    backgroundColor: '#fdecea',
-    borderRadius: 12,
-    fontSize: 13,
-    color: '#c62828',
+  stelle: {
+    fontSize: 16,
+    color: '#f4b400',
+    marginVertical: 4,
+  },
+  testo: {
+    marginTop: 6,
+    fontSize: 14,
+    color: '#444',
     lineHeight: 20,
+  },
+  cardImmagine: {
+    width: '100%',
+    height: 180,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  likeInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 12,
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  likeInfoTesto: {
+    fontSize: 12,
+    color: '#999',
   },
 });
