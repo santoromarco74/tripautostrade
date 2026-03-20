@@ -1,9 +1,11 @@
-import { ActivityIndicator, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ReviewScreenProps } from '../types/navigation';
 import { useReviews, Recensione } from '../context/ReviewsContext';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
+import { CardSkeleton } from '../components/SkeletonLoader';
+import { EmptyState } from '../components/EmptyState';
 
 function Stelle({ numero }: { numero: number }) {
   return (
@@ -49,18 +51,39 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
   const { recensioni, isLoading, toggleLike } = useReviews();
   const { user } = useAuth();
 
-  const recensioniArea = recensioni.filter((r) => r.areaId === area.id);
+  const recensioniArea = recensioni.filter((r) => r.areaId === String(area.id));
 
   const mediaValutazione =
     recensioniArea.length > 0
       ? (recensioniArea.reduce((acc, r) => acc + r.stelle, 0) / recensioniArea.length).toFixed(1)
       : null;
 
+  const handleDelete = (id: string) => {
+    Alert.alert('Elimina recensione', 'Vuoi davvero eliminare questa recensione?', [
+      { text: 'Annulla', style: 'cancel' },
+      {
+        text: 'Elimina',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deleteReview(id);
+          } catch {
+            Alert.alert('Errore', 'Impossibile eliminare la recensione.');
+          }
+        },
+      },
+    ]);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.nomeArea}>{area.name}</Text>
-        <Text style={styles.brandArea}>{area.brand} · {area.highway} Km {area.km}</Text>
+        <Text style={styles.brandArea}>
+          {area.brand}
+          {area.highway ? ` · ${area.highway}` : ''}
+          {area.km != null ? ` Km ${area.km}` : ''}
+        </Text>
         {mediaValutazione ? (
           <View style={styles.mediaRow}>
             <Text style={styles.mediaNumero}>{mediaValutazione}</Text>
@@ -78,19 +101,52 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
         contentContainerStyle={styles.lista}
         ListEmptyComponent={
           isLoading ? (
-            <ActivityIndicator size="large" color={Colors.primary} style={{ marginTop: 60 }} />
-          ) : (
-            <View style={styles.emptyContainer}>
-              <Ionicons name="chatbubble-outline" size={48} color="#ccc" />
-              <Text style={styles.emptyTesto}>Sii il primo a recensire quest'area!</Text>
+            <View style={{ paddingTop: 8 }}>
+              <CardSkeleton />
+              <CardSkeleton />
+              <CardSkeleton />
             </View>
+          ) : (
+            <EmptyState
+              icon="chatbubble-ellipses-outline"
+              title="Nessuna recensione ancora"
+              subtitle="Sii il primo a condividere la tua esperienza qui!"
+            />
           )
         }
         renderItem={({ item }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.autore}>{item.autore}</Text>
-              <Text style={styles.data}>{item.data}</Text>
+              <View style={styles.cardHeaderRight}>
+                <Text style={styles.data}>{item.data}</Text>
+                {user && item.userId === user.id && (
+                  <View style={styles.azioniRow}>
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigation.navigate('AddReview', {
+                          area,
+                          recensioneEsistente: {
+                            id: item.id,
+                            stelle: item.stelle,
+                            testo: item.testo,
+                            imageUrl: item.imageUrl,
+                          },
+                        })
+                      }
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 4 }}
+                    >
+                      <Ionicons name="pencil-outline" size={16} color={Colors.primary} />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => handleDelete(item.id)}
+                      hitSlop={{ top: 8, bottom: 8, left: 4, right: 8 }}
+                    >
+                      <Ionicons name="trash-outline" size={16} color="#d32f2f" />
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
             </View>
             <Stelle numero={item.stelle} />
             <Text style={styles.testo}>{item.testo}</Text>
@@ -110,6 +166,7 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
         <TouchableOpacity
           style={styles.btnScrivi}
           onPress={() => navigation.navigate('AddReview', { area })}
+          activeOpacity={0.8}
         >
           <Ionicons name="create-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
           <Text style={styles.btnScriviTesto}>Scrivi una recensione</Text>
@@ -168,34 +225,36 @@ const styles = StyleSheet.create({
     padding: 16,
     gap: 12,
   },
-  emptyContainer: {
-    alignItems: 'center',
-    paddingTop: 60,
-    gap: 12,
-  },
-  emptyTesto: {
-    fontSize: 15,
-    color: '#aaa',
-  },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 4,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 4,
+  },
+  cardHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  azioniRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
   autore: {
     fontWeight: '600',
     fontSize: 14,
     color: '#1a1a1a',
+    flex: 1,
   },
   data: {
     fontSize: 12,
@@ -210,7 +269,7 @@ const styles = StyleSheet.create({
   cardImmagine: {
     width: '100%',
     height: 200,
-    borderRadius: 8,
+    borderRadius: 12,
     marginTop: 10,
   },
   likeRow: {
@@ -239,7 +298,7 @@ const styles = StyleSheet.create({
   },
   btnScrivi: {
     backgroundColor: Colors.primary,
-    borderRadius: 12,
+    borderRadius: 16,
     paddingVertical: 14,
     alignItems: 'center',
     flexDirection: 'row',

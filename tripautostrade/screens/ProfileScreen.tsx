@@ -64,13 +64,25 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+    padding: 24,
+  },
+  avatarBox: {
+    alignItems: 'center',
+    marginTop: 32,
+    marginBottom: 32,
+  },
+  avatarCircle: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    backgroundColor: '#e8f5ee',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 16,
     padding: 40,
   },
-  titolo: {
-    fontSize: 20,
+  email: {
+    fontSize: 18,
     fontWeight: '700',
     color: '#1a1a1a',
   },

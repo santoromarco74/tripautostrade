@@ -11,17 +11,26 @@ import {
   View,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
+import * as Network from 'expo-network';
 import { Ionicons } from '@expo/vector-icons';
 import { AddReviewScreenProps } from '../types/navigation';
 import { useReviews } from '../context/ReviewsContext';
+import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 
 export default function AddReviewScreen({ route, navigation }: AddReviewScreenProps) {
-  const { area } = route.params;
-  const { addReview } = useReviews();
-  const [stelle, setStelle] = useState(0);
-  const [commento, setCommento] = useState('');
+  const { area, recensioneEsistente } = route.params;
+  const isEditing = !!recensioneEsistente;
+
+  const { addReview, updateReview } = useReviews();
+  const { user } = useAuth();
+
+  const [stelle, setStelle] = useState(recensioneEsistente?.stelle ?? 0);
+  const [commento, setCommento] = useState(recensioneEsistente?.testo ?? '');
   const [foto, setFoto] = useState<{ uri: string; base64: string } | null>(null);
+  const [fotoUrlEsistente, setFotoUrlEsistente] = useState<string | undefined>(
+    recensioneEsistente?.imageUrl
+  );
   const [publishing, setPublishing] = useState(false);
 
   const sceglieFoto = async () => {
@@ -39,10 +48,24 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
     });
     if (!result.canceled && result.assets[0].base64) {
       setFoto({ uri: result.assets[0].uri, base64: result.assets[0].base64 });
+      setFotoUrlEsistente(undefined);
     }
   };
 
   const pubblica = async () => {
+    const networkState = await Network.getNetworkStateAsync();
+    if (!networkState.isConnected || !networkState.isInternetReachable) {
+      Alert.alert(
+        'Sei Offline 📶',
+        'Devi essere connesso a internet per poter pubblicare o modificare una recensione. Riprova quando avrai di nuovo campo.'
+      );
+      return;
+    }
+
+    if (!user) {
+      Alert.alert('Non autenticato', 'Devi essere loggato per inviare una recensione.');
+      return;
+    }
     if (stelle === 0) {
       Alert.alert('Valutazione mancante', 'Seleziona almeno una stella.');
       return;
@@ -51,17 +74,30 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       Alert.alert('Commento troppo corto', 'Scrivi almeno 10 caratteri.');
       return;
     }
+
     setPublishing(true);
     try {
-      await addReview({
-        areaId: area.id,
-        stelle,
-        testo: commento.trim(),
-        ...(foto ? { fotoBase64: foto.base64 } : {}),
-      });
-      Alert.alert('Recensione inviata con successo!', undefined, [
-        { text: 'OK', onPress: () => navigation.goBack() },
-      ]);
+      if (isEditing) {
+        await updateReview({
+          id: recensioneEsistente.id,
+          stelle,
+          testo: commento.trim(),
+          ...(foto ? { fotoBase64: foto.base64 } : {}),
+        });
+        Alert.alert('Recensione aggiornata!', undefined, [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
+      } else {
+        await addReview({
+          areaId: area.id,
+          stelle,
+          testo: commento.trim(),
+          ...(foto ? { fotoBase64: foto.base64 } : {}),
+        });
+        Alert.alert('Recensione inviata con successo!', undefined, [
+          { text: 'OK', onPress: () => navigation.goBack() },
+        ]);
+      }
     } catch {
       Alert.alert('Errore', 'Impossibile inviare la recensione. Riprova.');
     } finally {
@@ -69,11 +105,17 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
     }
   };
 
+  const fotoUri = foto?.uri ?? fotoUrlEsistente;
+
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.headerArea}>
         <Text style={styles.nomeArea}>{area.name}</Text>
-        <Text style={styles.brandArea}>{area.brand} · {area.highway} Km {area.km}</Text>
+        <Text style={styles.brandArea}>
+          {area.brand}
+          {area.highway ? ` · ${area.highway}` : ''}
+          {area.km != null ? ` Km ${area.km}` : ''}
+        </Text>
       </View>
 
       {/* Stelle */}
@@ -117,10 +159,13 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       {/* Foto */}
       <View style={styles.sezione}>
         <Text style={styles.label}>Foto (opzionale)</Text>
-        {foto ? (
+        {fotoUri ? (
           <View style={styles.fotoContainer}>
-            <Image source={{ uri: foto.uri }} style={styles.anteprima} />
-            <TouchableOpacity style={styles.btnRimuoviFoto} onPress={() => setFoto(null)}>
+            <Image source={{ uri: fotoUri }} style={styles.anteprima} />
+            <TouchableOpacity
+              style={styles.btnRimuoviFoto}
+              onPress={() => { setFoto(null); setFotoUrlEsistente(undefined); }}
+            >
               <Ionicons name="close" size={18} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -136,7 +181,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       <TouchableOpacity style={[styles.btnPubblica, publishing && { opacity: 0.7 }]} onPress={pubblica} disabled={publishing}>
         {publishing
           ? <ActivityIndicator color="#fff" />
-          : <Text style={styles.btnPubblicaTesto}>Pubblica</Text>
+          : <Text style={styles.btnPubblicaTesto}>{isEditing ? 'Aggiorna' : 'Pubblica'}</Text>
         }
       </TouchableOpacity>
     </ScrollView>

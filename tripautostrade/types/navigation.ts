@@ -3,11 +3,23 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { ServiceArea } from '../data/serviceAreas';
 
+export type AuthStackParamList = {
+  Login: undefined;
+  Register: undefined;
+};
+
+export type RecensioneEsistente = {
+  id: string;
+  stelle: number;
+  testo: string;
+  imageUrl?: string;
+};
+
 export type RootStackParamList = {
   Login: undefined;
   Main: undefined;
   Reviews: { area: ServiceArea };
-  AddReview: { area: ServiceArea };
+  AddReview: { area: ServiceArea; recensioneEsistente?: RecensioneEsistente };
 };
 
 export type TabParamList = {
@@ -18,6 +30,11 @@ export type TabParamList = {
 
 export type HomeScreenProps = CompositeScreenProps<
   BottomTabScreenProps<TabParamList, 'Esplora'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+export type ActivityScreenProps = CompositeScreenProps<
+  BottomTabScreenProps<TabParamList, 'Attività'>,
   NativeStackScreenProps<RootStackParamList>
 >;
 

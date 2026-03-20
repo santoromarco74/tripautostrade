@@ -94,7 +94,7 @@ export default function ActivityScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  centro: {
     flex: 1,
     backgroundColor: '#f5f5f5',
   },
