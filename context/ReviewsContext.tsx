@@ -61,11 +61,18 @@ interface ReviewsContextValue {
   recensioni: Recensione[];
   isLoading: boolean;
   addReview: (params: {
-    areaId: string;
+    areaId: string | number;
     stelle: number;
     testo: string;
     fotoBase64?: string;
   }) => Promise<void>;
+  updateReview: (params: {
+    id: string;
+    stelle: number;
+    testo: string;
+    fotoBase64?: string;
+  }) => Promise<void>;
+  deleteReview: (id: string) => Promise<void>;
   toggleLike: (reviewId: string) => Promise<void>;
 }
 
@@ -97,7 +104,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
 
     const reviewIds = (reviews as DbRow[]).map((r) => r.id);
 
-    // Fetch like counts per review
     const { data: likeCounts } = await supabase
       .from('review_likes')
       .select('review_id')
@@ -108,7 +114,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       countMap[like.review_id] = (countMap[like.review_id] ?? 0) + 1;
     }
 
-    // Fetch which reviews the current user has liked
     const myLikes = new Set<string>();
     if (currentUserId) {
       const { data: userLikes } = await supabase
@@ -139,7 +144,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
 
     const wasLiked = review.likedByMe;
 
-    // Optimistic UI update
     setRecensioni((prev) =>
       prev.map((r) =>
         r.id === reviewId
@@ -160,7 +164,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
         .eq('user_id', user.id);
 
       if (error) {
-        // Revert on failure
         setRecensioni((prev) =>
           prev.map((r) =>
             r.id === reviewId
@@ -175,7 +178,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
         .insert({ review_id: reviewId, user_id: user.id });
 
       if (error) {
-        // Revert on failure
         setRecensioni((prev) =>
           prev.map((r) =>
             r.id === reviewId
@@ -188,7 +190,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
   };
 
   const addReview = async (params: {
-    areaId: string;
+    areaId: string | number;
     stelle: number;
     testo: string;
     fotoBase64?: string;
@@ -196,7 +198,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
     const { data: { user } } = await supabase.auth.getUser();
 
     let imageUrl: string | undefined;
-
     if (params.fotoBase64) {
       const fileName = `review_${Date.now()}.jpg`;
       const { error: uploadError } = await supabase.storage
@@ -226,8 +227,56 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
     setRecensioni((prev) => [dbToRecensione(data as DbRow, 0, false), ...prev]);
   };
 
+  const updateReview = async (params: {
+    id: string;
+    stelle: number;
+    testo: string;
+    fotoBase64?: string;
+  }) => {
+    let imageUrl: string | undefined;
+    if (params.fotoBase64) {
+      const fileName = `review_${Date.now()}.jpg`;
+      const { error: uploadError } = await supabase.storage
+        .from('review-photos')
+        .upload(fileName, decode(params.fotoBase64), { contentType: 'image/jpeg' });
+      if (uploadError) throw new Error(uploadError.message);
+      const { data: urlData } = supabase.storage
+        .from('review-photos')
+        .getPublicUrl(fileName);
+      imageUrl = urlData.publicUrl;
+    }
+
+    const { data, error } = await supabase
+      .from('reviews')
+      .update({
+        rating: params.stelle,
+        comment: params.testo,
+        ...(imageUrl ? { image_url: imageUrl } : {}),
+      })
+      .eq('id', params.id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    const existing = recensioni.find((r) => r.id === params.id);
+    setRecensioni((prev) =>
+      prev.map((r) =>
+        r.id === params.id
+          ? dbToRecensione(data as DbRow, existing?.likeCount ?? 0, existing?.likedByMe ?? false)
+          : r,
+      ),
+    );
+  };
+
+  const deleteReview = async (id: string) => {
+    const { error } = await supabase.from('reviews').delete().eq('id', id);
+    if (error) throw new Error(error.message);
+    setRecensioni((prev) => prev.filter((r) => r.id !== id));
+  };
+
   return (
-    <ReviewsContext.Provider value={{ recensioni, isLoading, addReview, toggleLike }}>
+    <ReviewsContext.Provider value={{ recensioni, isLoading, addReview, updateReview, deleteReview, toggleLike }}>
       {children}
     </ReviewsContext.Provider>
   );

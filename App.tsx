@@ -1,109 +1,69 @@
-import { useState, useEffect } from "react";
-import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
-import { StatusBar } from "expo-status-bar";
-import MapView from "react-native-maps";
-import * as Location from "expo-location";
+import { ActivityIndicator, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ReviewsProvider } from './context/ReviewsContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import TabNavigator from './navigation/TabNavigator';
+import ReviewsScreen from './screens/ReviewsScreen';
+import AddReviewScreen from './screens/AddReviewScreen';
+import LoginScreen from './screens/LoginScreen';
+import { RootStackParamList } from './types/navigation';
 
-const ITALY_CENTER = {
-  latitude: 41.9,
-  longitude: 12.5,
-  latitudeDelta: 6,
-  longitudeDelta: 6,
-};
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
-export default function App() {
-  const [location, setLocation] = useState<Location.LocationObject | null>(
-    null
-  );
-  const [permissionDenied, setPermissionDenied] = useState(false);
-  const [loading, setLoading] = useState(true);
+function RootNavigator() {
+  const { session, isLoading } = useAuth();
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-
-      if (status !== "granted") {
-        setPermissionDenied(true);
-        setLoading(false);
-        return;
-      }
-
-      const currentLocation = await Location.getCurrentPositionAsync({});
-      setLocation(currentLocation);
-      setLoading(false);
-    })();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#0066cc" />
-        <Text style={styles.loadingText}>Localizzazione in corso...</Text>
-        <StatusBar style="auto" />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator size="large" color="#006633" />
       </View>
     );
   }
 
-  if (permissionDenied) {
+  if (!session) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.deniedTitle}>Posizione non disponibile</Text>
-        <Text style={styles.deniedText}>
-          TripAutostrade ha bisogno dell'accesso alla tua posizione per mostrare
-          le aree di servizio vicine a te. Abilita la localizzazione nelle
-          impostazioni del dispositivo.
-        </Text>
-        <StatusBar style="auto" />
-      </View>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Login" component={LoginScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
     );
   }
-
-  const region = location
-    ? {
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-        latitudeDelta: 0.5,
-        longitudeDelta: 0.5,
-      }
-    : ITALY_CENTER;
 
   return (
-    <View style={styles.container}>
-      <MapView style={styles.map} initialRegion={region} showsUserLocation />
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Main"
+          component={TabNavigator}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Reviews"
+          component={ReviewsScreen}
+          options={{ title: 'Recensioni' }}
+        />
+        <Stack.Screen
+          name="AddReview"
+          component={AddReviewScreen}
+          options={{ title: 'Scrivi una recensione', presentation: 'modal' }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
-  centered: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 24,
-  },
-  loadingText: {
-    marginTop: 12,
-    fontSize: 16,
-    color: "#666",
-  },
-  deniedTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 12,
-  },
-  deniedText: {
-    fontSize: 16,
-    color: "#666",
-    textAlign: "center",
-    lineHeight: 24,
-  },
-});
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <AuthProvider>
+        <ReviewsProvider>
+          <RootNavigator />
+        </ReviewsProvider>
+      </AuthProvider>
+    </SafeAreaProvider>
+  );
+}
