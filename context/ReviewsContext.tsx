@@ -7,6 +7,7 @@ export interface Recensione {
   areaId: string;
   userId?: string;
   autore: string;
+  avatarUrl?: string;
   stelle: number;
   testo: string;
   data: string;
@@ -15,15 +16,20 @@ export interface Recensione {
   likedByMe: boolean;
 }
 
+interface DbProfile {
+  full_name: string | null;
+  avatar_url: string | null;
+}
+
 interface DbRow {
   id: string;
   service_area_id: string;
   user_id?: string;
-  author_name?: string;
   rating: number;
   comment: string;
   created_at: string;
   image_url?: string;
+  profiles?: DbProfile | null;
 }
 
 function dbToRecensione(
@@ -40,7 +46,8 @@ function dbToRecensione(
     id: row.id,
     areaId: row.service_area_id,
     userId: row.user_id,
-    autore: row.author_name ?? 'Anonimo',
+    autore: row.profiles?.full_name || 'Utente Autostradale',
+    avatarUrl: row.profiles?.avatar_url ?? undefined,
     stelle: row.rating,
     testo: row.comment,
     data,
@@ -87,7 +94,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
 
     const { data: reviews, error } = await supabase
       .from('reviews')
-      .select('*')
+      .select('*, profiles(full_name, avatar_url)')
       .order('created_at', { ascending: false });
 
     if (error || !reviews) {
@@ -189,10 +196,6 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
     fotoBase64?: string;
   }) => {
     const { data: { user } } = await supabase.auth.getUser();
-    const authorName =
-      (user?.user_metadata?.full_name as string | undefined) ??
-      user?.email?.split('@')[0] ??
-      'Anonimo';
 
     let imageUrl: string | undefined;
     if (params.fotoBase64) {
@@ -212,12 +215,11 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       .insert({
         service_area_id: params.areaId,
         user_id: user?.id,
-        author_name: authorName,
         rating: params.stelle,
         comment: params.testo,
         ...(imageUrl ? { image_url: imageUrl } : {}),
       })
-      .select()
+      .select('*, profiles(full_name, avatar_url)')
       .single();
 
     if (error) throw new Error(error.message);
