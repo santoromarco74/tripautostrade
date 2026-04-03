@@ -98,9 +98,10 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
           { text: 'OK', onPress: () => navigation.goBack() },
         ]);
       }
-    } catch {
-      Alert.alert('Errore', 'Impossibile inviare la recensione. Riprova.');
-    } finally {
+    } catch (err: any) {
+  Alert.alert('Il Vero Errore', err.message);
+  console.error("ERRORE SUPABASE:", err.message);
+} finally {
       setPublishing(false);
     }
   };
