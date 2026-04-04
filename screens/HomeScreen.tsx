@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Alert,
+  FlatList,
+  Keyboard,
   ScrollView,
   StyleSheet,
   Text,
@@ -44,6 +46,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [selectedArea, setSelectedArea] = useState<ServiceArea | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Tutti');
+  const [searchFocused, setSearchFocused] = useState(false);
 
   // Richiesta permesso GPS
   useEffect(() => {
@@ -179,20 +182,57 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       {/* Barra di ricerca + filtri brand */}
       <View style={[styles.searchContainer, { top: insets.top + 12 }]}>
         <View style={styles.searchBar}>
-          <Ionicons name="search" size={18} color="#888" style={styles.searchIcon} />
+          <Ionicons name="search" size={18} color={searchFocused ? Colors.primary : '#94A3B8'} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Cerca area di servizio..."
             placeholderTextColor="#aaa"
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={(t) => { setSearchQuery(t); }}
+            onFocus={() => setSearchFocused(true)}
+            onBlur={() => setSearchFocused(false)}
             returnKeyType="search"
             clearButtonMode="while-editing"
           />
-          {isLoading && (
-            <View style={styles.loadingDot} />
+          {isLoading && <View style={styles.loadingDot} />}
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => { setSearchQuery(''); Keyboard.dismiss(); }}>
+              <Ionicons name="close-circle" size={18} color="#94A3B8" />
+            </TouchableOpacity>
           )}
         </View>
+
+        {/* Dropdown risultati ricerca */}
+        {searchQuery.trim().length > 0 && (
+          <FlatList
+            data={filteredAreas.slice(0, 6)}
+            keyExtractor={(item) => String(item.id)}
+            style={styles.dropdown}
+            keyboardShouldPersistTaps="handled"
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.dropdownItem}
+                onPress={() => {
+                  setSelectedArea(item);
+                  setSearchQuery('');
+                  Keyboard.dismiss();
+                }}
+              >
+                <Ionicons name="location-outline" size={16} color={Colors.primary} style={{ marginRight: 10 }} />
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.dropdownNome} numberOfLines={1}>{item.name}</Text>
+                  <Text style={styles.dropdownSub}>{item.brand}{item.highway ? ` · ${item.highway}` : ''}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={14} color="#94A3B8" />
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <View style={styles.dropdownVuoto}>
+                <Text style={styles.dropdownVuotoTesto}>Nessuna area trovata</Text>
+              </View>
+            }
+          />
+        )}
 
         <ScrollView
           horizontal
@@ -459,5 +499,45 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
     fontWeight: '600',
     fontSize: 15,
+  },
+
+  // ── Dropdown ricerca ─────────────────────────────────────────────────────
+  dropdown: {
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    marginTop: 4,
+    maxHeight: 280,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
+    overflow: 'hidden',
+  },
+  dropdownItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  dropdownNome: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  dropdownSub: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 1,
+  },
+  dropdownVuoto: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  dropdownVuotoTesto: {
+    fontSize: 14,
+    color: Colors.textSecondary,
   },
 });

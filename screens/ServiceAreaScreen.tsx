@@ -114,7 +114,7 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
         <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
           <Text style={styles.sectionTitle}>Recensioni ({reviews.length})</Text>
           {user && (
-            <TouchableOpacity onPress={() => navigation.navigate('AddReview', { serviceArea })}>
+            <TouchableOpacity onPress={() => navigation.navigate('AddReview', { area: serviceArea })}>
               <Text style={{ color: '#007BFF', fontWeight: 'bold' }}>+ Scrivi</Text>
             </TouchableOpacity>
           )}
