@@ -316,15 +316,15 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    backgroundColor: Colors.surface,
+    borderRadius: 25,
+    paddingHorizontal: 16,
+    paddingVertical: 11,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
-    elevation: 6,
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
     marginBottom: 8,
   },
   searchIcon: {
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: '#1a1a1a',
+    color: Colors.text,
     padding: 0,
   },
   loadingDot: {
@@ -349,15 +349,15 @@ const styles = StyleSheet.create({
     paddingRight: 4,
   },
   chip: {
-    backgroundColor: '#fff',
-    borderRadius: 20,
-    paddingHorizontal: 16,
+    backgroundColor: Colors.surface,
+    borderRadius: 25,
+    paddingHorizontal: 18,
     paddingVertical: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.12,
+    shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 5,
   },
   chipActive: {
     backgroundColor: Colors.primary,
@@ -365,7 +365,7 @@ const styles = StyleSheet.create({
   chipText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#444',
+    color: Colors.textSecondary,
   },
   chipTextActive: {
     color: '#fff',
@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
   pannelloNome: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: Colors.text,
     marginBottom: 4,
   },
   pannelloNomeLink: {
@@ -413,23 +413,23 @@ const styles = StyleSheet.create({
   },
   pannelloBrand: {
     fontSize: 15,
-    color: '#666',
+    color: Colors.textSecondary,
     marginBottom: 8,
   },
   pannelloInfo: {
     fontSize: 14,
-    color: '#444',
+    color: Colors.text,
     marginBottom: 2,
   },
   pannelloDirezione: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#1a73e8',
+    color: Colors.primary,
     marginBottom: 4,
   },
   pannelloDistanza: {
     fontSize: 13,
-    color: '#888',
+    color: Colors.textSecondary,
     marginBottom: 16,
   },
   bottoniera: {
