@@ -179,23 +179,23 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.background,
   },
   header: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: Colors.border,
   },
   nomeArea: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#1a1a1a',
+    color: Colors.text,
     marginBottom: 4,
   },
   brandArea: {
     fontSize: 14,
-    color: '#666',
+    color: Colors.textSecondary,
     marginBottom: 12,
   },
   mediaRow: {
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
   },
   stelle: {
     fontSize: 18,
-    color: '#f4b400',
+    color: Colors.accent,
   },
   mediaContegg: {
     fontSize: 14,
@@ -226,14 +226,16 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   cardHeader: {
     flexDirection: 'row',
