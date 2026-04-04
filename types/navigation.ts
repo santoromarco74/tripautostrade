@@ -18,6 +18,7 @@ export type RecensioneEsistente = {
 export type RootStackParamList = {
   Login: undefined;
   Main: undefined;
+  ServiceArea: { area: ServiceArea };
   Reviews: { area: ServiceArea };
   AddReview: { area: ServiceArea; recensioneEsistente?: RecensioneEsistente };
 };
@@ -38,5 +39,6 @@ export type ActivityScreenProps = CompositeScreenProps<
   NativeStackScreenProps<RootStackParamList>
 >;
 
+export type ServiceAreaScreenProps = NativeStackScreenProps<RootStackParamList, 'ServiceArea'>;
 export type ReviewScreenProps = NativeStackScreenProps<RootStackParamList, 'Reviews'>;
 export type AddReviewScreenProps = NativeStackScreenProps<RootStackParamList, 'AddReview'>;

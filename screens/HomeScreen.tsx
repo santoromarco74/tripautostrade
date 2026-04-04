@@ -223,7 +223,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <Text style={styles.btnChiudiTesto}>✕</Text>
           </TouchableOpacity>
 
-          <Text style={styles.pannelloNome}>{selectedArea.name}</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('ServiceArea', { area: selectedArea })}>
+            <Text style={[styles.pannelloNome, styles.pannelloNomeLink]}>{selectedArea.name}</Text>
+          </TouchableOpacity>
           <Text style={styles.pannelloBrand}>{selectedArea.brand}</Text>
 
           {(selectedArea.highway || selectedArea.km != null) && (
@@ -404,6 +406,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#1a1a1a',
     marginBottom: 4,
+  },
+  pannelloNomeLink: {
+    textDecorationLine: 'underline',
+    color: Colors.primary,
   },
   pannelloBrand: {
     fontSize: 15,

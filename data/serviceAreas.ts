@@ -8,4 +8,11 @@ export interface ServiceArea {
   highway?: string;
   direction?: string;
   km?: number;
+  // Servizi disponibili (aggiornati da Supabase)
+  has_restaurant?: boolean;
+  has_cafe?: boolean;
+  has_showers?: boolean;
+  has_wifi?: boolean;
+  pet_friendly?: boolean;
+  ev_charging?: boolean;
 }

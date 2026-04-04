@@ -7,6 +7,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import TabNavigator from './navigation/TabNavigator';
 import ReviewsScreen from './screens/ReviewsScreen';
 import AddReviewScreen from './screens/AddReviewScreen';
+import ServiceAreaScreen from './screens/ServiceAreaScreen';
 import LoginScreen from './screens/LoginScreen';
 import { RootStackParamList } from './types/navigation';
 
@@ -40,6 +41,11 @@ function RootNavigator() {
           name="Main"
           component={TabNavigator}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="ServiceArea"
+          component={ServiceAreaScreen}
+          options={{ title: 'Area di Servizio' }}
         />
         <Stack.Screen
           name="Reviews"
