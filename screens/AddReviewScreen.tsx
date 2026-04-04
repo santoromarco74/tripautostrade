@@ -192,7 +192,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.background,
   },
   content: {
     padding: 20,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
   stelleLabel: {
     marginTop: 8,
     fontSize: 14,
-    color: '#f4b400',
+    color: Colors.accent,
     fontWeight: '600',
   },
   textInput: {

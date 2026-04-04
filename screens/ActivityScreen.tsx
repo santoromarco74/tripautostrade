@@ -107,7 +107,7 @@ export default function ActivityScreen() {
 const styles = StyleSheet.create({
   centro: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: Colors.background,
   },
   centrato: {
     flex: 1,
@@ -115,11 +115,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerBar: {
-    backgroundColor: '#fff',
+    backgroundColor: Colors.surface,
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: Colors.border,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -127,11 +127,11 @@ const styles = StyleSheet.create({
   headerTitolo: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1a1a1a',
+    color: Colors.text,
   },
   headerConteggio: {
     fontSize: 13,
-    color: '#888',
+    color: Colors.textSecondary,
   },
   lista: {
     padding: 16,
@@ -153,14 +153,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
     padding: 16,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -188,7 +190,7 @@ const styles = StyleSheet.create({
   },
   stelle: {
     fontSize: 16,
-    color: '#f4b400',
+    color: Colors.accent,
     marginVertical: 4,
   },
   testo: {
