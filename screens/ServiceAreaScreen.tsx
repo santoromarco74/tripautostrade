@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Modal, Switch, Alert, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Switch, Alert, FlatList, ActivityIndicator, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 // IMPORTANTE: Controlla che il percorso di Supabase sia corretto in base alle tue cartelle (potrebbe essere '../lib/supabase' o simile)
@@ -131,7 +131,14 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
                 {item.profiles?.full_name || 'Viaggiatore Autostradale'}
               </Text>
               <Text style={{ color: '#E85D04', marginVertical: 5 }}>{'⭐'.repeat(item.rating)}</Text>
-              <Text style={{ color: '#333' }}>{item.content}</Text>
+              <Text style={{ color: '#333' }}>{item.comment}</Text>
+              {item.image_url && (
+                <Image
+                  source={{ uri: item.image_url }}
+                  style={styles.reviewImage}
+                  resizeMode="cover"
+                />
+              )}
             </View>
           )}
         />
@@ -277,5 +284,11 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: 'gray',
     fontSize: 16,
+  },
+  reviewImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 8,
+    marginTop: 10,
   },
 });
