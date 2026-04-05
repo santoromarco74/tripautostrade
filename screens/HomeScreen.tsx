@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -14,7 +14,7 @@ import { HomeLoadingOverlay } from '../components/SkeletonLoader';
 import { showLocation } from 'react-native-map-link';
 import * as Location from 'expo-location';
 import MapView from 'react-native-map-clustering';
-import { Marker } from 'react-native-maps';
+import { Marker, MapView as RNMapView } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ServiceArea } from '../data/serviceAreas';
@@ -47,6 +47,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Tutti');
   const [searchFocused, setSearchFocused] = useState(false);
+  const mapRef = useRef<RNMapView>(null);
 
   // Richiesta permesso GPS
   useEffect(() => {
@@ -150,9 +151,25 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     );
   }
 
+  const selezionaArea = (area: ServiceArea) => {
+    setSelectedArea(area);
+    setSearchQuery('');
+    Keyboard.dismiss();
+    mapRef.current?.animateToRegion(
+      {
+        latitude: area.latitude,
+        longitude: area.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      },
+      1000,
+    );
+  };
+
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         style={styles.map}
         showsUserLocation={true}
         initialRegion={{
@@ -172,7 +189,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             coordinate={{ latitude: area.latitude, longitude: area.longitude }}
             title={area.name}
             description={area.brand}
-            onPress={() => setSelectedArea(area)}
+            onPress={() => selezionaArea(area)}
           >
             <BrandPin brand={area.brand} />
           </Marker>
@@ -212,11 +229,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.dropdownItem}
-                onPress={() => {
-                  setSelectedArea(item);
-                  setSearchQuery('');
-                  Keyboard.dismiss();
-                }}
+                onPress={() => selezionaArea(item)}
               >
                 <Ionicons name="location-outline" size={16} color={Colors.primary} style={{ marginRight: 10 }} />
                 <View style={{ flex: 1 }}>
