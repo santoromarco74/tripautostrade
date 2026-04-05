@@ -113,13 +113,27 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }, [areas, searchQuery, selectedBrand]);
 
   const handleNavigation = async (area: ServiceArea) => {
+    // Costruisce un titolo disambiguato con autostrada e km se disponibili
+    const titolo = [
+      area.name,
+      area.highway,
+      area.km != null ? `Km ${area.km}` : null,
+    ]
+      .filter(Boolean)
+      .join(', ');
+
     try {
       await showLocation({
         latitude: area.latitude,
         longitude: area.longitude,
-        title: area.name,
-        dialogTitle: 'Apri con...',
-        dialogMessage: 'Scegli l\'app di navigazione',
+        title: titolo,
+        // Forza Google Maps a usare le coordinate esatte invece di fare
+        // una ricerca per nome (che mostra risultati vicini all'utente)
+        googleForceLatLon: true,
+        // Apre direttamente la modalità navigazione, non solo la mappa
+        directionsMode: 'car',
+        dialogTitle: 'Naviga con...',
+        dialogMessage: `Apri la navigazione verso ${area.name}`,
         cancelText: 'Annulla',
       });
     } catch {
