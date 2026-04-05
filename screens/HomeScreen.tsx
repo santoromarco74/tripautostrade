@@ -40,11 +40,20 @@ const SERVICE_FILTERS: { key: keyof ServiceArea; label: string }[] = [
   { key: 'ev_charging',    label: '⚡ EV' },
 ];
 
-function BrandPin({ brand }: { brand: string }) {
-  const bgColor = Colors.brand[brand] ?? Colors.brand.Default;
+const BRAND_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
+  Autogrill: 'restaurant',
+  'Chef Express': 'cafe',
+  Sarni: 'fast-food',
+};
+
+function BrandPin({ brand, selected }: { brand: string; selected: boolean }) {
+  const icon = BRAND_ICON[brand] ?? 'restaurant';
   return (
-    <View style={[styles.pin, { backgroundColor: bgColor }]}>
-      <Ionicons name="restaurant" size={18} color="#fff" />
+    <View style={[
+      styles.pin,
+      selected && styles.pinSelezionato,
+    ]}>
+      <Ionicons name={icon} size={selected ? 20 : 16} color="#fff" />
     </View>
   );
 }
@@ -226,8 +235,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             title={area.name}
             description={area.brand}
             onPress={() => selezionaArea(area)}
+            tracksViewChanges={selectedArea?.id === area.id}
           >
-            <BrandPin brand={area.brand} />
+            <BrandPin brand={area.brand} selected={selectedArea?.id === area.id} />
           </Marker>
         ))}
       </MapView>
@@ -396,15 +406,25 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    borderWidth: 2,
+    backgroundColor: Colors.primary,
+    borderWidth: 2.5,
     borderColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  pinSelezionato: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: Colors.accent,
+    borderWidth: 3,
+    elevation: 8,
+    shadowOpacity: 0.4,
   },
   fallback: {
     flex: 1,
@@ -429,15 +449,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: 25,
+    borderRadius: 24,
     paddingHorizontal: 16,
-    paddingVertical: 11,
+    paddingVertical: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
     elevation: 5,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.04)',
   },
   searchIcon: {
     marginRight: 8,
@@ -461,21 +483,25 @@ const styles = StyleSheet.create({
     paddingRight: 4,
   },
   chip: {
-    backgroundColor: Colors.surface,
-    borderRadius: 25,
-    paddingHorizontal: 18,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 20,
+    paddingHorizontal: 16,
     paddingVertical: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.06)',
   },
   chipActive: {
     backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   chipServiceActive: {
     backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
   },
   chipText: {
     fontSize: 13,
