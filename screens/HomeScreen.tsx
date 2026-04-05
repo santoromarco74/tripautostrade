@@ -3,6 +3,8 @@ import {
   Alert,
   FlatList,
   Keyboard,
+  Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -11,7 +13,6 @@ import {
   View,
 } from 'react-native';
 import { HomeLoadingOverlay } from '../components/SkeletonLoader';
-import { showLocation } from 'react-native-map-link';
 import * as Location from 'expo-location';
 import MapView from 'react-native-map-clustering';
 import { Marker, MapView as RNMapView } from 'react-native-maps';
@@ -113,35 +114,32 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   }, [areas, searchQuery, selectedBrand]);
 
   const handleNavigation = async (area: ServiceArea) => {
-    // Costruisce un titolo disambiguato con autostrada e km se disponibili
-    const titolo = [
-      area.name,
-      area.highway,
-      area.km != null ? `Km ${area.km}` : null,
-    ]
-      .filter(Boolean)
-      .join(', ');
+    const { latitude: lat, longitude: lng } = area;
 
-    try {
-      await showLocation({
-        latitude: area.latitude,
-        longitude: area.longitude,
-        title: titolo,
-        // Forza Google Maps a usare le coordinate esatte invece di fare
-        // una ricerca per nome (che mostra risultati vicini all'utente)
-        googleForceLatLon: true,
-        // Apre direttamente la modalità navigazione, non solo la mappa
-        directionsMode: 'car',
-        dialogTitle: 'Naviga con...',
-        dialogMessage: `Apri la navigazione verso ${area.name}`,
-        cancelText: 'Annulla',
-      });
-    } catch {
-      Alert.alert(
-        'Nessuna app trovata',
-        'Non è stata trovata nessuna app di navigazione installata.',
-        [{ text: 'OK' }]
-      );
+    if (Platform.OS === 'android') {
+      // URI scheme Android: avvia direttamente la navigazione turn-by-turn
+      // senza passare per la scheda del luogo
+      const googleNav = `google.navigation:q=${lat},${lng}&mode=d`;
+      const geoFallback = `geo:${lat},${lng}?q=${lat},${lng}`;
+
+      if (await Linking.canOpenURL(googleNav)) {
+        await Linking.openURL(googleNav);
+      } else if (await Linking.canOpenURL(geoFallback)) {
+        await Linking.openURL(geoFallback);
+      } else {
+        Alert.alert('Nessuna app trovata', "Installa Google Maps o un'app di navigazione.");
+      }
+    } else {
+      // iOS: prova Google Maps, poi fallback Apple Maps — entrambi in modalità directions
+      const googleMaps = `comgooglemaps://?daddr=${lat},${lng}&directionsmode=driving`;
+      const appleMaps = `maps://app?daddr=${lat},${lng}&dirflg=d`;
+
+      if (await Linking.canOpenURL(googleMaps)) {
+        await Linking.openURL(googleMaps);
+      } else {
+        // Apple Maps è sempre disponibile su iOS
+        await Linking.openURL(appleMaps);
+      }
     }
   };
 
