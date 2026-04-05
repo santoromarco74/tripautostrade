@@ -117,27 +117,19 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     const { latitude: lat, longitude: lng } = area;
 
     if (Platform.OS === 'android') {
-      // URI scheme Android: avvia direttamente la navigazione turn-by-turn
-      // senza passare per la scheda del luogo
-      const googleNav = `google.navigation:q=${lat},${lng}&mode=d`;
-      const geoFallback = `geo:${lat},${lng}?q=${lat},${lng}`;
-
-      if (await Linking.canOpenURL(googleNav)) {
-        await Linking.openURL(googleNav);
-      } else if (await Linking.canOpenURL(geoFallback)) {
-        await Linking.openURL(geoFallback);
-      } else {
-        Alert.alert('Nessuna app trovata', "Installa Google Maps o un'app di navigazione.");
-      }
+      // Universal Link ufficiale Google Maps: apre l'anteprima percorso
+      // (tempo, km, percorso sulla mappa) prima di premere Avvia.
+      // SENZA dir_action=navigate, altrimenti salterebbe l'anteprima.
+      const googlePreview = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+      await Linking.openURL(googlePreview);
     } else {
-      // iOS: prova Google Maps, poi fallback Apple Maps — entrambi in modalità directions
+      // iOS: prova Google Maps app (mostra anteprima), poi Apple Maps
       const googleMaps = `comgooglemaps://?daddr=${lat},${lng}&directionsmode=driving`;
-      const appleMaps = `maps://app?daddr=${lat},${lng}&dirflg=d`;
+      const appleMaps = `maps://?daddr=${lat},${lng}&dirflg=d`;
 
       if (await Linking.canOpenURL(googleMaps)) {
         await Linking.openURL(googleMaps);
       } else {
-        // Apple Maps è sempre disponibile su iOS
         await Linking.openURL(appleMaps);
       }
     }
