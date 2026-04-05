@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
+  BackHandler,
   FlatList,
   Keyboard,
   Linking,
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { HomeLoadingOverlay } from '../components/SkeletonLoader';
 import * as Location from 'expo-location';
 import MapView from 'react-native-map-clustering';
@@ -28,6 +30,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 const CACHE_KEY = '@service_areas_cache';
 
 const BRANDS = ['Tutti', 'Autogrill', 'Chef Express', 'Sarni'];
+
+const SERVICE_FILTERS: { key: keyof ServiceArea; label: string }[] = [
+  { key: 'has_restaurant', label: '🍝 Ristorante' },
+  { key: 'has_cafe',       label: '☕ Bar' },
+  { key: 'has_wifi',       label: '📶 Wi-Fi' },
+  { key: 'pet_friendly',   label: '🐕 Pet' },
+  { key: 'has_showers',    label: '🚿 Docce' },
+  { key: 'ev_charging',    label: '⚡ EV' },
+];
 
 function BrandPin({ brand }: { brand: string }) {
   const bgColor = Colors.brand[brand] ?? Colors.brand.Default;
@@ -48,7 +59,27 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Tutti');
   const [searchFocused, setSearchFocused] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const mapRef = useRef<RNMapView>(null);
+
+  // Intercetta il tasto Back su Android solo su questa schermata
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert(
+          'Uscita',
+          "Vuoi davvero uscire dall'app?",
+          [
+            { text: 'Annulla', style: 'cancel' },
+            { text: 'Esci', style: 'destructive', onPress: () => BackHandler.exitApp() },
+          ]
+        );
+        return true; // blocca l'uscita immediata
+      };
+      const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => sub.remove();
+    }, [])
+  );
 
   // Richiesta permesso GPS
   useEffect(() => {
@@ -109,9 +140,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     return areas.filter((area) => {
       const matchesName = query === '' || area.name.toLowerCase().includes(query);
       const matchesBrand = selectedBrand === 'Tutti' || area.brand === selectedBrand;
-      return matchesName && matchesBrand;
+      const matchesService = activeFilter === null || area[activeFilter as keyof ServiceArea] === true;
+      return matchesName && matchesBrand && matchesService;
     });
-  }, [areas, searchQuery, selectedBrand]);
+  }, [areas, searchQuery, selectedBrand, activeFilter]);
 
   const handleNavigation = async (area: ServiceArea) => {
     const { latitude: lat, longitude: lng } = area;
@@ -272,6 +304,29 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             );
           })}
         </ScrollView>
+
+        {/* Filtri rapidi per servizi */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsRow}
+        >
+          {SERVICE_FILTERS.map(({ key, label }) => {
+            const active = activeFilter === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[styles.chip, active && styles.chipServiceActive]}
+                onPress={() => setActiveFilter(active ? null : key)}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
 
       {selectedArea && (
@@ -418,6 +473,9 @@ const styles = StyleSheet.create({
   },
   chipActive: {
     backgroundColor: Colors.primary,
+  },
+  chipServiceActive: {
+    backgroundColor: Colors.accent,
   },
   chipText: {
     fontSize: 13,
