@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -14,12 +14,33 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../context/AuthContext';
 import { useReviews, Recensione } from '../context/ReviewsContext';
 import { Colors } from '../constants/Colors';
+import { supabase } from '../lib/supabase';
+
+function calcolaTitolo(points: number): { titolo: string; emoji: string } {
+  if (points >= 100) return { titolo: "Leggenda dell'Asfalto",      emoji: '🏆' };
+  if (points >= 50)  return { titolo: 'Veterano delle Aree di Sosta', emoji: '🥇' };
+  if (points >= 20)  return { titolo: 'Esploratore Autostradale',    emoji: '🧭' };
+  return               { titolo: 'Novellino del Casello',            emoji: '🚗' };
+}
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { recensioni, deleteReview } = useReviews();
   const insets = useSafeAreaInsets();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [points, setPoints] = useState(0);
+
+  useEffect(() => {
+    if (!user) return;
+    supabase
+      .from('profiles')
+      .select('points')
+      .eq('id', user.id)
+      .single()
+      .then(({ data }) => {
+        if (data?.points != null) setPoints(data.points);
+      });
+  }, [user?.id]);
 
   const nomeCompleto = (user?.user_metadata?.full_name as string | undefined)
     ?? user?.email?.split('@')[0]
@@ -86,6 +107,14 @@ export default function ProfileScreen() {
         </View>
         <Text style={styles.nomeHero}>{nomeCompleto}</Text>
         <Text style={styles.emailHero}>{user?.email ?? '—'}</Text>
+
+        {/* Badge livello */}
+        <View style={styles.levelBadge}>
+          <Text style={styles.levelEmoji}>{calcolaTitolo(points).emoji}</Text>
+          <Text style={styles.levelTitolo}>{calcolaTitolo(points).titolo}</Text>
+          <View style={styles.levelDot} />
+          <Text style={styles.levelPunti}>{points} pt</Text>
+        </View>
       </View>
 
       {/* Stats card fluttuante */}
@@ -421,5 +450,38 @@ const styles = StyleSheet.create({
     color: '#E53935',
     fontWeight: '700',
     fontSize: 15,
+  },
+
+  // ── Badge livello ─────────────────────────────────────────────────────────
+  levelBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 14,
+    backgroundColor: 'rgba(255,255,255,0.18)',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.35)',
+  },
+  levelEmoji: {
+    fontSize: 16,
+  },
+  levelTitolo: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  levelDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+  },
+  levelPunti: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: Colors.accent,
   },
 });
