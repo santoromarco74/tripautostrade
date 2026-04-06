@@ -79,35 +79,20 @@ export function ReviewCard({
       {/* Divisore + like */}
       <View style={styles.divider} />
 
-      {isOwnReview ? (
-        /* Recensione propria: mostra like ricevuti in sola lettura */
-        <View style={styles.likeRow}>
-          <Ionicons
-            name={item.likeCount > 0 ? 'heart' : 'heart-outline'}
-            size={18}
-            color={item.likeCount > 0 ? '#E53935' : '#CBD5E1'}
-          />
-          <Text style={styles.likeCount}>
-            {item.likeCount > 0 ? item.likeCount : '—'}
-          </Text>
-        </View>
-      ) : (
-        /* Recensione altrui: like interattivo */
-        <TouchableOpacity
-          style={styles.likeRow}
-          onPress={() => onToggleLike(item.id)}
-          activeOpacity={0.7}
-        >
-          <Ionicons
-            name={item.likedByMe ? 'heart' : 'heart-outline'}
-            size={20}
-            color={item.likedByMe ? '#E53935' : '#94A3B8'}
-          />
-          <Text style={[styles.likeCount, item.likedByMe && styles.likeCountAttivo]}>
-            {item.likeCount > 0 ? item.likeCount : 'Utile'}
-          </Text>
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={styles.likeRow}
+        onPress={() => onToggleLike(item.id)}
+        activeOpacity={0.7}
+      >
+        <Ionicons
+          name={item.likedByMe ? 'heart' : 'heart-outline'}
+          size={20}
+          color={item.likedByMe ? '#E53935' : '#94A3B8'}
+        />
+        <Text style={[styles.likeCount, item.likedByMe && styles.likeCountAttivo]}>
+          {item.likeCount > 0 ? item.likeCount : 'Mi piace'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 }

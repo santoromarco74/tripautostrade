@@ -46,18 +46,6 @@ const BRAND_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> 
   Sarni: 'fast-food',
 };
 
-function BrandPin({ brand, selected }: { brand: string; selected: boolean }) {
-  const icon = BRAND_ICON[brand] ?? 'restaurant';
-  return (
-    // Wrapper sempre 46×46: mantiene la clip region costante su Android
-    // ed evita il glitch di marker tagliati quando il pin cambia stato.
-    <View style={styles.pinWrapper}>
-      <View style={[styles.pin, selected && styles.pinSelezionato]}>
-        <Ionicons name={icon} size={selected ? 20 : 16} color="#fff" />
-      </View>
-    </View>
-  );
-}
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
@@ -231,14 +219,27 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       >
         {filteredAreas.map((area) => (
           <Marker
-            key={area.id}
+            key={`${area.id}-${activeFilter || 'all'}`}
             coordinate={{ latitude: area.latitude, longitude: area.longitude }}
             title={area.name}
             description={area.brand}
             onPress={() => selezionaArea(area)}
-            tracksViewChanges={selectedArea?.id === area.id}
+            tracksViewChanges={false}
           >
-            <BrandPin brand={area.brand} selected={selectedArea?.id === area.id} />
+            <View style={[
+              styles.pinWrapper,
+            ]}>
+              <View style={[
+                styles.pin,
+                selectedArea?.id === area.id && styles.pinSelezionato,
+              ]}>
+                <Ionicons
+                  name={BRAND_ICON[area.brand] ?? 'restaurant'}
+                  size={selectedArea?.id === area.id ? 20 : 16}
+                  color="#fff"
+                />
+              </View>
+            </View>
           </Marker>
         ))}
       </MapView>
