@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -15,6 +15,7 @@ import { useAuth } from '../context/AuthContext';
 import { useReviews, Recensione } from '../context/ReviewsContext';
 import { Colors } from '../constants/Colors';
 import { supabase } from '../lib/supabase';
+import { useFocusEffect } from '@react-navigation/native';
 
 function calcolaTitolo(points: number): { titolo: string; emoji: string } {
   if (points >= 100) return { titolo: "Leggenda dell'Asfalto",      emoji: '🏆' };
@@ -30,17 +31,19 @@ export default function ProfileScreen() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [points, setPoints] = useState(0);
 
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from('profiles')
-      .select('points')
-      .eq('id', user.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.points != null) setPoints(data.points);
-      });
-  }, [user?.id]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
+      supabase
+        .from('profiles')
+        .select('points')
+        .eq('id', user.id)
+        .single()
+        .then(({ data }) => {
+          if (data?.points != null) setPoints(data.points);
+        });
+    }, [user?.id])
+  );
 
   const nomeCompleto = (user?.user_metadata?.full_name as string | undefined)
     ?? user?.email?.split('@')[0]
