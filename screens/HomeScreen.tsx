@@ -1,8 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
+  BackHandler,
   FlatList,
   Keyboard,
+  Linking,
+  Platform,
   ScrollView,
   StyleSheet,
   Text,
@@ -10,11 +13,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { HomeLoadingOverlay } from '../components/SkeletonLoader';
-import { showLocation } from 'react-native-map-link';
 import * as Location from 'expo-location';
 import MapView from 'react-native-map-clustering';
-import { Marker } from 'react-native-maps';
+import { Marker, MapView as RNMapView } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ServiceArea } from '../data/serviceAreas';
@@ -28,11 +31,29 @@ const CACHE_KEY = '@service_areas_cache';
 
 const BRANDS = ['Tutti', 'Autogrill', 'Chef Express', 'Sarni'];
 
-function BrandPin({ brand }: { brand: string }) {
-  const bgColor = Colors.brand[brand] ?? Colors.brand.Default;
+const SERVICE_FILTERS: { key: keyof ServiceArea; label: string }[] = [
+  { key: 'has_restaurant', label: '🍝 Ristorante' },
+  { key: 'has_cafe',       label: '☕ Bar' },
+  { key: 'has_wifi',       label: '📶 Wi-Fi' },
+  { key: 'pet_friendly',   label: '🐕 Pet' },
+  { key: 'has_showers',    label: '🚿 Docce' },
+  { key: 'ev_charging',    label: '⚡ EV' },
+];
+
+const BRAND_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
+  Autogrill: 'restaurant',
+  'Chef Express': 'cafe',
+  Sarni: 'fast-food',
+};
+
+function BrandPin({ brand, selected }: { brand: string; selected: boolean }) {
+  const icon = BRAND_ICON[brand] ?? 'restaurant';
   return (
-    <View style={[styles.pin, { backgroundColor: bgColor }]}>
-      <Ionicons name="restaurant" size={18} color="#fff" />
+    <View style={[
+      styles.pin,
+      selected && styles.pinSelezionato,
+    ]}>
+      <Ionicons name={icon} size={selected ? 20 : 16} color="#fff" />
     </View>
   );
 }
@@ -47,6 +68,27 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Tutti');
   const [searchFocused, setSearchFocused] = useState(false);
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const mapRef = useRef<RNMapView>(null);
+
+  // Intercetta il tasto Back su Android solo su questa schermata
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        Alert.alert(
+          'Uscita',
+          "Vuoi davvero uscire dall'app?",
+          [
+            { text: 'Annulla', style: 'cancel' },
+            { text: 'Esci', style: 'destructive', onPress: () => BackHandler.exitApp() },
+          ]
+        );
+        return true; // blocca l'uscita immediata
+      };
+      const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => sub.remove();
+    }, [])
+  );
 
   // Richiesta permesso GPS
   useEffect(() => {
@@ -107,26 +149,30 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     return areas.filter((area) => {
       const matchesName = query === '' || area.name.toLowerCase().includes(query);
       const matchesBrand = selectedBrand === 'Tutti' || area.brand === selectedBrand;
-      return matchesName && matchesBrand;
+      const matchesService = activeFilter === null || area[activeFilter as keyof ServiceArea] === true;
+      return matchesName && matchesBrand && matchesService;
     });
-  }, [areas, searchQuery, selectedBrand]);
+  }, [areas, searchQuery, selectedBrand, activeFilter]);
 
   const handleNavigation = async (area: ServiceArea) => {
-    try {
-      await showLocation({
-        latitude: area.latitude,
-        longitude: area.longitude,
-        title: area.name,
-        dialogTitle: 'Apri con...',
-        dialogMessage: 'Scegli l\'app di navigazione',
-        cancelText: 'Annulla',
-      });
-    } catch {
-      Alert.alert(
-        'Nessuna app trovata',
-        'Non è stata trovata nessuna app di navigazione installata.',
-        [{ text: 'OK' }]
-      );
+    const { latitude: lat, longitude: lng } = area;
+
+    if (Platform.OS === 'android') {
+      // Universal Link ufficiale Google Maps: apre l'anteprima percorso
+      // (tempo, km, percorso sulla mappa) prima di premere Avvia.
+      // SENZA dir_action=navigate, altrimenti salterebbe l'anteprima.
+      const googlePreview = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`;
+      await Linking.openURL(googlePreview);
+    } else {
+      // iOS: prova Google Maps app (mostra anteprima), poi Apple Maps
+      const googleMaps = `comgooglemaps://?daddr=${lat},${lng}&directionsmode=driving`;
+      const appleMaps = `maps://?daddr=${lat},${lng}&dirflg=d`;
+
+      if (await Linking.canOpenURL(googleMaps)) {
+        await Linking.openURL(googleMaps);
+      } else {
+        await Linking.openURL(appleMaps);
+      }
     }
   };
 
@@ -150,9 +196,25 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     );
   }
 
+  const selezionaArea = (area: ServiceArea) => {
+    setSelectedArea(area);
+    setSearchQuery('');
+    Keyboard.dismiss();
+    mapRef.current?.animateToRegion(
+      {
+        latitude: area.latitude,
+        longitude: area.longitude,
+        latitudeDelta: 0.05,
+        longitudeDelta: 0.05,
+      },
+      1000,
+    );
+  };
+
   return (
     <View style={styles.container}>
       <MapView
+        ref={mapRef}
         style={styles.map}
         showsUserLocation={true}
         initialRegion={{
@@ -172,9 +234,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             coordinate={{ latitude: area.latitude, longitude: area.longitude }}
             title={area.name}
             description={area.brand}
-            onPress={() => setSelectedArea(area)}
+            onPress={() => selezionaArea(area)}
+            tracksViewChanges={selectedArea?.id === area.id}
           >
-            <BrandPin brand={area.brand} />
+            <BrandPin brand={area.brand} selected={selectedArea?.id === area.id} />
           </Marker>
         ))}
       </MapView>
@@ -212,11 +275,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             renderItem={({ item }) => (
               <TouchableOpacity
                 style={styles.dropdownItem}
-                onPress={() => {
-                  setSelectedArea(item);
-                  setSearchQuery('');
-                  Keyboard.dismiss();
-                }}
+                onPress={() => selezionaArea(item)}
               >
                 <Ionicons name="location-outline" size={16} color={Colors.primary} style={{ marginRight: 10 }} />
                 <View style={{ flex: 1 }}>
@@ -250,6 +309,29 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               >
                 <Text style={[styles.chipText, active && styles.chipTextActive]}>
                   {brand}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+
+        {/* Filtri rapidi per servizi */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipsRow}
+        >
+          {SERVICE_FILTERS.map(({ key, label }) => {
+            const active = activeFilter === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                style={[styles.chip, active && styles.chipServiceActive]}
+                onPress={() => setActiveFilter(active ? null : key)}
+                activeOpacity={0.75}
+              >
+                <Text style={[styles.chipText, active && styles.chipTextActive]}>
+                  {label}
                 </Text>
               </TouchableOpacity>
             );
@@ -324,15 +406,25 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    borderWidth: 2,
+    backgroundColor: Colors.primary,
+    borderWidth: 2.5,
     borderColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
     elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 3,
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+  },
+  pinSelezionato: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: Colors.accent,
+    borderWidth: 3,
+    elevation: 8,
+    shadowOpacity: 0.4,
   },
   fallback: {
     flex: 1,
@@ -357,15 +449,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: Colors.surface,
-    borderRadius: 25,
+    borderRadius: 24,
     paddingHorizontal: 16,
-    paddingVertical: 11,
+    paddingVertical: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
     elevation: 5,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.04)',
   },
   searchIcon: {
     marginRight: 8,
@@ -389,18 +483,25 @@ const styles = StyleSheet.create({
     paddingRight: 4,
   },
   chip: {
-    backgroundColor: Colors.surface,
-    borderRadius: 25,
-    paddingHorizontal: 18,
+    backgroundColor: 'rgba(255,255,255,0.92)',
+    borderRadius: 20,
+    paddingHorizontal: 16,
     paddingVertical: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.06)',
   },
   chipActive: {
     backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+  },
+  chipServiceActive: {
+    backgroundColor: Colors.accent,
+    borderColor: Colors.accent,
   },
   chipText: {
     fontSize: 13,
