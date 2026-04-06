@@ -220,16 +220,15 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       >
         {filteredAreas.map((area) => (
           <Marker
-            key={`${area.id}-${activeFilter || 'all'}`}
+            // Aggiungiamo anche lo stato "selezionato" alla chiave per forzare il refresh su Android
+            key={`${area.id}-${activeFilter || 'all'}-${selectedArea?.id === area.id ? 'sel' : 'unsel'}`}
             coordinate={{ latitude: area.latitude, longitude: area.longitude }}
             title={area.name}
             description={area.brand}
             onPress={() => selezionaArea(area)}
-            tracksViewChanges={false}
+            // tracksViewChanges RIMOSSO: È lui il responsabile dei pin tagliati o invisibili su Android!
           >
-            <View style={[
-              styles.pinWrapper,
-            ]}>
+            <View style={styles.pinWrapper}>
               <View style={[
                 styles.pin,
                 selectedArea?.id === area.id && styles.pinSelezionato,

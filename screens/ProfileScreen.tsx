@@ -188,12 +188,43 @@ export default function ProfileScreen() {
         </View>
       }
       renderItem={({ item }: { item: Recensione }) => (
-        <ReviewCard
-          item={item}
-          currentUserId={user?.id}
-          onToggleLike={toggleLike}
-          onDelete={gestisciElimina}
-        />
+        <View style={styles.reviewCard}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <View>
+              <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{item.autore}</Text>
+              <Text style={{ color: '#E85D04', marginVertical: 5 }}>{'⭐'.repeat(item.stelle)}</Text>
+            </View>
+            
+            {/* Tasto Cestino per eliminare la recensione */}
+            <TouchableOpacity onPress={() => gestisciElimina(item.id)} style={{ padding: 5 }}>
+              <Ionicons name="trash-outline" size={22} color="#E63946" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={{ color: '#333', marginBottom: 10 }}>{item.testo}</Text>
+
+          {/* LA BARRA DEI MI PIACE GLOBALE */}
+          <View style={{ borderTopWidth: 1, borderColor: '#f0f0f0', paddingTop: 10, marginTop: 5 }}>
+            <TouchableOpacity 
+              style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start' }}
+              onPress={() => toggleLike(item.id)}
+            >
+              <Ionicons 
+                name={item.likedByMe ? 'heart' : 'heart-outline'} 
+                size={24} 
+                color={item.likedByMe ? '#E63946' : '#999'} 
+              />
+              <Text style={{ 
+                marginLeft: 6, 
+                fontSize: 16,
+                fontWeight: 'bold', 
+                color: item.likedByMe ? '#E63946' : '#666' 
+              }}>
+                {item.likeCount > 0 ? item.likeCount : 'Mi piace'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       )}
     />
   );
@@ -396,5 +427,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: Colors.accent,
+  },
+
+reviewCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
   },
 });
