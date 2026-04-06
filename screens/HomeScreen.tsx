@@ -49,11 +49,12 @@ const BRAND_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> 
 function BrandPin({ brand, selected }: { brand: string; selected: boolean }) {
   const icon = BRAND_ICON[brand] ?? 'restaurant';
   return (
-    <View style={[
-      styles.pin,
-      selected && styles.pinSelezionato,
-    ]}>
-      <Ionicons name={icon} size={selected ? 20 : 16} color="#fff" />
+    // Wrapper sempre 46×46: mantiene la clip region costante su Android
+    // ed evita il glitch di marker tagliati quando il pin cambia stato.
+    <View style={styles.pinWrapper}>
+      <View style={[styles.pin, selected && styles.pinSelezionato]}>
+        <Ionicons name={icon} size={selected ? 20 : 16} color="#fff" />
+      </View>
     </View>
   );
 }
@@ -401,6 +402,13 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  // Dimensioni fisse: Android non ridimensiona mai la clip region del marker
+  pinWrapper: {
+    width: 46,
+    height: 46,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pin: {
     width: 36,
