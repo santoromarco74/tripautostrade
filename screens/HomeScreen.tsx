@@ -12,12 +12,14 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  StatusBar
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { HomeLoadingOverlay } from '../components/SkeletonLoader';
 import * as Location from 'expo-location';
 import MapView from 'react-native-map-clustering';
-import { Marker, MapView as RNMapView } from 'react-native-maps';
+import { Marker } from 'react-native-maps';
+import type RNMapView from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ServiceArea } from '../data/serviceAreas';
@@ -46,17 +48,6 @@ const BRAND_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> 
   Sarni: 'fast-food',
 };
 
-function BrandPin({ brand, selected }: { brand: string; selected: boolean }) {
-  const icon = BRAND_ICON[brand] ?? 'restaurant';
-  return (
-    <View style={[
-      styles.pin,
-      selected && styles.pinSelezionato,
-    ]}>
-      <Ionicons name={icon} size={selected ? 20 : 16} color="#fff" />
-    </View>
-  );
-}
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
@@ -189,7 +180,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   if (!location) {
     return (
       <View style={{ flex: 1, backgroundColor: '#dde8d8' }}>
-        <View style={[styles.searchContainer, { top: insets.top + 12 }]}>
+        <View style={[styles.searchContainer, { top: (Platform.OS === 'android' ? (StatusBar.currentHeight || 24) : insets.top) + 12 }]}>
           <HomeLoadingOverlay />
         </View>
       </View>
@@ -230,16 +221,31 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       >
         {filteredAreas.map((area) => (
           <Marker
-            key={area.id}
+            // IL TRUCCO DEFINITIVO: Aggiungi lo stato "selezionato" alla chiave!
+            // Quando selectedArea cambia, la chiave cambia, forzando Android a ricalcolare
+            // le dimensioni del pin selezionato da zero, senza tagliarlo.
+            key={`${area.id}-${activeFilter || 'all'}-${selectedArea?.id === area.id ? 'sel' : 'unsel'}`}
             coordinate={{ latitude: area.latitude, longitude: area.longitude }}
             title={area.name}
             description={area.brand}
             onPress={() => selezionaArea(area)}
-            tracksViewChanges={selectedArea?.id === area.id}
+            // tracksViewChanges= RIMOSSO. Lascia che Android tracci il cambiamento
+            // mentre ricalcola la dimensione del pin selezionato.
           >
-            <BrandPin brand={area.brand} selected={selectedArea?.id === area.id} />
+            {/* Struttura semplificata, un solo View circolare direttamente */}
+            <View style={[
+              styles.pin,
+              selectedArea?.id === area.id && styles.pinSelezionato,
+            ]}>
+              <Ionicons
+                name={BRAND_ICON[area.brand] ?? 'restaurant'}
+                size={selectedArea?.id === area.id ? 20 : 16}
+                color="#fff"
+              />
+            </View>
           </Marker>
         ))}
+        {isLoading && <HomeLoadingOverlay />}
       </MapView>
 
       {/* Barra di ricerca + filtri brand */}
@@ -402,29 +408,34 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
+  // pinWrapper RIMOSSO (non serve più)
+
   pin: {
+    // Dimensioni fisse per Android
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 18, // Metà esatta di 36
     backgroundColor: Colors.primary,
-    borderWidth: 2.5,
-    borderColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
-    elevation: 4,
+    borderWidth: 2,
+    borderColor: '#fff',
+    
+    // Ombra più decisa per Android (elevation) e iOS
+    elevation: 6,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,
   },
   pinSelezionato: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    // Dimensioni fisse e più grandi per il pin selezionato
+    width: 48,
+    height: 48,
+    borderRadius: 24, // Metà esatta di 48
     backgroundColor: Colors.accent,
     borderWidth: 3,
-    elevation: 8,
-    shadowOpacity: 0.4,
+    elevation: 10, // Più elevation per farlo "risaltare"
   },
   fallback: {
     flex: 1,

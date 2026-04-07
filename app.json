@@ -8,9 +8,9 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#00695C"
     },
     "ios": {
       "supportsTablet": true,
@@ -21,8 +21,8 @@
     "android": {
       "package": "com.santoromarco74.tripautostrade",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#00695C"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,

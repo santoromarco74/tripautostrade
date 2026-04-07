@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Modal,
-  Switch, Alert, FlatList, ActivityIndicator, Image, ScrollView,
+  Switch, Alert, FlatList, ActivityIndicator, ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -9,6 +9,7 @@ import { supabase } from '../lib/supabase';
 import { useReviews } from '../context/ReviewsContext';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
+import { ReviewCard } from '../components/ReviewCard';
 
 type ServiceAreaScreenProps = NativeStackScreenProps<any, 'ServiceArea'>;
 
@@ -118,39 +119,12 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
           <Text style={styles.emptyTesto}>Nessuna recensione. Sii il primo!</Text>
         }
         renderItem={({ item }) => (
-          <View style={styles.reviewCard}>
-            <View style={styles.reviewHeader}>
-              <Text style={styles.reviewAutore}>{item.autore}</Text>
-              <Text style={styles.reviewData}>{item.data}</Text>
-            </View>
-            <Text style={styles.reviewStelle}>
-              {'★'.repeat(item.stelle)}{'☆'.repeat(5 - item.stelle)}
-            </Text>
-            <Text style={styles.reviewTesto}>{item.testo}</Text>
-            {item.imageUrl && (
-              <Image
-                source={{ uri: item.imageUrl }}
-                style={styles.reviewImage}
-                resizeMode="cover"
-              />
-            )}
-            {/* Like */}
-            <View style={styles.likeDivider} />
-            <TouchableOpacity
-              style={styles.likeRow}
-              onPress={() => toggleLike(item.id)}
-              activeOpacity={0.7}
-            >
-              <Ionicons
-                name={item.likedByMe ? 'heart' : 'heart-outline'}
-                size={20}
-                color={item.likedByMe ? '#E53935' : '#94A3B8'}
-              />
-              <Text style={[styles.likeCount, item.likedByMe && styles.likeCountAttivo]}>
-                {item.likeCount > 0 ? item.likeCount : 'Utile'}
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <ReviewCard
+            item={item}
+            showAuthor
+            currentUserId={user?.id}
+            onToggleLike={toggleLike}
+          />
         )}
       />
 
@@ -293,71 +267,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: 'center',
     paddingVertical: 32,
-  },
-
-  // ── Card recensione ───────────────────────────────────────────────────────
-  reviewCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-  },
-  reviewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  reviewAutore: {
-    fontWeight: '700',
-    fontSize: 15,
-    color: Colors.text,
-    flex: 1,
-  },
-  reviewData: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  reviewStelle: {
-    color: Colors.accent,
-    fontSize: 16,
-    marginBottom: 8,
-  },
-  reviewTesto: {
-    color: Colors.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  reviewImage: {
-    width: '100%',
-    height: 160,
-    borderRadius: 10,
-    marginTop: 12,
-  },
-  likeDivider: {
-    height: 1,
-    backgroundColor: Colors.border,
-    marginTop: 12,
-    marginBottom: 10,
-  },
-  likeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    alignSelf: 'flex-start',
-  },
-  likeCount: {
-    fontSize: 13,
-    color: '#94A3B8',
-    fontWeight: '600',
-  },
-  likeCountAttivo: {
-    color: '#E53935',
   },
 
   // ── FAB ───────────────────────────────────────────────────────────────────

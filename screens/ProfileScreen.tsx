@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
   FlatList,
-  Image,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,6 +14,8 @@ import { useAuth } from '../context/AuthContext';
 import { useReviews, Recensione } from '../context/ReviewsContext';
 import { Colors } from '../constants/Colors';
 import { supabase } from '../lib/supabase';
+import { useFocusEffect } from '@react-navigation/native';
+import { ReviewCard } from '../components/ReviewCard';
 
 function calcolaTitolo(points: number): { titolo: string; emoji: string } {
   if (points >= 100) return { titolo: "Leggenda dell'Asfalto",      emoji: '🏆' };
@@ -25,22 +26,24 @@ function calcolaTitolo(points: number): { titolo: string; emoji: string } {
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
-  const { recensioni, deleteReview } = useReviews();
+  const { recensioni, deleteReview, toggleLike } = useReviews();
   const insets = useSafeAreaInsets();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [points, setPoints] = useState(0);
 
-  useEffect(() => {
-    if (!user) return;
-    supabase
-      .from('profiles')
-      .select('points')
-      .eq('id', user.id)
-      .single()
-      .then(({ data }) => {
-        if (data?.points != null) setPoints(data.points);
-      });
-  }, [user?.id]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) return;
+      supabase
+        .from('profiles')
+        .select('points')
+        .eq('id', user.id)
+        .single()
+        .then(({ data }) => {
+          if (data?.points != null) setPoints(data.points);
+        });
+    }, [user?.id])
+  );
 
   const nomeCompleto = (user?.user_metadata?.full_name as string | undefined)
     ?? user?.email?.split('@')[0]
@@ -185,38 +188,41 @@ export default function ProfileScreen() {
         </View>
       }
       renderItem={({ item }: { item: Recensione }) => (
-        // ── 2. CARD RECENSIONE Material 3 ──
-        <View style={styles.card}>
-          {/* ── 3. CESTINO in alto a destra ── */}
-          <TouchableOpacity
-            style={styles.btnElimina}
-            onPress={() => gestisciElimina(item.id)}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons name="trash-outline" size={18} color="#E53935" />
-          </TouchableOpacity>
+        <View style={styles.reviewCard}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <View>
+              <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{item.autore}</Text>
+              <Text style={{ color: '#E85D04', marginVertical: 5 }}>{'⭐'.repeat(item.stelle)}</Text>
+            </View>
+            
+            {/* Tasto Cestino per eliminare la recensione */}
+            <TouchableOpacity onPress={() => gestisciElimina(item.id)} style={{ padding: 5 }}>
+              <Ionicons name="trash-outline" size={22} color="#E63946" />
+            </TouchableOpacity>
+          </View>
+          
+          <Text style={{ color: '#333', marginBottom: 10 }}>{item.testo}</Text>
 
-          <Text style={styles.stelle}>
-            {'★'.repeat(item.stelle)}{'☆'.repeat(5 - item.stelle)}
-          </Text>
-          <Text style={styles.cardTesto}>{item.testo}</Text>
-
-          {item.imageUrl && (
-            <Image
-              source={{ uri: item.imageUrl }}
-              style={styles.cardImmagine}
-              resizeMode="cover"
-            />
-          )}
-
-          <View style={styles.cardFooter}>
-            <Text style={styles.cardData}>{item.data}</Text>
-            {item.likeCount > 0 && (
-              <View style={styles.likeInfo}>
-                <Ionicons name="heart" size={13} color="#E53935" />
-                <Text style={styles.likeInfoTesto}>{item.likeCount}</Text>
-              </View>
-            )}
+          {/* LA BARRA DEI MI PIACE GLOBALE */}
+          <View style={{ borderTopWidth: 1, borderColor: '#f0f0f0', paddingTop: 10, marginTop: 5 }}>
+            <TouchableOpacity 
+              style={{ flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start' }}
+              onPress={() => toggleLike(item.id)}
+            >
+              <Ionicons 
+                name={item.likedByMe ? 'heart' : 'heart-outline'} 
+                size={24} 
+                color={item.likedByMe ? '#E63946' : '#999'} 
+              />
+              <Text style={{ 
+                marginLeft: 6, 
+                fontSize: 16,
+                fontWeight: 'bold', 
+                color: item.likedByMe ? '#E63946' : '#666' 
+              }}>
+                {item.likeCount > 0 ? item.likeCount : 'Mi piace'}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       )}
@@ -230,6 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.background,
   },
   listaContent: {
+    paddingHorizontal: 16,
     paddingBottom: 48,
   },
 
@@ -313,69 +320,6 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     marginHorizontal: 20,
     marginBottom: 12,
-  },
-
-  // ── 2. Card recensione ────────────────────────────────────────────────────
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 16,
-    marginHorizontal: 16,
-    marginBottom: 16,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-  },
-
-  // ── 3. Cestino ────────────────────────────────────────────────────────────
-  btnElimina: {
-    position: 'absolute',
-    top: 14,
-    right: 14,
-    padding: 4,
-  },
-
-  stelle: {
-    fontSize: 18,
-    color: Colors.accent,
-    marginBottom: 8,
-    marginRight: 32, // spazio per il cestino
-  },
-  cardTesto: {
-    fontSize: 14,
-    color: Colors.text,
-    lineHeight: 21,
-    marginRight: 8,
-  },
-  cardImmagine: {
-    width: '100%',
-    height: 160,
-    borderRadius: 10,
-    marginTop: 12,
-  },
-  cardFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 12,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  cardData: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-  },
-  likeInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  likeInfoTesto: {
-    fontSize: 12,
-    color: Colors.textSecondary,
   },
 
   // Empty state
@@ -483,5 +427,17 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     color: Colors.accent,
+  },
+
+reviewCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
   },
 });

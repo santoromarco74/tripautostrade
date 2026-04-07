@@ -1,7 +1,9 @@
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ReviewsProvider } from './context/ReviewsContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import TabNavigator from './navigation/TabNavigator';
@@ -9,18 +11,37 @@ import ReviewsScreen from './screens/ReviewsScreen';
 import AddReviewScreen from './screens/AddReviewScreen';
 import ServiceAreaScreen from './screens/ServiceAreaScreen';
 import LoginScreen from './screens/LoginScreen';
+import OnboardingScreen from './screens/OnboardingScreen';
 import { RootStackParamList } from './types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
   const { session, isLoading } = useAuth();
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
 
-  if (isLoading) {
+  useEffect(() => {
+    AsyncStorage.getItem('hasSeenOnboarding').then((value) => {
+      setHasSeenOnboarding(value === 'true');
+    });
+  }, []);
+
+  if (isLoading || hasSeenOnboarding === null) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <ActivityIndicator size="large" color="#006633" />
       </View>
+    );
+  }
+
+  if (!hasSeenOnboarding) {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+          <Stack.Screen name="Login" component={LoginScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
     );
   }
 
