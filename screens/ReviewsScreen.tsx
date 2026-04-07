@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ReviewScreenProps } from '../types/navigation';
@@ -6,6 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 import { CardSkeleton } from '../components/SkeletonLoader';
 import { EmptyState } from '../components/EmptyState';
+import { ReportModal } from '../components/ReportModal';
+import { SortFilterBar, SortOption } from '../components/SortFilterBar';
 
 function Stelle({ numero }: { numero: number }) {
   return (
@@ -50,8 +53,24 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
   const { area } = route.params;
   const { recensioni, isLoading, toggleLike, deleteReview } = useReviews();
   const { user } = useAuth();
+  const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState<SortOption>('recent');
 
   const recensioniArea = recensioni.filter((r) => r.areaId === String(area.id));
+
+  const sortedRecensioni = useMemo(() => {
+    const sorted = [...recensioniArea];
+    switch (sortOption) {
+      case 'highest':
+        return sorted.sort((a, b) => b.stelle - a.stelle || b.data.localeCompare(a.data));
+      case 'lowest':
+        return sorted.sort((a, b) => a.stelle - b.stelle || b.data.localeCompare(a.data));
+      case 'most_helpful':
+        return sorted.sort((a, b) => b.likeCount - a.likeCount || b.stelle - a.stelle);
+      default:
+        return sorted; // gia ordinati per data desc dal context
+    }
+  }, [recensioniArea, sortOption]);
 
   const mediaValutazione =
     recensioniArea.length > 0
@@ -95,8 +114,12 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
         )}
       </View>
 
+      {recensioniArea.length > 1 && (
+        <SortFilterBar activeSort={sortOption} onSortChange={setSortOption} />
+      )}
+
       <FlatList
-        data={recensioniArea}
+        data={sortedRecensioni}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.lista}
         ListEmptyComponent={
@@ -157,9 +180,25 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
                 resizeMode="cover"
               />
             )}
-            <LikeButton item={item} currentUserId={user?.id} onToggle={toggleLike} />
+            <View style={styles.cardFooter}>
+              <LikeButton item={item} currentUserId={user?.id} onToggle={toggleLike} />
+              {user && item.userId !== user.id && (
+                <TouchableOpacity
+                  onPress={() => setReportingReviewId(item.id)}
+                  hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                >
+                  <Ionicons name="flag-outline" size={16} color={Colors.textSecondary} />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
         )}
+      />
+
+      <ReportModal
+        visible={reportingReviewId !== null}
+        reviewId={reportingReviewId}
+        onClose={() => setReportingReviewId(null)}
       />
 
       <View style={styles.footer}>
@@ -273,6 +312,11 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 12,
     marginTop: 10,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   likeRow: {
     flexDirection: 'row',

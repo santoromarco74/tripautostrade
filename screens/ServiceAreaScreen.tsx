@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, Modal,
   Switch, Alert, FlatList, ActivityIndicator, ScrollView,
@@ -10,6 +10,9 @@ import { useReviews } from '../context/ReviewsContext';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 import { ReviewCard } from '../components/ReviewCard';
+import { ReportModal } from '../components/ReportModal';
+import { SortFilterBar, SortOption } from '../components/SortFilterBar';
+import { useFavorites } from '../context/FavoritesContext';
 
 type ServiceAreaScreenProps = NativeStackScreenProps<any, 'ServiceArea'>;
 
@@ -29,6 +32,9 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
   const [serviceArea, setServiceArea] = useState(area);
   const [isLoading, setIsLoading] = useState(false);
   const [isServicesModalVisible, setIsServicesModalVisible] = useState(false);
+  const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState<SortOption>('recent');
+
   const [localAmenities, setLocalAmenities] = useState({
     has_restaurant: serviceArea?.has_restaurant || false,
     has_cafe:       serviceArea?.has_cafe       || false,
@@ -40,7 +46,23 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
 
   const { user } = useAuth();
   const { recensioni, toggleLike } = useReviews();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const areaIsFavorite = isFavorite(serviceArea.id);
   const reviews = recensioni.filter((r) => r.areaId === String(serviceArea.id));
+
+  const sortedReviews = useMemo(() => {
+    const sorted = [...reviews];
+    switch (sortOption) {
+      case 'highest':
+        return sorted.sort((a, b) => b.stelle - a.stelle || b.data.localeCompare(a.data));
+      case 'lowest':
+        return sorted.sort((a, b) => a.stelle - b.stelle || b.data.localeCompare(a.data));
+      case 'most_helpful':
+        return sorted.sort((a, b) => b.likeCount - a.likeCount || b.stelle - a.stelle);
+      default:
+        return sorted;
+    }
+  }, [reviews, sortOption]);
 
   const handleSaveAmenities = async () => {
     setIsLoading(true);
@@ -68,6 +90,19 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
 
       {/* ── 1. HEADER CARD con angoli arrotondati in basso ── */}
       <View style={styles.headerCard}>
+        {user && (
+          <TouchableOpacity
+            style={styles.btnBookmark}
+            onPress={() => toggleFavorite(serviceArea.id)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+          >
+            <Ionicons
+              name={areaIsFavorite ? 'bookmark' : 'bookmark-outline'}
+              size={24}
+              color={areaIsFavorite ? Colors.accent : Colors.textSecondary}
+            />
+          </TouchableOpacity>
+        )}
         <Text style={styles.areaName}>{serviceArea.name || 'Area di Servizio'}</Text>
 
         {/* ── 2. BADGE SERVIZI in ScrollView orizzontale ── */}
@@ -107,13 +142,18 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
 
       {/* ── 3. LISTA RECENSIONI ── */}
       <FlatList
-        data={reviews}
+        data={sortedReviews}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.lista}
         ListHeaderComponent={
-          <Text style={styles.sectionTitle}>
-            Recensioni {reviews.length > 0 ? `(${reviews.length})` : ''}
-          </Text>
+          <View>
+            <Text style={styles.sectionTitle}>
+              Recensioni {reviews.length > 0 ? `(${reviews.length})` : ''}
+            </Text>
+            {reviews.length > 1 && (
+              <SortFilterBar activeSort={sortOption} onSortChange={setSortOption} />
+            )}
+          </View>
         }
         ListEmptyComponent={
           <Text style={styles.emptyTesto}>Nessuna recensione. Sii il primo!</Text>
@@ -124,6 +164,7 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
             showAuthor
             currentUserId={user?.id}
             onToggleLike={toggleLike}
+            onReport={(id) => setReportingReviewId(id)}
           />
         )}
       />
@@ -138,6 +179,13 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
           <Ionicons name="create-outline" size={28} color="#fff" />
         </TouchableOpacity>
       )}
+
+      {/* ── MODAL SEGNALAZIONE ── */}
+      <ReportModal
+        visible={reportingReviewId !== null}
+        reviewId={reportingReviewId}
+        onClose={() => setReportingReviewId(null)}
+      />
 
       {/* ── MODAL SERVIZI ── */}
       <Modal visible={isServicesModalVisible} animationType="slide" transparent>
@@ -197,6 +245,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 12,
     zIndex: 1,
+  },
+  btnBookmark: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    zIndex: 2,
+    padding: 4,
   },
   areaName: {
     fontSize: 24,

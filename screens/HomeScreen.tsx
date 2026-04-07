@@ -28,6 +28,7 @@ import { Colors } from '../constants/Colors';
 import { haversineDistance, formatDistance } from '../utils/distance';
 import { supabase } from '../lib/supabase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFavorites } from '../context/FavoritesContext';
 
 const CACHE_KEY = '@service_areas_cache';
 
@@ -61,6 +62,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const mapRef = useRef<RNMapView>(null);
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   // Intercetta il tasto Back su Android solo su questa schermata
   useFocusEffect(
@@ -351,9 +353,21 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             <Text style={styles.btnChiudiTesto}>✕</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => navigation.navigate('ServiceArea', { area: selectedArea })}>
-            <Text style={[styles.pannelloNome, styles.pannelloNomeLink]}>{selectedArea.name}</Text>
-          </TouchableOpacity>
+          <View style={styles.pannelloTitleRow}>
+            <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('ServiceArea', { area: selectedArea })}>
+              <Text style={[styles.pannelloNome, styles.pannelloNomeLink]}>{selectedArea.name}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => toggleFavorite(selectedArea.id)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Ionicons
+                name={isFavorite(selectedArea.id) ? 'bookmark' : 'bookmark-outline'}
+                size={22}
+                color={isFavorite(selectedArea.id) ? Colors.accent : Colors.textSecondary}
+              />
+            </TouchableOpacity>
+          </View>
           <Text style={styles.pannelloBrand}>{selectedArea.brand}</Text>
 
           {(selectedArea.highway || selectedArea.km != null) && (
@@ -552,6 +566,11 @@ const styles = StyleSheet.create({
   btnChiudiTesto: {
     fontSize: 18,
     color: '#888',
+  },
+  pannelloTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   pannelloNome: {
     fontSize: 22,
