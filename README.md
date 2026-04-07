@@ -1,57 +1,84 @@
 # 🚗 TripAutostrade
 
-**TripAutostrade** è un'applicazione mobile community-driven progettata per aiutare i viaggiatori a scoprire, valutare e recensire le aree di servizio lungo le autostrade. 
+**TripAutostrade** è un'applicazione mobile community-driven progettata per aiutare i viaggiatori a scoprire, valutare e recensire le aree di servizio lungo le autostrade italiane.
 
-L'obiettivo dell'app è creare un database affidabile generato dagli utenti per sapere sempre dove conviene fermarsi per un buon caffè, bagni puliti o carburante a buon prezzo.
+L'obiettivo è creare un database affidabile generato dagli utenti per sapere sempre dove conviene fermarsi per un buon caffè, bagni puliti o una ricarica EV.
 
 ---
 
 ## ✨ Funzionalità Principali
 
-* **🗺️ Mappa Interattiva:** Visualizzazione di tutte le aree di servizio tramite pin geolocalizzati.
-* **✍️ Sistema di Recensioni:** Gli utenti possono lasciare una recensione testuale e un voto (da 1 a 5 stelle) per ogni area di servizio.
-* **👍 Interazioni Social (Mi Piace):** Sistema di upvote ("Utile") per le recensioni degli altri viaggiatori, per far emergere i feedback più affidabili.
-* **🔐 Autenticazione Sicura:** Registrazione, Login e recupero password gestiti in sicurezza.
-* **👤 Profili Utente Relazionali:** Ogni utente ha un profilo pubblico generato automaticamente alla registrazione, visibile accanto alle proprie recensioni.
+* **🗺️ Mappa Interattiva:** Visualizzazione di tutte le aree di servizio tramite pin geolocalizzati con clustering automatico. Filtri rapidi per brand (Autogrill, Chef Express, Sarni) e per servizio (Bar, Wi-Fi, Pet, Docce, EV).
+* **🔍 Ricerca con Autocomplete:** Barra di ricerca fluttuante con dropdown risultati e animazione `animateToRegion` sulla mappa.
+* **✍️ Sistema di Recensioni:** Testo, voto da 1 a 5 stelle e foto opzionale per ogni area di servizio.
+* **❤️ Mi Piace Globali:** Like interattivi sulle recensioni, disponibili in tutte le schermate (area di servizio, profilo, attività).
+* **🏆 Gamification:** Sistema a punti e livelli nel profilo utente — da *Novellino del Casello* a *Leggenda dell'Asfalto*. I punti vengono gestiti automaticamente da Trigger SQL su Supabase.
+* **👤 Profilo Utente:** Hero con avatar, badge livello, statistiche (recensioni, media stelle, like ricevuti) e lista delle proprie recensioni con possibilità di eliminare.
+* **🎬 Onboarding:** Tutorial di benvenuto scorrevole alla prima apertura, con 3 slide animate e salvataggio su AsyncStorage.
+* **🔐 Autenticazione Sicura:** Registrazione, login e sessione persistente gestiti da Supabase Auth.
+* **🎨 Design System Material 3:** UI coerente con palette Verde Autostrada (`#00695C`) e Ambra (`#FFC107`), card con angoli arrotondati, chip, FAB e overlay fluttuanti.
 
 ---
 
 ## 🛠️ Stack Tecnologico
 
-L'app è costruita con tecnologie moderne e pensate per la scalabilità:
-
-* **Frontend:** [React Native](https://reactnative.dev/) & [Expo](https://expo.dev/) (Scritto in TypeScript per la massima affidabilità del codice).
-* **Navigazione:** [React Navigation](https://reactnavigation.org/) (Stack & Bottom Tabs).
-* **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL aperto e serverless).
-* **Autenticazione:** Supabase Auth (Email & Password).
-* **Mappe:** `react-native-maps`.
+* **Frontend:** React Native 0.81 + Expo 54 (TypeScript)
+* **Navigazione:** React Navigation (Native Stack + Bottom Tabs)
+* **Backend & Database:** Supabase (PostgreSQL + Auth + Storage)
+* **Mappe:** `react-native-maps` + `react-native-map-clustering`
+* **Storage locale:** `@react-native-async-storage/async-storage`
+* **Foto:** `expo-image-picker` + `base64-arraybuffer`
+* **GPS:** `expo-location`
 
 ---
 
 ## 🗄️ Struttura del Database (Supabase)
 
-Il backend si basa su un database PostgreSQL relazionale con le seguenti tabelle principali:
+* `service_areas` — dati statici delle aree (nome, coordinate, brand, servizi, autostrada)
+* `auth.users` — credenziali (gestito da Supabase Auth)
+* `profiles` — dati pubblici utente con campo `points`; popolato da Trigger SQL alla registrazione
+* `reviews` — recensioni con testo, rating, foto URL, FK a `service_areas` e `profiles`
+* `review_likes` — tabella ponte per i like unici (utente × recensione)
 
-* `service_areas`: Contiene i dati statici delle aree di servizio (nome, coordinate GPS).
-* `auth.users`: Tabella di sistema (bunker) per le credenziali di accesso.
-* `profiles`: Tabella pubblica con i dati degli utenti (nome, avatar), popolata automaticamente tramite **Trigger SQL** alla registrazione di un nuovo utente.
-* `reviews`: Contiene il testo della recensione, il voto, e i collegamenti (`foreign keys`) all'area di servizio e all'autore.
-* `review_likes`: Tabella ponte che gestisce i "Mi piace" unici per ogni recensione da parte degli utenti, evitando voti doppi.
+**Trigger SQL attivi:**
+- `handle_new_user` — crea il profilo pubblico al primo accesso
+- `update_user_points` — aggiorna `profiles.points` in base alle recensioni scritte e ai like ricevuti
 
 ---
 
 ## 🚀 Come avviare il progetto in locale
 
-Se vuoi clonare e far girare questo progetto sul tuo computer, segui questi passaggi:
+### Prerequisiti
+* Node.js installato
+* Account [Supabase](https://supabase.com/) con progetto configurato
+* App [Expo Go](https://expo.dev/client) sullo smartphone per il test
 
-### 1. Prerequisiti
-* [Node.js](https://nodejs.org/) installato.
-* Un account gratuito su [Supabase](https://supabase.com/).
-* L'app [Expo Go](https://expo.dev/client) installata sul tuo smartphone fisico per testare.
+### Installazione
 
-### 2. Installazione
-Clona la repository e installa le dipendenze:
 ```bash
-git clone [https://github.com/tuo-username/tripautostrade.git](https://github.com/tuo-username/tripautostrade.git)
+git clone https://github.com/santoromarco74/tripautostrade.git
 cd tripautostrade
 npm install
+```
+
+### Variabili d'ambiente
+
+Crea un file `.env` nella root (o configura `lib/supabase.ts`) con:
+
+```
+SUPABASE_URL=https://<tuo-progetto>.supabase.co
+SUPABASE_ANON_KEY=<tua-chiave-anon>
+```
+
+### Asset richiesti per la build
+
+Prima di eseguire `eas build`, assicurati che nella cartella `assets/` siano presenti:
+- `icon.png` — icona principale (1024×1024 px consigliato)
+- `splash.png` — splash screen (sfondo deve essere `#00695C` per una fusione perfetta)
+
+### Avvio
+
+```bash
+npx expo start --clear
+# poi premi 'i' per iOS Simulator o 'a' per Android Emulator
+```
