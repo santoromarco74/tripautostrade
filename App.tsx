@@ -6,6 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ReviewsProvider } from './context/ReviewsContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { FavoritesProvider } from './context/FavoritesContext';
 import TabNavigator from './navigation/TabNavigator';
 import ReviewsScreen from './screens/ReviewsScreen';
 import AddReviewScreen from './screens/AddReviewScreen';
@@ -87,9 +88,11 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <AuthProvider>
-        <ReviewsProvider>
-          <RootNavigator />
-        </ReviewsProvider>
+        <FavoritesProvider>
+          <ReviewsProvider>
+            <RootNavigator />
+          </ReviewsProvider>
+        </FavoritesProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

@@ -15,6 +15,8 @@ interface ReviewCardProps {
   onDelete?: (id: string) => void;
   /** Se fornito (e recensione propria), appare l'icona matita */
   onEdit?: () => void;
+  /** Callback per segnalare la recensione (solo su recensioni altrui) */
+  onReport?: (id: string) => void;
 }
 
 export function ReviewCard({
@@ -24,13 +26,14 @@ export function ReviewCard({
   onToggleLike,
   onDelete,
   onEdit,
+  onReport,
 }: ReviewCardProps) {
   const isOwnReview = currentUserId != null && item.userId === currentUserId;
 
   return (
     <View style={styles.card}>
 
-      {/* Cestino in alto a destra (assoluto) */}
+      {/* Cestino in alto a destra (assoluto) — recensioni proprie */}
       {onDelete && (
         <TouchableOpacity
           style={styles.btnElimina}
@@ -38,6 +41,17 @@ export function ReviewCard({
           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
         >
           <Ionicons name="trash-outline" size={18} color="#E53935" />
+        </TouchableOpacity>
+      )}
+
+      {/* Flag segnalazione — solo su recensioni altrui */}
+      {onReport && !isOwnReview && !onDelete && (
+        <TouchableOpacity
+          style={styles.btnElimina}
+          onPress={() => onReport(item.id)}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons name="flag-outline" size={16} color={Colors.textSecondary} />
         </TouchableOpacity>
       )}
 

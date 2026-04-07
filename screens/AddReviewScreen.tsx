@@ -17,6 +17,7 @@ import { AddReviewScreenProps } from '../types/navigation';
 import { useReviews } from '../context/ReviewsContext';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
+import { compressImage } from '../utils/imageCompression';
 
 export default function AddReviewScreen({ route, navigation }: AddReviewScreenProps) {
   const { area, recensioneEsistente } = route.params;
@@ -43,11 +44,11 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.5,
-      base64: true,
+      quality: 1,
     });
-    if (!result.canceled && result.assets[0].base64) {
-      setFoto({ uri: result.assets[0].uri, base64: result.assets[0].base64 });
+    if (!result.canceled) {
+      const compressed = await compressImage(result.assets[0].uri);
+      setFoto(compressed);
       setFotoUrlEsistente(undefined);
     }
   };
