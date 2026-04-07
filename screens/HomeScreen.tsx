@@ -221,32 +221,30 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         clusterFontFamily="System"
         radius={40}
       >
-        {filteredAreas.map((area) => (
-          <Marker
-            // IL TRUCCO DEFINITIVO: Aggiungi lo stato "selezionato" alla chiave!
-            // Quando selectedArea cambia, la chiave cambia, forzando Android a ricalcolare
-            // le dimensioni del pin selezionato da zero, senza tagliarlo.
-            key={`${area.id}-${activeFilter || 'all'}-${selectedArea?.id === area.id ? 'sel' : 'unsel'}`}
-            coordinate={{ latitude: area.latitude, longitude: area.longitude }}
-            title={area.name}
-            description={area.brand}
-            onPress={() => selezionaArea(area)}
-            // tracksViewChanges= RIMOSSO. Lascia che Android tracci il cambiamento
-            // mentre ricalcola la dimensione del pin selezionato.
-          >
-            {/* Struttura semplificata, un solo View circolare direttamente */}
-            <View style={[
-              styles.pin,
-              selectedArea?.id === area.id && styles.pinSelezionato,
-            ]}>
-              <Ionicons
-                name={BRAND_ICON[area.brand] ?? 'restaurant'}
-                size={selectedArea?.id === area.id ? 20 : 16}
-                color="#fff"
-              />
-            </View>
-          </Marker>
-        ))}
+        {filteredAreas.map((area) => {
+          const isSelected = selectedArea?.id === area.id;
+          return (
+            <Marker
+              key={`${area.id}-${activeFilter || 'all'}-${isSelected ? 'sel' : 'unsel'}`}
+              coordinate={{ latitude: area.latitude, longitude: area.longitude }}
+              title={area.name}
+              description={area.brand}
+              onPress={() => selezionaArea(area)}
+              tracksViewChanges={false}
+            >
+              {/* Wrapper esterno con dimensioni fisse MAX per evitare clipping su Android */}
+              <View style={styles.pinWrapper}>
+                <View style={[styles.pin, isSelected && styles.pinSelezionato]}>
+                  <Ionicons
+                    name={BRAND_ICON[area.brand] ?? 'restaurant'}
+                    size={isSelected ? 20 : 16}
+                    color="#fff"
+                  />
+                </View>
+              </View>
+            </Marker>
+          );
+        })}
         {isLoading && <HomeLoadingOverlay />}
       </MapView>
 
@@ -422,8 +420,12 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  // pinWrapper RIMOSSO (non serve più)
-
+  pinWrapper: {
+    width: 52,
+    height: 52,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   pin: {
     // Dimensioni fisse per Android
     width: 36,
