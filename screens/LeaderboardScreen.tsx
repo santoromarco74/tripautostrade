@@ -67,7 +67,7 @@ export default function LeaderboardScreen({ navigation }: LeaderboardScreenProps
 
   const [profiles, setProfiles]   = useState<Profile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [period, setPeriod]       = useState<'week' | 'month'>('week');
+  const [period, setPeriod]       = useState<'week' | 'month' | 'all'>('week');
 
   useEffect(() => {
     fetchLeaderboard();
@@ -239,23 +239,18 @@ export default function LeaderboardScreen({ navigation }: LeaderboardScreenProps
         {/* ── LIST HEADER ─────────────────────────────────────────────────── */}
         <View style={styles.listHeaderRow}>
           <Text style={styles.listHeaderTitle}>Top Viaggiatori</Text>
-          <View style={styles.periodPills}>
-            <TouchableOpacity
-              style={[styles.periodPill, period === 'week' && styles.periodPillActive]}
-              onPress={() => setPeriod('week')}
-            >
-              <Text style={[styles.periodPillText, period === 'week' && styles.periodPillTextActive]}>
-                Settimana
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.periodPill, period === 'month' && styles.periodPillActive]}
-              onPress={() => setPeriod('month')}
-            >
-              <Text style={[styles.periodPillText, period === 'month' && styles.periodPillTextActive]}>
-                Mese
-              </Text>
-            </TouchableOpacity>
+          <View style={styles.periodContainer}>
+            {(['week', 'month', 'all'] as const).map((p) => (
+              <TouchableOpacity
+                key={p}
+                style={[styles.periodPill, period === p && styles.periodPillActive]}
+                onPress={() => setPeriod(p)}
+              >
+                <Text style={[styles.periodPillText, period === p && styles.periodPillTextActive]}>
+                  {p === 'week' ? 'Settimana' : p === 'month' ? 'Mese' : 'Sempre'}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
@@ -445,15 +440,18 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: P,
   },
-  periodPills: {
+  periodContainer: {
     flexDirection: 'row',
-    gap: 6,
+    backgroundColor: '#DAE3EF',
+    borderRadius: 24,
+    padding: 4,
+    gap: 2,
   },
   periodPill: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
-    backgroundColor: SF,
+    backgroundColor: 'transparent',
   },
   periodPillActive: {
     backgroundColor: P,
@@ -563,7 +561,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   statsTileLarge: {
-    backgroundColor: P,
+    backgroundColor: '#00695C', // primary-container (HTML: bg-primary-container)
     borderRadius: 24,
     padding: 24,
     height: 148,
@@ -571,7 +569,7 @@ const styles = StyleSheet.create({
   statsTileLabel: {
     fontSize: 10,
     fontWeight: '800',
-    color: 'rgba(160,242,225,0.8)',
+    color: 'rgba(148,229,213,0.85)', // on-primary-container tint
     letterSpacing: 2,
   },
   statsTileBig: {
