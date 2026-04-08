@@ -23,6 +23,9 @@ const BG = '#F7F9FF'; // Background
 const SF = '#E6EFFA'; // Surface container
 const SL = '#ECF4FF'; // Surface container low
 
+// Fallback Unsplash per aree senza image_url
+const HERO_FALLBACK = 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80';
+
 type ServiceAreaScreenProps = NativeStackScreenProps<any, 'ServiceArea'>;
 
 const AMENITY_CHIPS = [
@@ -103,28 +106,18 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
     }
   };
 
-  // Brand color for hero background fallback
-  const brandColor: Record<string, string> = {
-    Autogrill: '#E21937',
-    'Chef Express': '#F47B20',
-    Sarni: '#FFC220',
-  };
-  const heroBg = brandColor[serviceArea?.brand] || P;
+  const heroImageUri: string = (serviceArea as any)?.image_url || HERO_FALLBACK;
   const activeChips = AMENITY_CHIPS.filter((c) => serviceArea?.[c.key]);
 
   const listHeader = (
     <>
       {/* ── HERO ─────────────────────────────────────────────────────────── */}
       <View style={styles.heroContainer}>
-        {(serviceArea as any)?.image_url ? (
-          <Image
-            source={{ uri: (serviceArea as any).image_url }}
-            style={StyleSheet.absoluteFillObject}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: heroBg }]} />
-        )}
+        <Image
+          source={{ uri: heroImageUri }}
+          style={StyleSheet.absoluteFillObject}
+          resizeMode="cover"
+        />
         {/* Dark gradient overlay (simulated) */}
         <View style={styles.heroGradientTop} />
         <View style={styles.heroGradientBottom} />
@@ -371,7 +364,7 @@ const styles = StyleSheet.create({
 
   // ── Hero ─────────────────────────────────────────────────────────────────────
   heroContainer: {
-    height: 280,
+    height: 360,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -380,7 +373,7 @@ const styles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    height: 100,
+    height: 120,
     backgroundColor: 'rgba(0,0,0,0.25)',
   },
   heroGradientBottom: {
@@ -388,8 +381,8 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: 180,
-    backgroundColor: 'rgba(0,79,69,0.82)',
+    height: 240,
+    backgroundColor: 'rgba(0,79,69,0.85)',
   },
   backButton: {
     position: 'absolute',
@@ -469,10 +462,10 @@ const styles = StyleSheet.create({
   // ── Sheet sovrapposta ────────────────────────────────────────────────────────
   sheet: {
     backgroundColor: '#F7F9FF',
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    marginTop: -28,
-    paddingTop: 24,
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    marginTop: -48,
+    paddingTop: 28,
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -4 },
