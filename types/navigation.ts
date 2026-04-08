@@ -22,6 +22,10 @@ export type RootStackParamList = {
   ServiceArea: { area: ServiceArea };
   Reviews: { area: ServiceArea };
   AddReview: { area: ServiceArea; recensioneEsistente?: RecensioneEsistente };
+  WriteReview: { area: ServiceArea; recensioneEsistente?: RecensioneEsistente };
+  Leaderboard: undefined;
+  ActivityFeed: undefined;
+  Stats: undefined;
 };
 
 export type TabParamList = {

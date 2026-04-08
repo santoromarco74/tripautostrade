@@ -10,6 +10,7 @@ import { FavoritesProvider } from './context/FavoritesContext';
 import TabNavigator from './navigation/TabNavigator';
 import ReviewsScreen from './screens/ReviewsScreen';
 import AddReviewScreen from './screens/AddReviewScreen';
+import WriteReviewScreen from './screens/WriteReviewScreen';
 import ServiceAreaScreen from './screens/ServiceAreaScreen';
 import LoginScreen from './screens/LoginScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
@@ -78,6 +79,11 @@ function RootNavigator() {
           name="AddReview"
           component={AddReviewScreen}
           options={{ title: 'Scrivi una recensione', presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="WriteReview"
+          component={WriteReviewScreen}
+          options={{ headerShown: false, presentation: 'modal' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
