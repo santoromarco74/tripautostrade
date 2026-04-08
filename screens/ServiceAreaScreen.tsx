@@ -304,7 +304,7 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
       {user && (
         <TouchableOpacity
           style={[styles.fab, { bottom: insets.bottom + 24 }]}
-          onPress={() => navigation.navigate('AddReview', { area: serviceArea })}
+          onPress={() => navigation.navigate('WriteReview', { area: serviceArea })}
           activeOpacity={0.85}
         >
           <MaterialIcons name="rate-review" size={26} color="#fff" />

@@ -76,6 +76,10 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
     <View style={styles.centro}>
       <View style={styles.headerBar}>
         <Text style={styles.headerTitolo}>Attivita</Text>
+        <TouchableOpacity onPress={() => navigation.navigate('ActivityFeed')} style={styles.headerFeedBtn}>
+          <Ionicons name="globe-outline" size={22} color={Colors.primary} />
+          <Text style={styles.headerFeedLabel}>Feed</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.segmentContainer}>
@@ -224,11 +228,24 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerTitolo: {
     fontSize: 18,
     fontWeight: '700',
     color: Colors.text,
+  },
+  headerFeedBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  headerFeedLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
   },
   segmentContainer: {
     paddingHorizontal: 16,

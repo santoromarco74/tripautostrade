@@ -14,7 +14,9 @@ import { useAuth } from '../context/AuthContext';
 import { useReviews, Recensione } from '../context/ReviewsContext';
 import { Colors } from '../constants/Colors';
 import { supabase } from '../lib/supabase';
-import { useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../types/navigation';
 import { ReviewCard } from '../components/ReviewCard';
 
 function calcolaTitolo(points: number): { titolo: string; emoji: string } {
@@ -28,6 +30,7 @@ export default function ProfileScreen() {
   const { user, signOut } = useAuth();
   const { recensioni, deleteReview, toggleLike } = useReviews();
   const insets = useSafeAreaInsets();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [points, setPoints] = useState(0);
 
@@ -151,6 +154,19 @@ export default function ProfileScreen() {
           <Text style={styles.infoTitolo}>Email</Text>
           <Text style={styles.infoValore}>{user?.email ?? '—'}</Text>
         </View>
+      </View>
+
+      {/* ── Navigazione rapida ── */}
+      <View style={styles.quickNavRow}>
+        <TouchableOpacity style={styles.quickNavBtn} onPress={() => navigation.navigate('Leaderboard')}>
+          <Ionicons name="trophy-outline" size={22} color={Colors.primary} />
+          <Text style={styles.quickNavLabel}>Classifica</Text>
+        </TouchableOpacity>
+        <View style={styles.quickNavDivider} />
+        <TouchableOpacity style={styles.quickNavBtn} onPress={() => navigation.navigate('Stats')}>
+          <Ionicons name="bar-chart-outline" size={22} color={Colors.primary} />
+          <Text style={styles.quickNavLabel}>Statistiche</Text>
+        </TouchableOpacity>
       </View>
 
       {/* ── 4. LOGOUT PILL OUTLINED ── */}
@@ -377,6 +393,35 @@ const styles = StyleSheet.create({
   },
 
   // ── 4. Logout pill outlined ───────────────────────────────────────────────
+  quickNavRow: {
+    flexDirection: 'row',
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    marginBottom: 12,
+    elevation: 1,
+    shadowColor: '#000',
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  quickNavBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    paddingVertical: 14,
+  },
+  quickNavLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
+  },
+  quickNavDivider: {
+    width: 1,
+    backgroundColor: Colors.border,
+    marginVertical: 10,
+  },
   btnLogout: {
     flexDirection: 'row',
     alignItems: 'center',
