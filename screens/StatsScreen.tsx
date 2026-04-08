@@ -44,6 +44,59 @@ function getLevelLabel(points: number): string {
   return 'Novellino';
 }
 
+// ─── Two-half-circle progress ring (no external libraries) ───────────────────
+// Technique: two clip containers (left/right half) each hold a full ring.
+// Rotating each ring inside its clip reveals a portion of the arc.
+// θ = 180° → empty, θ = 0° → full half revealed.
+function ProgressRing({
+  pct, size = 112, strokeWidth = 10,
+}: { pct: number; size?: number; strokeWidth?: number }) {
+  const H     = size / 2;
+  const pR    = Math.min(pct, 50);
+  const pL    = Math.max(0, pct - 50);
+  const thetaR = 180 * (1 - pR / 50);   // right half: 180=empty 0=full
+  const thetaL = 180 * (1 - pL / 50);   // left  half: 180=empty 0=full
+
+  const arcBase: object = {
+    position: 'absolute',
+    width: size, height: size,
+    borderRadius: H,
+    borderWidth: strokeWidth,
+    borderColor: A,
+  };
+
+  return (
+    <View style={{ width: size, height: size }}>
+      {/* Track ring */}
+      <View style={{
+        position: 'absolute', width: size, height: size,
+        borderRadius: H, borderWidth: strokeWidth - 2,
+        borderColor: 'rgba(160,242,225,0.3)',
+      }} />
+
+      {/* Right arc (fills 0 → 50%) */}
+      <View style={{ position: 'absolute', left: H, top: 0, width: H, height: size, overflow: 'hidden' }}>
+        <View style={[arcBase, { left: -H, transform: [{ rotate: `${thetaR}deg` }] }] as any} />
+      </View>
+
+      {/* Left arc (fills 50 → 100%) */}
+      <View style={{ position: 'absolute', left: 0, top: 0, width: H, height: size, overflow: 'hidden' }}>
+        <View style={[arcBase, { left: 0, transform: [{ rotate: `${thetaL}deg` }] }] as any} />
+      </View>
+
+      {/* Center label */}
+      <View style={{
+        position: 'absolute',
+        top: strokeWidth, left: strokeWidth, right: strokeWidth, bottom: strokeWidth,
+        alignItems: 'center', justifyContent: 'center',
+      }}>
+        <Text style={{ fontSize: 22, fontWeight: '900', color: '#fff' }}>{pct}%</Text>
+        <Text style={{ fontSize: 9, fontWeight: '800', color: A, letterSpacing: 1.5 }}>GREEN</Text>
+      </View>
+    </View>
+  );
+}
+
 export default function StatsScreen({ navigation }: StatsScreenProps) {
   const insets             = useSafeAreaInsets();
   const { user }           = useAuth();
@@ -171,15 +224,8 @@ export default function StatsScreen({ navigation }: StatsScreenProps) {
               </Text>
             </View>
 
-            {/* Circular progress (manual) */}
-            <View style={styles.progressRing}>
-              <View style={styles.progressRingOuter}>
-                <View style={styles.progressRingInner}>
-                  <Text style={styles.progressPercent}>{efficiency}%</Text>
-                  <Text style={styles.progressLabel}>GREEN</Text>
-                </View>
-              </View>
-            </View>
+            {/* Circular progress ring — two-half-circle technique */}
+            <ProgressRing pct={efficiency} />
           </View>
         </View>
 
@@ -374,40 +420,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: 'rgba(255,255,255,0.8)',
     lineHeight: 19,
-  },
-
-  // ── Circular progress ────────────────────────────────────────────────────────
-  progressRing: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  progressRingOuter: {
-    width: 112,
-    height: 112,
-    borderRadius: 56,
-    borderWidth: 10,
-    borderColor: A,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 2,
-    shadowColor: A,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-  },
-  progressRingInner: {
-    alignItems: 'center',
-  },
-  progressPercent: {
-    fontSize: 22,
-    fontWeight: '900',
-    color: '#fff',
-  },
-  progressLabel: {
-    fontSize: 9,
-    fontWeight: '800',
-    color: A,
-    letterSpacing: 1.5,
   },
 
   // ── Bento grid ───────────────────────────────────────────────────────────────
