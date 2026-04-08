@@ -16,7 +16,7 @@ const P   = '#004F45'; // Verde Autostrada
 const PC  = '#00695C'; // Primary container
 const A   = '#FDC003'; // Amber
 const AD  = '#785900'; // Amber dark
-const BG  = '#ECF4FF'; // Background
+const BG  = '#F7F9FF'; // Background
 const SF  = '#E6EFFA'; // Surface container
 
 type ActivityFeedScreenProps = NativeStackScreenProps<RootStackParamList, 'ActivityFeed'>;
@@ -138,6 +138,15 @@ export default function ActivityFeedScreen({ navigation }: ActivityFeedScreenPro
 
         {/* Review text */}
         <Text style={styles.reviewText}>"{item.testo}"</Text>
+
+        {/* Area tag chip */}
+        {area?.highway && (
+          <View style={styles.chipRow}>
+            <View style={styles.chip}>
+              <Text style={styles.chipText}>{area.highway}</Text>
+            </View>
+          </View>
+        )}
 
         {/* Card footer */}
         <View style={styles.cardFooter}>
@@ -361,10 +370,10 @@ const styles = StyleSheet.create({
   // ── Activity card ──────────────────────────────────────────────────────────────
   card: {
     backgroundColor: '#fff',
-    borderRadius: 24,
+    borderRadius: 20,
     padding: 20,
     marginBottom: 20,
-    gap: 14,
+    gap: 12,
     elevation: 2,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
@@ -491,6 +500,26 @@ const styles = StyleSheet.create({
   emptySubText: {
     fontSize: 13,
     color: '#9CA3AF',
+  },
+
+  // ── Service chips ────────────────────────────────────────────────────────────
+  chipRow: {
+    flexDirection: 'row',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  chip: {
+    backgroundColor: SF,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 10,
+  },
+  chipText: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#004290',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
 
   // ── FAB ──────────────────────────────────────────────────────────────────────
