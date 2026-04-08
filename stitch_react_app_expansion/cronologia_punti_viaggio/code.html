@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+
+<html lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed": "#ffdf9e",
+                    "on-error": "#ffffff",
+                    "surface-container": "#e6effa",
+                    "primary-container": "#00695c",
+                    "surface": "#f7f9ff",
+                    "inverse-on-surface": "#e9f2fd",
+                    "on-tertiary-fixed-variant": "#004493",
+                    "surface-container-high": "#e0e9f5",
+                    "surface-bright": "#f7f9ff",
+                    "inverse-primary": "#84d5c5",
+                    "on-error-container": "#93000a",
+                    "primary": "#004f45",
+                    "outline-variant": "#bec9c5",
+                    "on-primary-fixed-variant": "#005046",
+                    "background": "#f7f9ff",
+                    "error-container": "#ffdad6",
+                    "surface-dim": "#d2dbe6",
+                    "on-background": "#141c25",
+                    "outline": "#6e7976",
+                    "error": "#ba1a1a",
+                    "on-surface-variant": "#3e4946",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "tertiary-container": "#0059bd",
+                    "on-primary-fixed": "#00201b",
+                    "on-tertiary": "#ffffff",
+                    "primary-fixed-dim": "#84d5c5",
+                    "on-tertiary-container": "#c5d6ff",
+                    "on-surface": "#141c25",
+                    "on-secondary-fixed": "#261a00",
+                    "tertiary-fixed": "#d8e2ff",
+                    "inverse-surface": "#29313a",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-secondary-container": "#6c5000",
+                    "surface-tint": "#046b5e",
+                    "secondary-container": "#fdc003",
+                    "tertiary": "#004290",
+                    "secondary-fixed-dim": "#fabd00",
+                    "on-primary-container": "#94e5d5",
+                    "on-tertiary-fixed": "#001a41",
+                    "surface-container-highest": "#dae3ef",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-variant": "#dae3ef",
+                    "primary-fixed": "#a0f2e1",
+                    "on-secondary-fixed-variant": "#5b4300",
+                    "surface-container-low": "#ecf4ff",
+                    "secondary": "#785900"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-low font-body text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-emerald-950/80 backdrop-blur-xl flex items-center px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<button class="text-emerald-50 hover:bg-emerald-900/50 transition-colors scale-95 active:scale-90 transition-transform flex items-center justify-center w-10 h-10 rounded-full">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline font-bold text-lg tracking-tight text-emerald-50">Cronologia Punti</h1>
+</div>
+</header>
+<main class="pt-20 pb-32 px-4 max-w-2xl mx-auto space-y-6">
+<!-- Hero Section: Point Summary & Data Visual -->
+<section class="bg-primary bg-gradient-to-br from-primary to-primary-container p-8 rounded-xl shadow-none overflow-hidden relative">
+<div class="relative z-10 flex flex-col gap-6">
+<div class="flex justify-between items-start">
+<div>
+<p class="font-label text-on-primary-container text-xs uppercase tracking-widest mb-1">Bilancio Attuale</p>
+<h2 class="font-headline font-extrabold text-5xl text-on-primary">1.250 <span class="text-secondary-container text-2xl font-bold italic">pts</span></h2>
+</div>
+<div class="bg-surface-container-lowest/10 p-3 rounded-full">
+<span class="material-symbols-outlined text-secondary-container" style="font-variation-settings: 'FILL' 1;">stars</span>
+</div>
+</div>
+<!-- Points Graph (Simulated) -->
+<div class="mt-4">
+<p class="font-label text-on-primary-container/70 text-[10px] uppercase tracking-widest mb-4">Ultimi 30 Giorni</p>
+<div class="h-32 w-full flex items-end justify-between gap-1">
+<!-- Bars represent the trend -->
+<div class="w-full bg-on-primary/10 rounded-t-sm h-[40%]"></div>
+<div class="w-full bg-on-primary/10 rounded-t-sm h-[35%]"></div>
+<div class="w-full bg-on-primary/20 rounded-t-sm h-[50%]"></div>
+<div class="w-full bg-on-primary/10 rounded-t-sm h-[45%]"></div>
+<div class="w-full bg-secondary-container/80 rounded-t-sm h-[70%]"></div>
+<div class="w-full bg-on-primary/20 rounded-t-sm h-[60%]"></div>
+<div class="w-full bg-on-primary/30 rounded-t-sm h-[85%]"></div>
+<div class="w-full bg-secondary-container rounded-t-sm h-[100%] shadow-[0_0_15px_rgba(253,192,3,0.3)]"></div>
+<div class="w-full bg-on-primary/20 rounded-t-sm h-[75%]"></div>
+<div class="w-full bg-on-primary/15 rounded-t-sm h-[65%]"></div>
+<div class="w-full bg-on-primary/10 rounded-t-sm h-[50%]"></div>
+<div class="w-full bg-on-primary/10 rounded-t-sm h-[40%]"></div>
+</div>
+<div class="flex justify-between mt-2 text-[9px] font-label text-on-primary-container/50 uppercase">
+<span>30 giorni fa</span>
+<span>Oggi</span>
+</div>
+</div>
+</div>
+<!-- Decorative mesh gradient -->
+<div class="absolute top-0 right-0 w-64 h-64 bg-secondary-container/10 blur-3xl -mr-20 -mt-20 rounded-full"></div>
+</section>
+<!-- Profile Brief -->
+<div class="flex items-center gap-4 px-2">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-white shadow-sm">
+<img alt="Marco Valeri" class="w-full h-full object-cover" data-alt="portrait of a confident middle-aged man with short hair and friendly expression, warm professional lighting, outdoor blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqYfRGSWjhoT3fpOvuC0fwOeST01S_WdskXkY38D7RHkyXTzdBdMNwKlCp5R-haKvtSRtzLxoBRuyMdk5aGBqt4_OqY290gAUhPTPzbAr0bgZeOLYuv8hJXpsfYMePFJCkWzos1isS93WT7EfCv7u3WV-i-_RSJujlAXWjy7fWGZMH_H4Nz9EpPEZ8ovg1zQTnb5KFhbmWK4OJk95h5bmCV1tVa7VzA5tgb4dg_hhHv_CNkNlpn6Pf8lRmz6b1Engr4jMyLHrq9fk"/>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface">Marco Valeri</p>
+<p class="font-label text-xs text-outline tracking-tight">Livello: Viaggiatore Esperto</p>
+</div>
+</div>
+<!-- Chronological Activity Feed -->
+<section class="space-y-4">
+<div class="flex items-center justify-between px-2">
+<h3 class="font-headline font-bold text-primary tracking-tight">Attività Recenti</h3>
+<button class="font-label text-xs font-bold text-secondary-container bg-primary py-1 px-3 rounded-full uppercase tracking-tighter">Filtra</button>
+</div>
+<!-- Bento-style List -->
+<div class="space-y-3">
+<!-- Item 1: Review -->
+<div class="surface-container-lowest glass-card p-5 rounded-lg flex items-center gap-4 transition-all hover:translate-x-1 duration-300">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div class="flex-grow">
+<p class="font-label text-[10px] uppercase tracking-widest text-secondary font-bold mb-0.5">Recensione Area di Servizio</p>
+<h4 class="font-headline font-bold text-on-surface leading-tight">Arda Est</h4>
+<p class="font-body text-xs text-outline mt-1">12 Maggio 2024</p>
+</div>
+<div class="text-right">
+<span class="font-headline font-extrabold text-primary">+50</span>
+<span class="font-label text-[10px] text-primary/60 block uppercase">pts</span>
+</div>
+</div>
+<!-- Item 2: Challenge -->
+<div class="surface-container-lowest glass-card p-5 rounded-lg flex items-center gap-4 transition-all hover:translate-x-1 duration-300">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-secondary-container" style="font-variation-settings: 'FILL' 1;">trophy</span>
+</div>
+<div class="flex-grow">
+<p class="font-label text-[10px] uppercase tracking-widest text-secondary font-bold mb-0.5">Sfida Completata</p>
+<h4 class="font-headline font-bold text-on-surface leading-tight">Re dell'Autogrill</h4>
+<p class="font-body text-xs text-outline mt-1">10 Maggio 2024</p>
+</div>
+<div class="text-right">
+<span class="font-headline font-extrabold text-primary">+200</span>
+<span class="font-label text-[10px] text-primary/60 block uppercase">pts</span>
+</div>
+</div>
+<!-- Item 3: Check-in -->
+<div class="surface-container-lowest glass-card p-5 rounded-lg flex items-center gap-4 transition-all hover:translate-x-1 duration-300">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-tertiary" style="font-variation-settings: 'FILL' 1;">location_on</span>
+</div>
+<div class="flex-grow">
+<p class="font-label text-[10px] uppercase tracking-widest text-outline font-bold mb-0.5">Check-in</p>
+<h4 class="font-headline font-bold text-on-surface leading-tight">Secchia Ovest</h4>
+<p class="font-body text-xs text-outline mt-1">08 Maggio 2024</p>
+</div>
+<div class="text-right">
+<span class="font-headline font-extrabold text-primary">+15</span>
+<span class="font-label text-[10px] text-primary/60 block uppercase">pts</span>
+</div>
+</div>
+<!-- Item 4: Review -->
+<div class="surface-container-lowest glass-card p-5 rounded-lg flex items-center gap-4 transition-all hover:translate-x-1 duration-300">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div class="flex-grow">
+<p class="font-label text-[10px] uppercase tracking-widest text-secondary font-bold mb-0.5">Recensione Area di Servizio</p>
+<h4 class="font-headline font-bold text-on-surface leading-tight">Brianza Nord</h4>
+<p class="font-body text-xs text-outline mt-1">05 Maggio 2024</p>
+</div>
+<div class="text-right">
+<span class="font-headline font-extrabold text-primary">+50</span>
+<span class="font-label text-[10px] text-primary/60 block uppercase">pts</span>
+</div>
+</div>
+<!-- Item 5: Challenge -->
+<div class="surface-container-lowest glass-card p-5 rounded-lg flex items-center gap-4 transition-all hover:translate-x-1 duration-300">
+<div class="w-12 h-12 rounded-full bg-secondary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-secondary-container" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+</div>
+<div class="flex-grow">
+<p class="font-label text-[10px] uppercase tracking-widest text-secondary font-bold mb-0.5">Bonus Benvenuto</p>
+<h4 class="font-headline font-bold text-on-surface leading-tight">Inizio del Viaggio</h4>
+<p class="font-body text-xs text-outline mt-1">01 Maggio 2024</p>
+</div>
+<div class="text-right">
+<span class="font-headline font-extrabold text-primary">+500</span>
+<span class="font-label text-[10px] text-primary/60 block uppercase">pts</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Decorative Action Card -->
+<section class="bg-surface-container-highest p-6 rounded-xl relative overflow-hidden">
+<div class="relative z-10">
+<h4 class="font-headline font-bold text-primary mb-2">Vuoi più punti?</h4>
+<p class="font-body text-sm text-on-surface-variant max-w-[70%]">Completa la sfida "Gran Tour d'Italia" e ricevi un bonus di 1.000 pts!</p>
+<button class="mt-4 bg-primary text-on-primary px-6 py-2.5 rounded-full font-label font-bold text-xs uppercase tracking-wider">Scopri Sfide</button>
+</div>
+<span class="material-symbols-outlined absolute -bottom-6 -right-6 text-[120px] text-primary/5 select-none" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-xl rounded-t-[2.5rem] shadow-[0_-8px_30px_rgb(0,0,0,0.04)]">
+<button class="flex flex-col items-center gap-1 text-zinc-500 dark:text-zinc-400 py-2 px-6 hover:text-emerald-700 transition-colors">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-['Inter'] font-medium text-[10px] uppercase tracking-widest">Esplora</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-zinc-500 dark:text-zinc-400 py-2 px-6 hover:text-emerald-700 transition-colors">
+<span class="material-symbols-outlined">route</span>
+<span class="font-['Inter'] font-medium text-[10px] uppercase tracking-widest">Viaggi</span>
+</button>
+<button class="flex flex-col items-center gap-1 bg-amber-400 text-emerald-950 rounded-full py-2 px-6 transition-all duration-300 scale-95 active:scale-90">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span class="font-['Inter'] font-medium text-[10px] uppercase tracking-widest">Punti</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-zinc-500 dark:text-zinc-400 py-2 px-6 hover:text-emerald-700 transition-colors">
+<span class="material-symbols-outlined">person</span>
+<span class="font-['Inter'] font-medium text-[10px] uppercase tracking-widest">Profilo</span>
+</button>
+</nav>
+</body></html>

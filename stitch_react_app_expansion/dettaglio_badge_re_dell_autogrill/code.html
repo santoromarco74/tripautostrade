@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<html lang="it"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Re dell'Autogrill - TripAutostrade</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,700;0,800;1,800&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#e6effa",
+                    "surface-dim": "#d2dbe6",
+                    "surface-container-low": "#ecf4ff",
+                    "background": "#f7f9ff",
+                    "surface-container-highest": "#dae3ef",
+                    "error": "#ba1a1a",
+                    "outline": "#6e7976",
+                    "surface": "#f7f9ff",
+                    "on-tertiary": "#ffffff",
+                    "outline-variant": "#bec9c5",
+                    "on-surface-variant": "#3e4946",
+                    "error-container": "#ffdad6",
+                    "on-secondary-container": "#6c5000",
+                    "secondary-container": "#fdc003",
+                    "on-primary-container": "#94e5d5",
+                    "tertiary-container": "#0059bd",
+                    "inverse-on-surface": "#e9f2fd",
+                    "surface-variant": "#dae3ef",
+                    "on-tertiary-container": "#c5d6ff",
+                    "on-primary-fixed": "#00201b",
+                    "secondary-fixed-dim": "#fabd00",
+                    "surface-tint": "#046b5e",
+                    "surface-container-high": "#e0e9f5",
+                    "on-background": "#141c25",
+                    "on-secondary-fixed-variant": "#5b4300",
+                    "on-secondary-fixed": "#261a00",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "tertiary": "#004290",
+                    "primary": "#004f45",
+                    "secondary": "#785900",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed": "#a0f2e1",
+                    "primary-fixed-dim": "#84d5c5",
+                    "secondary-fixed": "#ffdf9e",
+                    "on-primary-fixed-variant": "#005046",
+                    "on-tertiary-fixed": "#001a41",
+                    "inverse-surface": "#29313a",
+                    "on-surface": "#141c25",
+                    "tertiary-fixed": "#d8e2ff",
+                    "surface-bright": "#f7f9ff",
+                    "on-primary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "primary-container": "#00695c",
+                    "on-error": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .organic-gradient {
+            background: linear-gradient(135deg, #004f45 0%, #00695c 100%);
+        }
+        .badge-glow {
+            filter: drop-shadow(0 0 30px rgba(253, 192, 3, 0.4));
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body selection:bg-secondary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-emerald-900/80 dark:bg-slate-950/80 backdrop-blur-md flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-emerald-50">arrow_back</span>
+<h1 class="text-emerald-50 dark:text-emerald-400 font-headline font-bold text-2xl tracking-tight">TripAutostrade</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-emerald-50">search</span>
+<div class="w-10 h-10 rounded-full bg-emerald-700 border-2 border-emerald-500 overflow-hidden">
+<img alt="Profile" class="w-full h-full object-cover" data-alt="close-up portrait of a smiling young professional man with a friendly expression in soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAu08A92KHPjxrZ6b4GX9zpiQPCP2mwGAk7ChCORv3Z71k_jdhmO6VQJ8yyH2n5OgTHs9omr6Knd3J86jFwlDENTRyKy2KjNVM3lEvxMgfowY57Kd7KH1yZsVYAifmAg4o6wUSLDGoEYsiPQ48YzpM6eAuqFBzyKYaCxfcyIwP4BbpK-Rs7jGKE5Ix6r4kGQht5NZaCBfNngKZtkKmiawUKCvMZsQXi8L4cBEC1AzXaq3rcf5iLB_r9LnJkMDtuwK9L-g_dczZpV5E"/>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6">
+<!-- Hero Section: Organic Brutalism -->
+<section class="relative mb-12 flex flex-col items-center text-center">
+<div class="absolute -top-12 -left-12 w-64 h-64 organic-gradient rounded-full blur-[80px] opacity-20 -z-10"></div>
+<!-- Stylized Badge Icon -->
+<div class="relative w-64 h-64 mb-8 flex items-center justify-center badge-glow">
+<div class="absolute inset-0 bg-secondary-container/20 rounded-full rotate-6"></div>
+<div class="absolute inset-0 bg-primary-container/10 rounded-full -rotate-6"></div>
+<div class="relative w-48 h-48 organic-gradient rounded-full flex flex-col items-center justify-center border-4 border-secondary-container shadow-2xl">
+<span class="material-symbols-outlined text-secondary-container text-7xl" style="font-variation-settings: 'FILL' 1;">crown</span>
+<div class="flex gap-2 mt-2">
+<span class="material-symbols-outlined text-secondary-fixed text-4xl">coffee</span>
+<span class="material-symbols-outlined text-secondary-fixed text-4xl">lunch_dining</span>
+</div>
+</div>
+</div>
+<h2 class="font-headline text-4xl font-extrabold tracking-tight text-primary mb-4">Re dell'Autogrill</h2>
+<p class="text-on-surface-variant max-w-sm mx-auto leading-relaxed">
+                Conquista il trono delle soste! Per diventare il Re dell'Autogrill devi recensire 50 diverse aree di servizio e accumulare 1.500 punti viaggio.
+            </p>
+</section>
+<!-- Progress Section -->
+<section class="mb-12">
+<div class="surface-container-low rounded-xl p-8 shadow-sm">
+<div class="flex justify-between items-end mb-6">
+<div>
+<span class="font-label text-xs uppercase tracking-widest text-outline mb-1 block">Livello Attuale</span>
+<h3 class="font-headline text-2xl font-bold text-on-surface">3/4 del cammino</h3>
+</div>
+<div class="text-right">
+<span class="font-headline text-3xl font-black text-secondary">1.250</span>
+<span class="font-label text-outline text-sm">/ 1.500 PUNTI</span>
+</div>
+</div>
+<!-- Custom Progress Bar -->
+<div class="h-6 w-full bg-surface-dim rounded-full overflow-hidden p-1 shadow-inner">
+<div class="h-full w-[75%] organic-gradient rounded-full relative">
+<div class="absolute inset-0 bg-white/20 animate-pulse"></div>
+<div class="absolute right-2 top-1/2 -translate-y-1/2 w-2 h-2 bg-white rounded-full shadow-lg"></div>
+</div>
+</div>
+<div class="mt-6 flex items-center gap-3 text-sm text-primary font-medium">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span>Mancano solo 250 punti per il trono</span>
+</div>
+</div>
+</section>
+<!-- Benefits Section: Glassmorphism Bento Grid -->
+<section class="mb-12">
+<h4 class="font-headline text-xl font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-container" style="font-variation-settings: 'FILL' 1;">verified</span>
+                Vantaggi Esclusivi
+            </h4>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+<!-- Benefit Card 1 -->
+<div class="glass-card p-6 rounded-lg border border-white/40 shadow-sm flex flex-col gap-4">
+<div class="w-12 h-12 bg-secondary-container/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">local_cafe</span>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface mb-1">Sconti esclusivi sul caffè</p>
+<p class="text-sm text-on-surface-variant">Ricevi uno sconto del 20% su ogni espresso in autostrada.</p>
+</div>
+</div>
+<!-- Benefit Card 2 -->
+<div class="glass-card p-6 rounded-lg border border-white/40 shadow-sm flex flex-col gap-4">
+<div class="w-12 h-12 bg-primary-container/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">shower</span>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface mb-1">Accesso prioritario alle docce</p>
+<p class="text-sm text-on-surface-variant">Salta la coda nelle aree Truck &amp; Relax convenzionate.</p>
+</div>
+</div>
+<!-- Benefit Card 3 -->
+<div class="glass-card p-6 rounded-lg border border-white/40 shadow-sm flex flex-col gap-4">
+<div class="w-12 h-12 bg-amber-400/20 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined text-amber-600" style="font-variation-settings: 'FILL' 1;">workspace_premium</span>
+</div>
+<div>
+<p class="font-headline font-bold text-on-surface mb-1">Badge dorato sul profilo</p>
+<p class="text-sm text-on-surface-variant">Mostra a tutti i viaggiatori il tuo status regale.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- CTA Action -->
+<button class="w-full py-5 organic-gradient text-white rounded-full font-headline font-bold text-lg shadow-xl shadow-primary/20 active:scale-95 transition-transform flex items-center justify-center gap-3">
+<span class="material-symbols-outlined">add_location_alt</span>
+            Recensisci Nuova Area
+        </button>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full h-24 flex justify-around items-center px-6 pb-4 bg-white dark:bg-slate-900 shadow-[0_-8px_30px_rgb(0,0,0,0.04)] z-50 rounded-t-[2.5rem] md:hidden">
+<div class="flex flex-col items-center justify-center text-emerald-800/60 dark:text-slate-400 px-4 py-2 hover:text-emerald-900 dark:hover:text-emerald-100">
+<span class="material-symbols-outlined">map</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider">Map</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-amber-400 text-emerald-950 rounded-full px-6 py-2 transition-all">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">explore</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider">Activity</span>
+</div>
+<div class="flex flex-col items-center justify-center text-emerald-800/60 dark:text-slate-400 px-4 py-2 hover:text-emerald-900 dark:hover:text-emerald-100">
+<span class="material-symbols-outlined">person</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider">Profile</span>
+</div>
+</nav>
+<!-- Background Decorative Elements -->
+<div class="fixed top-1/2 left-0 w-96 h-96 bg-primary-container opacity-[0.03] rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+<div class="fixed bottom-0 right-0 w-64 h-64 bg-secondary-container opacity-[0.05] rounded-full blur-[100px] -z-10 pointer-events-none"></div>
+</body></html>

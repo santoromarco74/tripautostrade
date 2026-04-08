@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,700;0,800;1,800&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed-variant": "#5b4300",
+                    "primary-fixed": "#a0f2e1",
+                    "surface-variant": "#dae3ef",
+                    "secondary": "#785900",
+                    "surface-container-low": "#ecf4ff",
+                    "on-tertiary-fixed": "#001a41",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-highest": "#dae3ef",
+                    "tertiary": "#004290",
+                    "secondary-container": "#fdc003",
+                    "surface-tint": "#046b5e",
+                    "on-secondary-container": "#6c5000",
+                    "secondary-fixed-dim": "#fabd00",
+                    "on-primary-container": "#94e5d5",
+                    "on-secondary-fixed": "#261a00",
+                    "on-surface": "#141c25",
+                    "primary-fixed-dim": "#84d5c5",
+                    "on-tertiary-container": "#c5d6ff",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#29313a",
+                    "tertiary-fixed": "#d8e2ff",
+                    "on-background": "#141c25",
+                    "surface-dim": "#d2dbe6",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-container": "#0059bd",
+                    "on-primary-fixed": "#00201b",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "on-surface-variant": "#3e4946",
+                    "outline": "#6e7976",
+                    "error": "#ba1a1a",
+                    "background": "#f7f9ff",
+                    "on-primary-fixed-variant": "#005046",
+                    "primary": "#004f45",
+                    "outline-variant": "#bec9c5",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed-variant": "#004493",
+                    "surface": "#f7f9ff",
+                    "inverse-on-surface": "#e9f2fd",
+                    "on-error-container": "#93000a",
+                    "inverse-primary": "#84d5c5",
+                    "surface-container-high": "#e0e9f5",
+                    "surface-bright": "#f7f9ff",
+                    "on-error": "#ffffff",
+                    "secondary-fixed": "#ffdf9e",
+                    "primary-container": "#00695c",
+                    "surface-container": "#e6effa"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-low font-body text-on-surface selection:bg-secondary-container">
+<!-- TopAppBar -->
+<header class="bg-emerald-900/80 dark:bg-slate-950/80 backdrop-blur-md fixed top-0 w-full z-50">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-emerald-50 hover:opacity-80 transition-opacity scale-95 active:duration-150 cursor-pointer">search</span>
+<h1 class="font-plus-jakarta-sans italic font-black text-emerald-50 dark:text-emerald-50 text-2xl tracking-tight">TripAutostrade</h1>
+</div>
+<div class="flex items-center gap-4">
+<nav class="hidden md:flex gap-6 items-center">
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider text-emerald-200/70 hover:opacity-80 transition-opacity cursor-pointer">Map</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider text-amber-400 hover:opacity-80 transition-opacity cursor-pointer">Activity</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider text-emerald-200/70 hover:opacity-80 transition-opacity cursor-pointer">Profile</span>
+</nav>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-emerald-700 ring-2 ring-emerald-400/30">
+<img class="w-full h-full object-cover" data-alt="portrait of a traveler with a stylish beanie and warm lighting, professional photography style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjoW4Ol_sM_tpeN-2ZGpd1Dw-P116uiLXf90_CnInmH6T64oDp1LPqNS-OO11l9un0JrZRR1T62482NF93j1ttBWr9i6ljYFiJFXxPib4fh4hEYvvmyJrEOMCzvrt8jdC6BuSUVQeFufUQEFywDTtNXehxh3ZFIQm1VuaBPuofaiTZDVV99yxurKcdM2EUaX7HRXvMtQ7jOq8sqXDRuvcacfVikjGUKkeN0VK9bA---oJ68jH0kUpt__J8YplZNIb8JzpiSRbuN5o"/>
+</div>
+</div>
+</div>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto min-h-screen">
+<!-- Feed Header -->
+<div class="mb-10">
+<h2 class="font-headline text-4xl font-extrabold text-primary tracking-tighter mb-2">Community Feed</h2>
+<p class="font-label text-on-surface-variant tracking-tight opacity-70">Real-time updates from the road network.</p>
+</div>
+<!-- Bento Filter Grid -->
+<div class="grid grid-cols-4 gap-3 mb-10">
+<div class="col-span-2 bg-primary-container p-4 rounded-lg flex flex-col justify-between text-on-primary-container">
+<span class="material-symbols-outlined mb-2">trending_up</span>
+<span class="font-label font-bold text-sm">Most Liked</span>
+</div>
+<div class="col-span-1 bg-surface-container-lowest p-4 rounded-lg flex flex-col items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined">coffee</span>
+</div>
+<div class="col-span-1 bg-surface-container-lowest p-4 rounded-lg flex flex-col items-center justify-center text-primary shadow-sm">
+<span class="material-symbols-outlined">ev_station</span>
+</div>
+</div>
+<!-- Activity Feed List -->
+<div class="space-y-8">
+<!-- Activity Card 1 -->
+<article class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-outline-variant/15 flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="close-up portrait of a man smiling with a blurred outdoor background, high-end editorial style" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZZQhkKj_M4hH3miiYyym9AudL9YZAGItU352BjGqMz-QkmKMDN_ZhVQ9Ikpa2R1dHNer07Q05q8jMqfWN16nj8NJihggy0gvMvquEkV4e5OQzO6iu1WJJcfFdvilPPHxfdQiP3kbBtii3FFecmmRTTyF6cWRPWrXIIYbbtVaBHx_xyPAUU22XzIEslkYjEHe72W2h25JiL0IuStCMAtthkleG2DOomibCfyipErAZgpekhCfZDaGFmt95zyj-zDfb5j94kIi6jco"/>
+<div>
+<p class="font-headline font-bold text-on-surface">Marco Valeri</p>
+<p class="font-label text-xs text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                                Secchia Ovest A1
+                            </p>
+</div>
+</div>
+<div class="bg-secondary-container px-3 py-1 rounded-full flex items-center gap-1">
+<span class="font-headline font-bold text-sm text-on-secondary-fixed-variant">4.8</span>
+<span class="material-symbols-outlined text-[16px] text-on-secondary-fixed-variant" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<div class="relative rounded-DEFAULT overflow-hidden aspect-video">
+<img class="w-full h-full object-cover" data-alt="interior of a modern highway cafe with large windows and warm coffee steam, magazine lifestyle photography" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChN0cCsaLGbInomXVVDN6Ce6vbScMY5nKmTO7oDcU1XMpIUleuqIZPHq2JAHREeMFEr06CUfALihV7ztO4FUYQePPqBIwSF82qkoNCpOVvk4iY0EF-0vQfvlcQao_NF8w0cjX1HeGmP12Z_oC4xzZaj3qQ9V1IP-xWfz8-Z_U3deBfgFevw9tUw-MswTOvL0wzCBAS9n2mAQaf30l2_oAwwHO7CmRGFDYwTkWJY83mIb5K0SoH97F3INC_UmxVHknb_KMGh0bjkwk"/>
+</div>
+<p class="font-body text-on-surface leading-relaxed italic">
+                    "The best espresso on the A1. Quiet workspace upstairs if you need to take a call. Highly recommended for a long haul."
+                </p>
+<div class="flex justify-between items-center pt-2">
+<div class="flex gap-2">
+<div class="flex items-center gap-1 text-on-surface-variant px-3 py-1 bg-surface-container-low rounded-full">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span class="font-label text-xs">2h ago</span>
+</div>
+</div>
+<button class="flex items-center gap-2 text-primary hover:text-secondary transition-colors">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">favorite</span>
+<span class="font-headline font-bold">124</span>
+</button>
+</div>
+</article>
+<!-- Activity Card 2 -->
+<article class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-outline-variant/15 flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="woman portrait with natural lighting and soft background focus, editorial quality" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDhRt2HEU-aEfYo9_yjMnE6uSSAc37wSaXQ1_dYIbiYFu5Fw2YU-SlZWl7sefds2NyGlzGwWdnd1P5HIBaGRkDQfssNqEASjLeLlPO0CxeN7z0-lyVGILiPhtT9OjkBhQeuo7HF0nUIDZkKRlzYRDsXrjI-mVtKfCs7DEYSg7Q17sfQQ37GZ5B6yshpuKFUBTq5Kj-YodIb_obItm4b2LjfaYsbywqsOVUUbk0qcxunuvG88EmkI24_j6OEsNZvOtwvV8qGhZnxA40"/>
+<div>
+<p class="font-headline font-bold text-on-surface">Elena Rossi</p>
+<p class="font-label text-xs text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                                Chianti Est A1
+                            </p>
+</div>
+</div>
+<div class="bg-secondary-container px-3 py-1 rounded-full flex items-center gap-1">
+<span class="font-headline font-bold text-sm text-on-secondary-fixed-variant">5.0</span>
+<span class="material-symbols-outlined text-[16px] text-on-secondary-fixed-variant" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+<p class="font-body text-on-surface leading-relaxed">
+                    "Stunning views of the valley. The gourmet shop has actual local products, not just the usual tourist snacks. Charging stations are all working perfectly."
+                </p>
+<div class="flex gap-2">
+<span class="bg-surface-container px-3 py-1 rounded-md font-label text-[10px] uppercase font-bold tracking-wider text-tertiary">EV Chargers</span>
+<span class="bg-surface-container px-3 py-1 rounded-md font-label text-[10px] uppercase font-bold tracking-wider text-tertiary">Gourmet</span>
+</div>
+<div class="flex justify-between items-center pt-2">
+<div class="flex gap-2">
+<div class="flex items-center gap-1 text-on-surface-variant px-3 py-1 bg-surface-container-low rounded-full">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span class="font-label text-xs">5h ago</span>
+</div>
+</div>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+<span class="font-headline font-bold">56</span>
+</button>
+</div>
+</article>
+<!-- Activity Card 3 -->
+<article class="bg-surface-container-lowest p-6 rounded-lg shadow-sm border border-outline-variant/15 flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-headline font-bold">
+                            GT
+                        </div>
+<div>
+<p class="font-headline font-bold text-on-surface">Giulio T.</p>
+<p class="font-label text-xs text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                                Arda Est A1
+                            </p>
+</div>
+</div>
+<div class="bg-surface-container-high px-3 py-1 rounded-full flex items-center gap-1">
+<span class="font-headline font-bold text-sm text-on-surface-variant">3.5</span>
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant" style="font-variation-settings: 'FILL' 1;">star_half</span>
+</div>
+</div>
+<p class="font-body text-on-surface leading-relaxed">
+                    "The iconic bridge restaurant is amazing for the architecture, but it was extremely crowded today. Wait times for a table were over 20 minutes."
+                </p>
+<div class="flex justify-between items-center pt-2">
+<div class="flex gap-2">
+<div class="flex items-center gap-1 text-on-surface-variant px-3 py-1 bg-surface-container-low rounded-full">
+<span class="material-symbols-outlined text-sm">schedule</span>
+<span class="font-label text-xs">Yesterday</span>
+</div>
+</div>
+<button class="flex items-center gap-2 text-on-surface-variant hover:text-secondary transition-colors">
+<span class="material-symbols-outlined text-[20px]">favorite</span>
+<span class="font-headline font-bold">12</span>
+</button>
+</div>
+</article>
+</div>
+</main>
+<!-- FAB -->
+<button class="fixed bottom-28 right-6 w-16 h-16 bg-secondary-container text-on-secondary-container rounded-full flex items-center justify-center shadow-[0_24px_40px_rgba(253,192,3,0.15)] z-40 active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-3xl">add_comment</span>
+</button>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full h-24 flex justify-around items-center px-6 pb-4 bg-white dark:bg-slate-900 z-50 rounded-t-[2.5rem] shadow-[0_-8px_30px_rgb(0,0,0,0.04)] md:hidden">
+<div class="flex flex-col items-center justify-center text-emerald-800/60 dark:text-slate-400 px-4 py-2 hover:text-emerald-900 dark:hover:text-emerald-100 cursor-pointer transition-all">
+<span class="material-symbols-outlined">map</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider">Map</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-amber-400 text-emerald-950 rounded-full px-6 py-2 transition-all cursor-pointer">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider">Activity</span>
+</div>
+<div class="flex flex-col items-center justify-center text-emerald-800/60 dark:text-slate-400 px-4 py-2 hover:text-emerald-900 dark:hover:text-emerald-100 cursor-pointer transition-all">
+<span class="material-symbols-outlined">person</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider">Profile</span>
+</div>
+</nav>
+</body></html>

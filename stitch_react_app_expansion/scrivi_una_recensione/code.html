@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Space_Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-container": "#fdc003",
+                    "on-tertiary-fixed-variant": "#004493",
+                    "surface-tint": "#046b5e",
+                    "secondary-fixed": "#ffdf9e",
+                    "on-tertiary-container": "#c5d6ff",
+                    "on-error-container": "#93000a",
+                    "tertiary": "#004290",
+                    "on-tertiary": "#ffffff",
+                    "surface": "#f7f9ff",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f7f9ff",
+                    "outline-variant": "#bec9c5",
+                    "on-primary": "#ffffff",
+                    "on-primary-fixed-variant": "#005046",
+                    "on-surface-variant": "#3e4946",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "secondary": "#785900",
+                    "primary": "#004f45",
+                    "on-background": "#141c25",
+                    "on-primary-container": "#94e5d5",
+                    "surface-container-low": "#ecf4ff",
+                    "surface-variant": "#dae3ef",
+                    "primary-fixed-dim": "#84d5c5",
+                    "on-secondary-fixed": "#261a00",
+                    "on-error": "#ffffff",
+                    "error": "#ba1a1a",
+                    "background": "#f7f9ff",
+                    "surface-container-highest": "#dae3ef",
+                    "primary-container": "#00695c",
+                    "surface-container": "#e6effa",
+                    "inverse-primary": "#84d5c5",
+                    "on-secondary-fixed-variant": "#5b4300",
+                    "on-surface": "#141c25",
+                    "primary-fixed": "#a0f2e1",
+                    "on-secondary-container": "#6c5000",
+                    "on-secondary": "#ffffff",
+                    "outline": "#6e7976",
+                    "on-tertiary-fixed": "#001a41",
+                    "on-primary-fixed": "#00201b",
+                    "surface-dim": "#d2dbe6",
+                    "surface-container-high": "#e0e9f5",
+                    "inverse-on-surface": "#e9f2fd",
+                    "secondary-fixed-dim": "#fabd00",
+                    "tertiary-fixed": "#d8e2ff",
+                    "tertiary-container": "#0059bd",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#29313a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"]
+            }
+          },
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .headline-font { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .label-font { font-family: 'Space Grotesk', sans-serif; }
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="bg-emerald-900/80 dark:bg-emerald-950/80 backdrop-blur-xl fixed top-0 w-full z-50 flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-emerald-500 dark:text-emerald-400 cursor-pointer scale-95 active:duration-150" data-icon="arrow_back">arrow_back</span>
+<h1 class="text-emerald-50 font-['Plus_Jakarta_Sans'] font-extrabold text-lg tracking-tight">Write a Review</h1>
+</div>
+<div class="w-10"></div> <!-- Spacer for balance -->
+</header>
+<!-- Content Canvas -->
+<main class="pt-24 px-5 max-w-2xl mx-auto">
+<!-- Header Section: Service Area Identity -->
+<div class="mb-8 flex items-center gap-4">
+<div class="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+<img class="w-full h-full object-cover" data-alt="modern highway service area building with sleek architecture and green landscaping under bright daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpTbZIyz53uvx1WdhaK3S608Pjo1Q7zhSJdM1CRWJjsBBy5ENvw3KLcneoXkI1Lbionpi86N25jZQfYjVSxyASEBQFN2OtLKmDpCMo4MhtJuTPHgUPcszx3tZa0oZp04Y2KoGRk-5pvK7UMpU0YP28AIHRuJIzqx9nVKoxMA3FNtdB_DUqZ9ATM8AHFJ4KZmovrd2k4BhixP35ZG9jqj6zy3mOkNh8GbD3G1lTr1DYtnu33mTs4yB9w86neaStJEfX_9VkdwgZNNY"/>
+</div>
+<div>
+<h2 class="headline-font text-2xl font-bold text-primary tracking-tight">Arda Est</h2>
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm" data-icon="location_on">location_on</span>
+<span class="label-font text-sm font-medium">A1 Highway, Km 142</span>
+</div>
+</div>
+</div>
+<!-- Review Form Container -->
+<div class="space-y-6">
+<!-- Star Rating Card -->
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-[0_4px_24px_rgba(0,79,69,0.04)] text-center">
+<p class="headline-font font-semibold text-on-surface mb-4">How was your visit?</p>
+<div class="flex justify-center gap-2">
+<span class="material-symbols-outlined text-4xl text-secondary-container cursor-pointer" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-4xl text-secondary-container cursor-pointer" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-4xl text-secondary-container cursor-pointer" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-4xl text-secondary-container cursor-pointer" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-4xl text-outline-variant cursor-pointer" data-icon="star">star</span>
+</div>
+<p class="label-font text-xs text-on-surface-variant mt-3 uppercase tracking-widest font-bold">Tap to rate</p>
+</div>
+<!-- Comment Area -->
+<div class="bg-surface-container-lowest p-1 rounded-lg shadow-[0_4px_24px_rgba(0,79,69,0.04)]">
+<textarea class="w-full bg-transparent border-none focus:ring-0 p-5 text-on-surface placeholder:text-outline min-h-[160px] resize-none" placeholder="Share your experience... Was it clean? How was the coffee?"></textarea>
+</div>
+<!-- Media Section: Bento Style -->
+<div class="grid grid-cols-3 gap-3">
+<div class="col-span-1 aspect-square bg-surface-container-high rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-outline-variant hover:bg-surface-container-highest transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-primary mb-1 group-active:scale-90 transition-transform" data-icon="add_a_photo">add_a_photo</span>
+<span class="label-font text-[10px] font-bold text-primary-container">ADD PHOTO</span>
+</div>
+<div class="col-span-1 aspect-square rounded-lg overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="close-up of a fresh italian espresso in a white porcelain cup at a rest stop cafe" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDl0U1-rzaV8x497a2nsx_f3YleL_toucaouzFNtp26bfwRPcpHSPkmFUFFkL9qccOl_dQ91xLR2YbL_pJJIV-kw391kPb28WQLgbFuYG2kQcB84LqALha0-obPWbTO_DoXXYoBRjWwx695omNdlAhurFinuAt82ug9FCSjFd6A8M2Zv1xdsUrq7qoBivMc1A9b7O_F6md9Cgt0JPFCC-i3ktg1XsNiNfU_MxoFAUBwtHSUEz5oiQjSFq-zoXBFL9aS9urpz-yZC6E"/>
+<div class="absolute top-1 right-1 bg-on-surface/50 text-white rounded-full p-1 backdrop-blur-sm cursor-pointer">
+<span class="material-symbols-outlined text-xs" data-icon="close">close</span>
+</div>
+</div>
+<div class="col-span-1 aspect-square rounded-lg overflow-hidden relative">
+<img class="w-full h-full object-cover" data-alt="clean modern interior design of a high-end restaurant lounge area with warm lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDQgi1N3jOJfRZ-LyzVVQ3DBnjP4qkhVw1vhBYVlDBi0t_nO5TbrtlhZ4iAdP8CJ4vqm3T5quxrKA7JLunezGZapH3mSv7DLvpFZD3rnyp9E2WjnP_Hv668AHiXOTRtbdoHYQUppiVLR8K_iq74ACbJUdyg0XwiLRA4qLsyx5mmTMr7q7NCGriIpKBcS7Q4lw-jukMmDhoCEJLfSH6xj8f9FJQ9L4MgdzIw6956cLw3rUDTGVyb1lU1owiwcCaDnfUJmVhHrJJsq8w"/>
+<div class="absolute top-1 right-1 bg-on-surface/50 text-white rounded-full p-1 backdrop-blur-sm cursor-pointer">
+<span class="material-symbols-outlined text-xs" data-icon="close">close</span>
+</div>
+</div>
+</div>
+<!-- Amenities Quick Select (The Digital Concierge touch) -->
+<div class="bg-surface-container-low p-5 rounded-lg">
+<p class="label-font text-xs font-bold text-primary mb-3 uppercase tracking-wider">Highlight amenities</p>
+<div class="flex flex-wrap gap-2">
+<div class="px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface text-sm font-medium border border-outline-variant/20 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="ev_station">ev_station</span> EV Charging
+                    </div>
+<div class="px-4 py-2 rounded-full bg-primary text-on-primary text-sm font-medium flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="local_cafe" style="font-variation-settings: 'FILL' 1;">local_cafe</span> Coffee
+                    </div>
+<div class="px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface text-sm font-medium border border-outline-variant/20 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="wc">wc</span> Clean Restrooms
+                    </div>
+<div class="px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface text-sm font-medium border border-outline-variant/20 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" data-icon="wifi">wifi</span> Fast Wifi
+                    </div>
+</div>
+</div>
+</div>
+<!-- Submit Action -->
+<div class="mt-10">
+<button class="w-full bg-secondary-container text-on-secondary-container headline-font font-bold py-4 rounded-full shadow-lg hover:shadow-xl active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                Submit Review
+                <span class="material-symbols-outlined" data-icon="send">send</span>
+</button>
+<p class="text-center text-on-surface-variant text-xs mt-4 label-font">By submitting, you agree to our Community Guidelines.</p>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full flex justify-around items-center px-4 py-3 pb-6 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-xl rounded-t-3xl z-50 shadow-[0_-4px_24px_rgba(0,79,69,0.06)]">
+<div class="flex flex-col items-center justify-center text-emerald-800/60 dark:text-neutral-400 py-2 px-5 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Space_Grotesk'] text-[11px] font-medium tracking-wide">Explore</span>
+</div>
+<div class="flex flex-col items-center justify-center text-emerald-800/60 dark:text-neutral-400 py-2 px-5 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-['Space_Grotesk'] text-[11px] font-medium tracking-wide">Journey</span>
+</div>
+<div class="flex flex-col items-center justify-center text-emerald-800/60 dark:text-neutral-400 py-2 px-5 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="font-['Space_Grotesk'] text-[11px] font-medium tracking-wide">Saved</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-amber-400 text-emerald-900 rounded-full py-2 px-5 font-bold Active: scale-90 transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Space_Grotesk'] text-[11px] font-medium tracking-wide">Profile</span>
+</div>
+</nav>
+</body></html>

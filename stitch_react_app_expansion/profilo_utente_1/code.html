@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,700;0,800;1,800&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#5b4300",
+                        "primary-fixed": "#a0f2e1",
+                        "surface-variant": "#dae3ef",
+                        "secondary": "#785900",
+                        "surface-container-low": "#ecf4ff",
+                        "on-tertiary-fixed": "#001a41",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#dae3ef",
+                        "tertiary": "#004290",
+                        "secondary-container": "#fdc003",
+                        "surface-tint": "#046b5e",
+                        "on-secondary-container": "#6c5000",
+                        "secondary-fixed-dim": "#fabd00",
+                        "on-primary-container": "#94e5d5",
+                        "on-secondary-fixed": "#261a00",
+                        "on-surface": "#141c25",
+                        "primary-fixed-dim": "#84d5c5",
+                        "on-tertiary-container": "#c5d6ff",
+                        "on-primary": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "inverse-surface": "#29313a",
+                        "tertiary-fixed": "#d8e2ff",
+                        "on-background": "#141c25",
+                        "surface-dim": "#d2dbe6",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-container": "#0059bd",
+                        "on-primary-fixed": "#00201b",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "on-surface-variant": "#3e4946",
+                        "outline": "#6e7976",
+                        "error": "#ba1a1a",
+                        "background": "#f7f9ff",
+                        "on-primary-fixed-variant": "#005046",
+                        "primary": "#004f45",
+                        "outline-variant": "#bec9c5",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#004493",
+                        "surface": "#f7f9ff",
+                        "inverse-on-surface": "#e9f2fd",
+                        "on-error-container": "#93000a",
+                        "inverse-primary": "#84d5c5",
+                        "surface-container-high": "#e0e9f5",
+                        "surface-bright": "#f7f9ff",
+                        "on-error": "#ffffff",
+                        "secondary-fixed": "#ffdf9e",
+                        "primary-container": "#00695c",
+                        "surface-container": "#e6effa"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-plus-jakarta-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-space-grotesk { font-family: 'Space Grotesk', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen overflow-hidden">
+<!-- Top Navigation Shell -->
+<header class="bg-emerald-900/80 dark:bg-slate-950/80 backdrop-blur-md fixed top-0 w-full z-50 flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-emerald-50 text-2xl">search</span>
+<h1 class="text-emerald-50 dark:text-emerald-50 font-plus-jakarta-sans italic font-black text-2xl tracking-tight">TripAutostrade</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="hidden md:flex gap-6 items-center">
+<a class="text-amber-400 font-label text-sm uppercase tracking-widest font-bold" href="#">Map</a>
+<a class="text-emerald-200/70 font-label text-sm uppercase tracking-widest hover:opacity-80 transition-opacity" href="#">Activity</a>
+<a class="text-emerald-200/70 font-label text-sm uppercase tracking-widest hover:opacity-80 transition-opacity" href="#">Profile</a>
+</div>
+<img alt="user_profile_avatar" class="w-10 h-10 rounded-full border-2 border-emerald-400/30 object-cover" data-alt="portrait of a professional man with a friendly smile, clean lighting, blurred office background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqMYlnT1JEoaVRQFefdF-umzDL7iU_wfwfcO1EiljYPqIcUGd6TybAc9ix56S-INldtZHbDESkYaZhjNHWbOllBdqhgKwh9D5wP9R7KbtK8NLwtfTBSkSUTWooh016_IviJZiVgwobgY3IJ83IxDrdQRHSbTNvfN61sCVN8J6RxZl3cd-LL0z6xV3yaZtuvkSodu1CJ0eXDa89OSH9a46TP_juPq32c5H_9aDkCogVA7LIzqWb5wi5IeWDXER3Yn3gbmY4AjYAcso"/>
+</div>
+</header>
+<!-- Main Canvas: Interactive Map -->
+<main class="relative h-screen w-full pt-16">
+<!-- Background Map Element -->
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover" data-alt="stylized geographic map background showing highway networks and green landscape from high altitude" data-location="Italy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCRLcrwWUu4NRwssQrQ827JxIWNPo7AANcwssE-r9w7ovp1VvKncyEYa4frxN2TMBg_Y7R7DHtG7wWv8Du2gxkU2m193ao_kQ0qfnmTLyxhMP0Qe5-qWhX949BceefQfcprp2rYM-uE8WGI38WTwKyedEk17VtAZ7PhCsWrNDO0Y9evJf53CGO5HY1Gz8211VzJmP0jRHbZGwexxYN46PQGtCYYugRTb_1B6Ppq4pvIILh5xpiUYIYg5pzo7XdpJOi8S-iCS6cONaI"/>
+<!-- Map Overlay Gradients for Depth -->
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-primary/10"></div>
+</div>
+<!-- Floating Search Interface -->
+<div class="absolute top-24 left-1/2 -translate-x-1/2 w-full max-w-lg px-6 z-20">
+<div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-xl p-2 shadow-[0_24px_48px_rgba(0,0,0,0.08)] flex items-center gap-3 border border-outline-variant/15">
+<div class="flex-1 flex items-center gap-3 px-4">
+<span class="material-symbols-outlined text-primary">directions_car</span>
+<input class="bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant font-body w-full" placeholder="Where are you traveling today?" type="text"/>
+</div>
+<button class="bg-primary text-white p-3 rounded-full flex items-center justify-center hover:scale-95 transition-transform">
+<span class="material-symbols-outlined">tune</span>
+</button>
+</div>
+</div>
+<!-- Interactive Pins (Simulated) -->
+<div class="absolute top-[45%] left-[30%] z-10 group">
+<div class="bg-white p-1 rounded-full shadow-lg cursor-pointer transform hover:-translate-y-1 transition-all">
+<div class="bg-primary text-white px-4 py-2 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">local_gas_station</span>
+<span class="font-label font-bold text-xs">Arda Est</span>
+</div>
+</div>
+</div>
+<div class="absolute top-[55%] left-[60%] z-10 group">
+<div class="bg-white p-1 rounded-full shadow-lg cursor-pointer transform hover:-translate-y-1 transition-all">
+<div class="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<span class="font-label font-bold text-xs">Secchia Ovest</span>
+</div>
+</div>
+</div>
+<!-- FAB: Add Review -->
+<div class="fixed bottom-28 right-8 z-40">
+<button class="bg-secondary-container text-on-secondary-container w-16 h-16 rounded-full flex items-center justify-center shadow-[0_20px_40px_rgba(253,192,3,0.3)] hover:scale-105 active:scale-90 transition-all">
+<span class="material-symbols-outlined text-3xl">add_comment</span>
+</button>
+</div>
+<!-- Detail Overlay Sheet (Preview) -->
+<div class="fixed bottom-0 left-0 w-full z-30 flex justify-center pointer-events-none">
+<div class="w-full max-w-4xl bg-surface-container-lowest rounded-t-xl p-8 shadow-[0_-12px_40px_rgba(0,0,0,0.06)] pointer-events-auto transform translate-y-24 hover:translate-y-4 transition-all duration-500 pb-32">
+<div class="w-12 h-1.5 bg-outline-variant/30 rounded-full mx-auto mb-8"></div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-md font-label text-[10px] font-bold uppercase tracking-wider">Top Rated</span>
+<div class="flex text-secondary-container">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm">star_half</span>
+</div>
+</div>
+<h2 class="text-3xl font-headline font-bold text-on-surface mb-2">Arda Est Service Area</h2>
+<p class="text-on-surface-variant font-body mb-6">A1 Autostrada del Sole, Fiorenzuola d'Arda</p>
+<div class="flex flex-wrap gap-2">
+<div class="bg-surface-container text-on-surface px-4 py-2 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">ev_station</span>
+<span class="font-label text-sm font-medium">Ultra Fast</span>
+</div>
+<div class="bg-surface-container text-on-surface px-4 py-2 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-lg">coffee</span>
+<span class="font-label text-sm font-medium">Premium Bar</span>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-low p-4 rounded-lg">
+<span class="text-primary font-headline font-extrabold text-2xl">4.8</span>
+<p class="text-on-surface-variant font-label text-[10px] uppercase font-bold">Coffee Quality</p>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg">
+<span class="text-primary font-headline font-extrabold text-2xl">12</span>
+<p class="text-on-surface-variant font-label text-[10px] uppercase font-bold">EV Plugs</p>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg col-span-2 flex items-center justify-between">
+<div class="flex -space-x-3">
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="portrait of a man with sunglasses and beard" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6GdxuVqrJpwCUESpRyN0E8-_QLW38oJjr-rHjDdhkXSujqzB-aTxALffPtbBWZXmyInPxcSmgCShHaQpwFgf1n55TpXAr6S7aoiizAN583diuQ8e0GkdXI0E-d4gag0GpyGSZxhKM5jA3a_-1gvGgMWQuytClOS1J_ubAclguiHrA7Ci6jlDBvhSNrkrh-l0PZMDF2mjBBAQC6hR8sMSVhGYcF7xW6JuOehF_QX-EDNd06daIL6w6RhKBm5hrj3XN7_6qFhMlf8A"/>
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="young woman with curly hair and cheerful expression" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtc9OoMPRA9e8I1GUcCTHNdC0Hq2c1Bz7nPHW3G0-RRBbQapIDTihizzlUfjhcKID25aPfqSYJSh5EOoI04gYFzqyEfCEeWjlJruyReZClywg4mhevmvgx9DbHkeymQcfGoO8ujb1_WTlW3U8UxUQbpZ9sXLa-omNEpcWcQxBmQeQVSBdYp6VlsGpK-LxVRrz_SqsPuGDRxSI3tKngsHkbSJt7Lm9WTYgLd9zZVmL5cGjCcLqgaCeHG18ULFyNeTf1wLw-zqllyj0"/>
+<img class="w-8 h-8 rounded-full border-2 border-white object-cover" data-alt="natural portrait of a woman in soft window light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNL4IoL3OX9P-C4JWFhZKu83pIa7yan17L0rFSvEQojHCe168a5dmWBNwL1T_dqiwfHYmNvR-BWANBNQghsRu3MUR5dh5gwA2WpTSUFHcj2OfhPgpMEc3n_HvCHCCDMqTsyQqYD5z02VooC6w8qAZSQ5ddOliV-1-5WT_GsCfA5LogO2vbKsgWDf-6O3G0ACAiWMgRK5QWXL-zuYiiqSt-8EEt65K8zKy9LLR-tIeoD4MDhDwwKdakh8UlNaADMsYBDuuzACMUg7c"/>
+</div>
+<span class="text-on-surface-variant font-label text-xs">Community favorite today</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full h-24 flex justify-around items-center px-6 pb-4 bg-emerald-50/50 dark:bg-slate-800/50 bg-white dark:bg-slate-900 z-50 rounded-t-[2.5rem] shadow-[0_-8px_30px_rgb(0,0,0,0.04)] md:hidden">
+<a class="flex flex-col items-center justify-center bg-amber-400 text-emerald-950 rounded-full px-6 py-2 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">map</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center text-emerald-800/60 dark:text-slate-400 px-4 py-2 hover:text-emerald-900 dark:hover:text-emerald-100 transition-colors" href="#">
+<span class="material-symbols-outlined">explore</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider">Activity</span>
+</a>
+<a class="flex flex-col items-center justify-center text-emerald-800/60 dark:text-slate-400 px-4 py-2 hover:text-emerald-900 dark:hover:text-emerald-100 transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="font-inter text-[11px] font-semibold uppercase tracking-wider">Profile</span>
+</a>
+</nav>
+</body></html>

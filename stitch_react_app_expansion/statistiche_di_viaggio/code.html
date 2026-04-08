@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>TripAutostrade - Travel Insights</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&amp;family=Inter:wght@400;500&amp;family=Space_Grotesk:wght@500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-high": "#e0e9f5",
+                        "on-primary-fixed-variant": "#005046",
+                        "primary": "#004f45",
+                        "on-surface-variant": "#3e4946",
+                        "tertiary": "#004290",
+                        "surface-tint": "#046b5e",
+                        "on-secondary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#84d5c5",
+                        "error-container": "#ffdad6",
+                        "surface-container-highest": "#dae3ef",
+                        "on-secondary-fixed": "#261a00",
+                        "inverse-primary": "#84d5c5",
+                        "primary-fixed": "#a0f2e1",
+                        "on-secondary-container": "#6c5000",
+                        "surface-container-low": "#ecf4ff",
+                        "on-tertiary-fixed": "#001a41",
+                        "surface-variant": "#dae3ef",
+                        "on-primary-fixed": "#00201b",
+                        "on-tertiary-container": "#c5d6ff",
+                        "on-surface": "#141c25",
+                        "on-primary-container": "#94e5d5",
+                        "surface-dim": "#d2dbe6",
+                        "primary-container": "#00695c",
+                        "on-tertiary-fixed-variant": "#004493",
+                        "on-secondary-fixed-variant": "#5b4300",
+                        "secondary": "#785900",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "background": "#f7f9ff",
+                        "on-primary": "#ffffff",
+                        "outline": "#6e7976",
+                        "error": "#ba1a1a",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#fdc003",
+                        "surface-container": "#e6effa",
+                        "secondary-fixed-dim": "#fabd00",
+                        "surface-bright": "#f7f9ff",
+                        "surface": "#f7f9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-background": "#141c25",
+                        "outline-variant": "#bec9c5",
+                        "inverse-surface": "#29313a",
+                        "tertiary-container": "#0059bd",
+                        "tertiary-fixed": "#d8e2ff",
+                        "secondary-fixed": "#ffdf9e",
+                        "inverse-on-surface": "#e9f2fd"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+        .font-headline { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .font-label { font-family: 'Space_Grotesk', sans-serif; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-low text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#ECF4FF] dark:bg-slate-900 flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity Active: scale-95 duration-150">
+<span class="material-symbols-outlined text-[#004F45] dark:text-[#00695C]" data-icon="arrow_back">arrow_back</span>
+</button>
+<h1 class="font-['Plus_Jakarta_Sans'] font-bold text-lg tracking-tight text-[#004F45] dark:text-[#00695C]">Travel Insights</h1>
+</div>
+<button class="hover:opacity-80 transition-opacity Active: scale-95 duration-150">
+<span class="material-symbols-outlined text-[#004F45] dark:text-[#00695C]" data-icon="share">share</span>
+</button>
+</header>
+<main class="mt-20 px-6 max-w-2xl mx-auto space-y-8">
+<!-- Hero: Wayfarer Efficiency Score -->
+<section class="bg-primary-container rounded-xl p-8 relative overflow-hidden shadow-lg">
+<div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+<div>
+<span class="font-label text-secondary-container text-xs uppercase tracking-[0.2em] font-bold">Wayfarer Efficiency</span>
+<h2 class="font-headline text-on-primary-container text-3xl font-extrabold mt-1">Eco-Mastery</h2>
+<p class="text-on-primary-container/80 text-sm mt-2 max-w-[240px]">You are in the top 5% of efficient drivers on the A1 corridor this month.</p>
+</div>
+<div class="relative flex items-center justify-center">
+<svg class="w-32 h-32 transform -rotate-90">
+<circle class="text-primary/30" cx="64" cy="64" fill="transparent" r="56" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-secondary-container" cx="64" cy="64" fill="transparent" r="56" stroke="currentColor" stroke-dasharray="351.8" stroke-dashoffset="52.7" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline font-bold text-2xl text-on-primary-container">85%</span>
+<span class="font-label text-[10px] text-secondary-container uppercase tracking-tighter">Green</span>
+</div>
+</div>
+</div>
+<div class="absolute top-0 right-0 -mr-12 -mt-12 w-48 h-48 bg-secondary-container/10 rounded-full blur-3xl"></div>
+</section>
+<!-- Milestones Bento Grid -->
+<div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+<!-- Total Distance -->
+<div class="col-span-2 md:col-span-1 bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/15 flex flex-col justify-between">
+<span class="material-symbols-outlined text-primary mb-4" data-icon="distance">distance</span>
+<div>
+<p class="font-label text-[10px] uppercase tracking-widest text-outline">Total Distance</p>
+<h3 class="font-headline font-extrabold text-2xl text-on-surface">12,450 <span class="text-sm font-medium text-outline">km</span></h3>
+</div>
+</div>
+<!-- Average Speed -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/15">
+<span class="material-symbols-outlined text-secondary mb-4" data-icon="speed">speed</span>
+<p class="font-label text-[10px] uppercase tracking-widest text-outline">Avg Speed</p>
+<h3 class="font-headline font-extrabold text-2xl text-on-surface">85 <span class="text-sm font-medium text-outline">km/h</span></h3>
+</div>
+<!-- Total Stops -->
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/15">
+<span class="material-symbols-outlined text-tertiary mb-4" data-icon="local_parking">local_parking</span>
+<p class="font-label text-[10px] uppercase tracking-widest text-outline">Total Stops</p>
+<h3 class="font-headline font-extrabold text-2xl text-on-surface">42</h3>
+</div>
+</div>
+<!-- Distance Over Time: Chart Section -->
+<section class="bg-surface-container-lowest p-8 rounded-xl border border-outline-variant/15">
+<div class="flex justify-between items-end mb-8">
+<div>
+<h3 class="font-headline font-bold text-xl text-on-surface">Distance Over Time</h3>
+<p class="text-outline text-xs mt-1">Monthly travel performance</p>
+</div>
+<div class="flex gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+<span class="w-2 h-2 rounded-full bg-surface-container-highest"></span>
+</div>
+</div>
+<div class="flex items-end justify-between h-48 gap-2 pt-4">
+<div class="flex flex-col items-center flex-1 gap-3">
+<div class="w-full bg-surface-container rounded-t-full h-[40%] transition-all hover:bg-primary/20"></div>
+<span class="font-label text-[10px] text-outline">MAR</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-3">
+<div class="w-full bg-surface-container rounded-t-full h-[65%] transition-all hover:bg-primary/20"></div>
+<span class="font-label text-[10px] text-outline">APR</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-3">
+<div class="w-full bg-surface-container rounded-t-full h-[55%] transition-all hover:bg-primary/20"></div>
+<span class="font-label text-[10px] text-outline">MAY</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-3">
+<div class="w-full bg-secondary-container rounded-t-full h-[90%] shadow-[0_0_20px_rgba(253,192,3,0.3)]"></div>
+<span class="font-label text-[10px] text-secondary font-bold">JUN</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-3">
+<div class="w-full bg-surface-container rounded-t-full h-[45%] transition-all hover:bg-primary/20"></div>
+<span class="font-label text-[10px] text-outline">JUL</span>
+</div>
+<div class="flex flex-col items-center flex-1 gap-3">
+<div class="w-full bg-surface-container rounded-t-full h-[70%] transition-all hover:bg-primary/20"></div>
+<span class="font-label text-[10px] text-outline">AUG</span>
+</div>
+</div>
+</section>
+<!-- Top Destinations List -->
+<section class="space-y-4">
+<h3 class="font-headline font-bold text-xl text-on-surface px-2">Top Destinations</h3>
+<div class="space-y-3">
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/15 flex items-center justify-between group hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="" class="w-full h-full object-cover" data-alt="modern glass architecture of a highway service station building under clear blue sky" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFFtouMggjOENj9lf1eH2UR3yTbx-1StOFA4r_Pwv7flPSh4cJsc6_axbDdXt1w9knCgzmZPPGLqnIZwMr-wwwwINqIyMf4uIyWiznTXxrklZ3l9SJ2WWpTgSyG5RqFEufdY-_0QDMqcd2T2SEEGQCHiUzR2xeEJ-KamnC1igQW6UuCs86Y-OmFFJSfx5FWJ_cU4Jvqu31J-Vxsztt1aGkTpu-MC5MxKJ4FbEZ2UALeL0tG_1hWS2cvjhOW_HD1jeUfAdYSfWQX4M"/>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface">Arda Est</h4>
+<p class="text-xs text-outline font-label">A1 Autostrada del Sole</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline font-extrabold text-lg text-primary">12</span>
+<span class="block text-[10px] font-label uppercase text-outline tracking-wider">Times</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/15 flex items-center justify-between group hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="" class="w-full h-full object-cover" data-alt="vibrant neon signs and night lights of a roadside stopping area in Italy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAFSfTz_kP0eGBHv4a_NXTN1shrSIBMkRkxynI4xj8ZkbhQ5gbw8g1kzkjPYmyiDQScVC5l0NiESAZMHb25T2JG5G3YQoHv883qk5Mt_skXbwTgzNA7Zn3KQDABrzZ7SPn8K1Z6pNvuYfKjwfAztJ-zVWdOPyGLvQZw3aCmVS_VZGqgh44rrUp60NV7DXawxYVnH9j0SGxbQqJ6G3piw0qvGMHhTxldA2L46zcgKVxDMJgx_dvCRP96NjdfZbZ9Mi4efzt4AraNsj0"/>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface">Secchia Ovest</h4>
+<p class="text-xs text-outline font-label">A1 / A22 Junction</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline font-extrabold text-lg text-primary">8</span>
+<span class="block text-[10px] font-label uppercase text-outline tracking-wider">Times</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/15 flex items-center justify-between group hover:bg-surface-bright transition-colors">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full overflow-hidden flex-shrink-0">
+<img alt="" class="w-full h-full object-cover" data-alt="luxurious modern interior of a highway bistro with warm designer lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDXzv0yiOnNUwZuPillEsX95vnRAoCZ6Vd5HowHsdlyaDVj4gDhUCT32DgInGAKzKK312WkZH7SgylUdevYagfFx5S_KNRG1N5E_CvniJeBEA33qnqeHgDbLEAYnO5N-icAHWevRzd5Gs3WsMChHEOn706fCJY_p-PI37LL91cf-pXKpTJ5R4k4DBXEWTRkmq2oRlYjHkD-LZzrQAvNHG-bCTFRwRiEbHPIcGCStBJ2XyWTv58HSc7kU2sl9Ofcw6DzFrHEqVFfMTQ"/>
+</div>
+<div>
+<h4 class="font-headline font-bold text-on-surface">Somaglia</h4>
+<p class="text-xs text-outline font-label">Lodi South Entrance</p>
+</div>
+</div>
+<div class="text-right">
+<span class="font-headline font-extrabold text-lg text-primary">5</span>
+<span class="block text-[10px] font-label uppercase text-outline tracking-wider">Times</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-[2rem] bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-[#BEC9C5]/15 shadow-[0_-4px_40px_rgba(0,79,69,0.06)]">
+<div class="flex justify-around items-center h-20 px-4 pb-2">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:text-[#004F45] dark:hover:text-[#00695C] transition-opacity Active: scale-90 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Space_Grotesk'] font-medium text-[10px] uppercase tracking-widest">Explore</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:text-[#004F45] dark:hover:text-[#00695C] transition-opacity Active: scale-90 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="route">route</span>
+<span class="font-['Space_Grotesk'] font-medium text-[10px] uppercase tracking-widest">Routes</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#FDC003] text-[#785900] rounded-full px-5 py-2 transition-opacity Active: scale-90 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="leaderboard" style="font-variation-settings: 'FILL' 1;">leaderboard</span>
+<span class="font-['Space_Grotesk'] font-medium text-[10px] uppercase tracking-widest">Stats</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 px-5 py-2 hover:text-[#004F45] dark:hover:text-[#00695C] transition-opacity Active: scale-90 duration-200 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Space_Grotesk'] font-medium text-[10px] uppercase tracking-widest">Profile</span>
+</a>
+</div>
+</nav>
+</body></html>

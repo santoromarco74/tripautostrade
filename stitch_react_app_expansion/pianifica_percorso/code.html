@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Plan Route - TripAutostrade</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@400;500;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed": "#ffdf9e",
+                        "inverse-on-surface": "#e9f2fd",
+                        "tertiary-container": "#0059bd",
+                        "tertiary-fixed": "#d8e2ff",
+                        "inverse-surface": "#29313a",
+                        "outline-variant": "#bec9c5",
+                        "surface": "#f7f9ff",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "on-background": "#141c25",
+                        "surface-bright": "#f7f9ff",
+                        "surface-container": "#e6effa",
+                        "secondary-fixed-dim": "#fabd00",
+                        "on-error-container": "#93000a",
+                        "secondary-container": "#fdc003",
+                        "outline": "#6e7976",
+                        "error": "#ba1a1a",
+                        "background": "#f7f9ff",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "on-tertiary-fixed-variant": "#004493",
+                        "on-secondary-fixed-variant": "#5b4300",
+                        "secondary": "#785900",
+                        "primary-container": "#00695c",
+                        "surface-dim": "#d2dbe6",
+                        "on-tertiary-container": "#c5d6ff",
+                        "on-surface": "#141c25",
+                        "on-primary-container": "#94e5d5",
+                        "on-tertiary-fixed": "#001a41",
+                        "surface-variant": "#dae3ef",
+                        "on-primary-fixed": "#00201b",
+                        "surface-container-low": "#ecf4ff",
+                        "on-secondary-container": "#6c5000",
+                        "primary-fixed": "#a0f2e1",
+                        "surface-container-highest": "#dae3ef",
+                        "on-secondary-fixed": "#261a00",
+                        "inverse-primary": "#84d5c5",
+                        "error-container": "#ffdad6",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed-dim": "#84d5c5",
+                        "tertiary": "#004290",
+                        "surface-tint": "#046b5e",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#3e4946",
+                        "primary": "#004f45",
+                        "surface-container-high": "#e0e9f5",
+                        "on-primary-fixed-variant": "#005046"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Plus Jakarta Sans"],
+                        "body": ["Inter"],
+                        "label": ["Space Grotesk"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9ff;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #bec9c5;
+            border-radius: 10px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface">
+<!-- TopAppBar -->
+<header class="bg-[#ECF4FF] dark:bg-slate-950 flex justify-between items-center w-full px-6 py-4 sticky top-0 z-50">
+<div class="flex items-center gap-4">
+<button class="transition-all duration-300 ease-in-out hover:bg-black/5 dark:hover:bg-white/5 p-2 rounded-full text-[#004F45] dark:text-emerald-500">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="text-xl font-black text-[#004F45] dark:text-emerald-400 font-['Plus_Jakarta_Sans'] tracking-tight">TripAutostrade</h1>
+</div>
+<div class="h-10 w-10 rounded-full bg-surface-container-highest flex items-center justify-center overflow-hidden border-2 border-primary/10">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="User profile avatar showing a young professional man with a friendly smile, studio lighting, clean background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSr3YYxB2QDaaqofbhMdmU0UDn6SJLxMXKj655HDTPLLoyZaTnJuwTSixdWWMrAe8MUc2l-50_N0WPIwqSUtv_Sonh74UiGYS0DR6Qe0HXr-tID9LpfnFm73WayIOYilE8K8FtIGc0hktxI925QGhRcPjeAFuazbdzrrGdQz6PpBk5lStHK9o4Wkr4MyDQvPCBjQUnBAY9lU1x8y-2cZx0w59s-62W_M3rB48v5rF6E2glckCqxXWWgPLvLeKjczGYtGsdVQF9cNI"/>
+</div>
+</header>
+<main class="pb-32">
+<!-- Map View Section (40% Screen Height approx) -->
+<section class="relative h-[353px] w-full overflow-hidden shadow-sm">
+<div class="absolute inset-0 bg-surface-dim">
+<img alt="Route Map" class="w-full h-full object-cover opacity-80 mix-blend-multiply" data-alt="Stylized topographic map of Italian highways with GPS route indicators and green lush landscape surroundings" data-location="Italy" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGMnf_KgREcjscOY15Z1qd2825IHYDUlNw5U9L0USAaPJAiDRMV2tKFnNmSwf8BfzaWCTYZiqRZ8DQwb0ytbl0PiQF7sLZZuzIK_Hz0ywxYj-k9KTB2gKBzRUY4mWOUnH_nZqTjE2MUCHXtAiT59_fv2y57ExmrBCsgN1B3EmDB0aREiUxORAQXDI_XxcJYkUq_6uBiDWyVGci_wp1wtRp1sTOK3Xw1wGN8-8zqdMKvkCrCIjus06zyrrkwIlKgKreX7khgJUZo54"/>
+<!-- Map Overlay Gradient -->
+<div class="absolute inset-0 bg-gradient-to-b from-transparent to-surface-container-low/40"></div>
+</div>
+<!-- Map Action Overlays -->
+<div class="absolute top-4 right-4 flex flex-col gap-2">
+<button class="bg-surface-container-lowest/90 backdrop-blur-md p-3 rounded-full shadow-lg text-primary hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" data-icon="my_location">my_location</span>
+</button>
+<button class="bg-surface-container-lowest/90 backdrop-blur-md p-3 rounded-full shadow-lg text-primary hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+</button>
+</div>
+<!-- Tap to Drop Pin Hint -->
+<div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-primary/90 backdrop-blur-md px-6 py-2 rounded-full flex items-center gap-2 shadow-xl">
+<span class="material-symbols-outlined text-white text-sm" data-icon="touch_app">touch_app</span>
+<span class="font-label text-white text-xs uppercase tracking-widest font-bold">Tap map to drop pins</span>
+</div>
+</section>
+<!-- Route Details Canvas -->
+<section class="px-6 -mt-8 relative z-10">
+<div class="bg-surface-container-lowest rounded-xl shadow-2xl p-6 border border-outline-variant/15">
+<!-- Trip Naming -->
+<div class="mb-8">
+<label class="block font-label text-[10px] uppercase tracking-[0.2em] text-outline mb-2 ml-1">Trip Identity</label>
+<div class="relative flex items-center group">
+<span class="material-symbols-outlined absolute left-4 text-primary group-focus-within:text-secondary transition-colors" data-icon="edit_road">edit_road</span>
+<input class="w-full pl-12 pr-4 py-4 bg-surface-container-low rounded-lg border-none focus:ring-2 focus:ring-secondary/30 text-lg font-headline font-bold text-on-surface placeholder:text-outline-variant transition-all" placeholder="Name your trip..." type="text" value="Milano - Roma Estate"/>
+</div>
+</div>
+<!-- Waypoints Section -->
+<div class="space-y-4">
+<div class="flex justify-between items-end mb-4">
+<h2 class="font-headline text-2xl font-extrabold text-primary tracking-tight">Waypoints</h2>
+<span class="font-label text-[11px] text-outline uppercase tracking-wider">3 Stops Planned</span>
+</div>
+<!-- Waypoint List -->
+<div class="space-y-3">
+<!-- Card 1 -->
+<div class="flex items-center gap-3 p-4 bg-surface-container-low rounded-lg group hover:bg-surface-container transition-colors">
+<button class="cursor-grab active:cursor-grabbing text-outline-variant hover:text-outline transition-colors">
+<span class="material-symbols-outlined" data-icon="drag_indicator">drag_indicator</span>
+</button>
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<span class="h-2 w-2 rounded-full bg-primary"></span>
+<p class="font-headline font-bold text-on-surface">Milano Centrale</p>
+</div>
+<p class="font-label text-[10px] text-outline ml-4 uppercase tracking-tighter">Departure Point</p>
+</div>
+<button class="text-error/40 hover:text-error transition-colors p-2">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+<!-- Card 2 -->
+<div class="flex items-center gap-3 p-4 bg-surface-container-low rounded-lg group hover:bg-surface-container transition-colors">
+<button class="cursor-grab active:cursor-grabbing text-outline-variant hover:text-outline transition-colors">
+<span class="material-symbols-outlined" data-icon="drag_indicator">drag_indicator</span>
+</button>
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<span class="h-2 w-2 rounded-full bg-secondary-container"></span>
+<p class="font-headline font-bold text-on-surface">Secchia Ovest S.A.</p>
+</div>
+<p class="font-label text-[10px] text-outline ml-4 uppercase tracking-tighter">Coffee &amp; Fuel Stop • 165km</p>
+</div>
+<button class="text-error/40 hover:text-error transition-colors p-2">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+<!-- Card 3 -->
+<div class="flex items-center gap-3 p-4 bg-surface-container-low rounded-lg group hover:bg-surface-container transition-colors">
+<button class="cursor-grab active:cursor-grabbing text-outline-variant hover:text-outline transition-colors">
+<span class="material-symbols-outlined" data-icon="drag_indicator">drag_indicator</span>
+</button>
+<div class="flex-1">
+<div class="flex items-center gap-2">
+<span class="h-2 w-2 rounded-full bg-tertiary"></span>
+<p class="font-headline font-bold text-on-surface">Roma Nord</p>
+</div>
+<p class="font-label text-[10px] text-outline ml-4 uppercase tracking-tighter">Destination</p>
+</div>
+<button class="text-error/40 hover:text-error transition-colors p-2">
+<span class="material-symbols-outlined" data-icon="delete">delete</span>
+</button>
+</div>
+</div>
+<!-- Add Waypoint Button (Inline) -->
+<button class="w-full mt-4 py-4 border-2 border-dashed border-outline-variant rounded-lg flex items-center justify-center gap-2 text-outline hover:border-primary hover:text-primary transition-all group">
+<span class="material-symbols-outlined group-hover:rotate-90 transition-transform" data-icon="add_circle">add_circle</span>
+<span class="font-label text-xs font-bold uppercase tracking-widest">Add New Stop</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Route Summary Chip Cluster -->
+<section class="px-6 mt-6 flex flex-wrap gap-2">
+<div class="bg-surface-container-high px-4 py-2 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="schedule">schedule</span>
+<span class="font-label text-[11px] font-bold text-on-surface-variant">5H 45M</span>
+</div>
+<div class="bg-surface-container-high px-4 py-2 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-primary" data-icon="distance">distance</span>
+<span class="font-label text-[11px] font-bold text-on-surface-variant">578 KM</span>
+</div>
+<div class="bg-secondary-fixed px-4 py-2 rounded-full flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-secondary" data-icon="local_gas_station">local_gas_station</span>
+<span class="font-label text-[11px] font-bold text-on-secondary-fixed-variant">1 REFUEL</span>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Shell & Primary Action -->
+<div class="fixed bottom-0 left-0 w-full z-50">
+<!-- Floating Primary Action (Save Route) -->
+<div class="px-6 mb-4">
+<button class="w-full bg-gradient-to-br from-secondary-container to-secondary-fixed-dim text-secondary py-5 rounded-full font-headline font-extrabold text-lg flex items-center justify-center gap-3 shadow-[0_12px_30px_rgba(253,192,3,0.3)] active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span>
+                Save Route
+            </button>
+</div>
+<!-- BottomNavBar -->
+<nav class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-[#BEC9C5]/15 shadow-[0_-8px_40px_rgba(0,79,69,0.06)] fixed bottom-0 left-0 w-full flex justify-around items-center px-4 pb-6 pt-2 rounded-t-[3rem]">
+<div class="flex flex-col items-center justify-center text-[#004F45]/60 dark:text-slate-400 px-4 py-2 hover:text-[#004F45] dark:hover:text-emerald-300 transition-all">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-['Space_Grotesk'] text-[11px] uppercase tracking-widest mt-1">Map</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-[#FDC003] text-[#785900] rounded-full px-6 py-2 scale-110 shadow-lg transition-transform duration-200">
+<span class="material-symbols-outlined" data-icon="directions">directions</span>
+<span class="font-['Space_Grotesk'] text-[11px] uppercase tracking-widest mt-1">Waypoints</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#004F45]/60 dark:text-slate-400 px-4 py-2 hover:text-[#004F45] dark:hover:text-emerald-300 transition-all">
+<span class="material-symbols-outlined" data-icon="bookmark">bookmark</span>
+<span class="font-['Space_Grotesk'] text-[11px] uppercase tracking-widest mt-1">Saved</span>
+</div>
+<div class="flex flex-col items-center justify-center text-[#004F45]/60 dark:text-slate-400 px-4 py-2 hover:text-[#004F45] dark:hover:text-emerald-300 transition-all">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Space_Grotesk'] text-[11px] uppercase tracking-widest mt-1">Profile</span>
+</div>
+</nav>
+</div>
+</body></html>

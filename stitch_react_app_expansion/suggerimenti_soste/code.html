@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=Space_Grotesk:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#6c5000",
+                    "primary-fixed": "#a0f2e1",
+                    "on-surface": "#141c25",
+                    "on-secondary": "#ffffff",
+                    "surface-container": "#e6effa",
+                    "inverse-primary": "#84d5c5",
+                    "surface-container-highest": "#dae3ef",
+                    "primary-container": "#00695c",
+                    "error": "#ba1a1a",
+                    "background": "#f7f9ff",
+                    "on-secondary-fixed-variant": "#5b4300",
+                    "surface-container-high": "#e0e9f5",
+                    "tertiary-fixed": "#d8e2ff",
+                    "tertiary-container": "#0059bd",
+                    "surface-container-lowest": "#ffffff",
+                    "inverse-surface": "#29313a",
+                    "secondary-fixed-dim": "#fabd00",
+                    "inverse-on-surface": "#e9f2fd",
+                    "outline": "#6e7976",
+                    "on-tertiary-fixed": "#001a41",
+                    "surface-dim": "#d2dbe6",
+                    "on-primary-fixed": "#00201b",
+                    "secondary-fixed": "#ffdf9e",
+                    "on-tertiary-container": "#c5d6ff",
+                    "on-error-container": "#93000a",
+                    "tertiary": "#004290",
+                    "on-tertiary": "#ffffff",
+                    "secondary-container": "#fdc003",
+                    "on-tertiary-fixed-variant": "#004493",
+                    "surface-tint": "#046b5e",
+                    "surface-variant": "#dae3ef",
+                    "surface-container-low": "#ecf4ff",
+                    "on-primary-container": "#94e5d5",
+                    "on-secondary-fixed": "#261a00",
+                    "on-error": "#ffffff",
+                    "primary-fixed-dim": "#84d5c5",
+                    "on-primary-fixed-variant": "#005046",
+                    "surface-bright": "#f7f9ff",
+                    "outline-variant": "#bec9c5",
+                    "on-primary": "#ffffff",
+                    "surface": "#f7f9ff",
+                    "error-container": "#ffdad6",
+                    "tertiary-fixed-dim": "#adc6ff",
+                    "secondary": "#785900",
+                    "primary": "#004f45",
+                    "on-background": "#141c25",
+                    "on-surface-variant": "#3e4946"
+            },
+            "borderRadius": {
+                    "DEFAULT": "1rem",
+                    "lg": "2rem",
+                    "xl": "3rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Plus Jakarta Sans"],
+                    "body": ["Inter"],
+                    "label": ["Space Grotesk"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        display: inline-block;
+        line-height: 1;
+      }
+      .glass-card {
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface-container-low font-body text-on-surface min-h-screen pb-32">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#ECF4FF] dark:bg-slate-900 flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<button class="text-[#004F45] dark:text-teal-400 hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+<h1 class="font-['Plus_Jakarta_Sans'] font-bold tracking-tight text-xl font-black text-[#004F45] dark:text-teal-500">Wayfarer</h1>
+</div>
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container-highest">
+<img alt="user profile picture" class="w-full h-full object-cover" data-alt="close-up portrait of a traveler with a friendly expression, soft cinematic lighting, outdoor natural background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwafY1R39eB-lRFdHNZXyylJX_df7btGY6V83qp3wfdqNe1K3L2XCPr-j91cZcDEL2mPYOOBiYMHNzFIEo3G0h1J_coc19z6BM-pg-2bDaLKDw_raf3hXm3oHovfwQgXDX6J1SyH8qnUUP5U5ijGOMG-7knHZskYnREFV4BnJuURssLqspUMub1mXKzfnftIqwbnY3zsaVUgd3277iVjdfHKoIPaEkjASt3tyBRJ4Nbh9NgnTBpbtp6w9UiirwfSySY8keX9tyfe0"/>
+</div>
+</header>
+<main class="pt-24 px-6 max-w-2xl mx-auto">
+<!-- Header Section -->
+<header class="mb-10">
+<h2 class="font-headline text-4xl font-extrabold text-primary tracking-tight leading-tight">Rest Stop Suggestions</h2>
+<p class="font-body text-on-surface-variant text-lg mt-2 opacity-80">Tailored for your journey.</p>
+</header>
+<!-- Bento Grid / Cards Container -->
+<div class="space-y-8">
+<!-- Card 1: Secchia Ovest -->
+<div class="group relative bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_-4px_24px_rgba(0,79,69,0.04)] transition-all duration-300 hover:translate-y-[-4px]">
+<div class="aspect-[16/9] w-full relative overflow-hidden">
+<img alt="Secchia Ovest" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="modern highway rest area building with sleek glass facade and landscaped gardens at dusk, warm interior glow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjbcYDdyRiMt8aEEeIqvGQUi4NpwFb_Yx_HzXOeFYEfMqnTzCnBkr7aHcdBEY7JpiegFEg_gjjMEK5U1BA77qcdMvQ101qqmE38gDmxXRLoXMMbmbWMfiaDqao1gGBt8YkIPUm_RKJOgIA6vgwZHcN9tRHT_dwBumTKpIHVtX31Y-yduygF61B5ssOCQkjyBYa2Q4L8YRnIeBJ6AK1ugS2OYRs1KkG9cRZC1Zj6L7RNPQczWHUx-T9_iCuQ83Xc1Gt1XaRhNReZw4"/>
+<div class="absolute top-4 left-4">
+<span class="bg-secondary-container text-on-secondary-container px-4 py-1.5 rounded-full font-label text-xs font-bold tracking-widest uppercase">15 KM AWAY</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-headline text-2xl font-bold text-primary">Secchia Ovest</h3>
+<div class="flex items-center mt-1 gap-1 text-secondary">
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label text-sm font-bold">4.8</span>
+<span class="text-on-surface-variant text-xs font-normal ml-1">(1.2k reviews)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-8">
+<div class="flex items-center gap-1.5 bg-surface-container-high px-3 py-1.5 rounded-md">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="ev_station">ev_station</span>
+<span class="font-label text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Fast EV</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-high px-3 py-1.5 rounded-md">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="restaurant">restaurant</span>
+<span class="font-label text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Gourmet Food</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-high px-3 py-1.5 rounded-md">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="wc">wc</span>
+<span class="font-label text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Pristine WC</span>
+</div>
+</div>
+<button class="w-full py-4 bg-primary text-white rounded-full font-headline font-bold text-sm tracking-wide hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="add_road">add_road</span>
+                        Add to Route
+                    </button>
+</div>
+</div>
+<!-- Card 2: Arda Est -->
+<div class="group relative bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_-4px_24px_rgba(0,79,69,0.04)] transition-all duration-300 hover:translate-y-[-4px]">
+<div class="aspect-[16/9] w-full relative overflow-hidden">
+<img alt="Arda Est" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" data-alt="dramatic architectural highway rest stop bridge building stretching over a multi-lane highway, bright daylight" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfEx2Gz7b-P_UFyTFXr17KrQNQw9-KG60JgTCla9Ji78J2UDOeD5iJSsLXBYB-seqTTpf3jrJXntUi09BZg2hNog0lE8gg16W4pge2fMTPf0JY6j2g8H-lvXEU32AEnV_5rSAvxxPk2u__spu_uda0usLJw4oQa35atcBUbKnGiiSfLaraSVEHEVLPFSPA-5-miR_ejedqpNFtdG7AFaGCsV9uWKP3GgWk5sVghzj_8qRVjdsW5hTdxV3Mc90IAqxFRHk1ztw1W0E"/>
+<div class="absolute top-4 left-4">
+<span class="bg-primary text-white px-4 py-1.5 rounded-full font-label text-xs font-bold tracking-widest uppercase">NEXT EXIT</span>
+</div>
+</div>
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div>
+<h3 class="font-headline text-2xl font-bold text-primary">Arda Est</h3>
+<div class="flex items-center mt-1 gap-1 text-secondary">
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label text-sm font-bold">4.5</span>
+<span class="text-on-surface-variant text-xs font-normal ml-1">(850 reviews)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-8">
+<div class="flex items-center gap-1.5 bg-surface-container-high px-3 py-1.5 rounded-md">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="local_cafe">local_cafe</span>
+<span class="font-label text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Premium Coffee</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-high px-3 py-1.5 rounded-md">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="park">park</span>
+<span class="font-label text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Pet Area</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-high px-3 py-1.5 rounded-md">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="local_parking">local_parking</span>
+<span class="font-label text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Wide Parking</span>
+</div>
+</div>
+<button class="w-full py-4 bg-primary text-white rounded-full font-headline font-bold text-sm tracking-wide hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="add_road">add_road</span>
+                        Add to Route
+                    </button>
+</div>
+</div>
+<!-- Card 3: Cantagallo -->
+<div class="group relative bg-surface-container-lowest rounded-xl overflow-hidden shadow-[0_-4px_24px_rgba(0,79,69,0.04)] transition-all duration-300 hover:translate-y-[-4px]">
+<div class="p-6">
+<div class="flex justify-between items-start mb-4">
+<div class="w-2/3">
+<span class="font-label text-[10px] font-bold text-secondary uppercase tracking-[0.2em] mb-1 block">42 KM AWAY</span>
+<h3 class="font-headline text-2xl font-bold text-primary">Cantagallo Nord</h3>
+<div class="flex items-center mt-1 gap-1 text-secondary">
+<span class="material-symbols-outlined text-sm" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-label text-sm font-bold">4.2</span>
+</div>
+</div>
+<div class="w-24 h-24 rounded-lg overflow-hidden bg-surface-container-high">
+<img alt="Cantagallo" class="w-full h-full object-cover" data-alt="interior of a modern high-end cafeteria with clean lines, minimalist furniture and soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBo5j2nlD2lAOaa2C-LBN7PUN7XNovcpW1T9g_0BwxlksqYss1uwyzBrIz10bKftrDZuqYX31rooyCZsUflZx4mihP1GFjPv9dYJ2o84QdoBzpDQNXRgP3Fwcak4d1r242Oy7j1grP3Xvxts569VwzTtkP00BZfzKiqvcRXON0nPfrxjz38JZaV_Bcal7lk63y6KJujffbB4exYoDzOMpfis9IO0Rq_R6ECGM6t48AL_892mkX6n6rslLc1qOYPu_SHPPBUBrwe-tg"/>
+</div>
+</div>
+<div class="flex flex-wrap gap-2 mb-8">
+<div class="flex items-center gap-1.5 bg-surface-container-high px-3 py-1.5 rounded-md">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="shopping_bag">shopping_bag</span>
+<span class="font-label text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Market</span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-high px-3 py-1.5 rounded-md">
+<span class="material-symbols-outlined text-[18px] text-primary" data-icon="child_care">child_care</span>
+<span class="font-label text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Kids Zone</span>
+</div>
+</div>
+<button class="w-full py-4 bg-primary text-white rounded-full font-headline font-bold text-sm tracking-wide hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-lg" data-icon="add_road">add_road</span>
+                        Add to Route
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-[2rem] bg-white/80 dark:bg-slate-950/80 backdrop-blur-md border-t border-[#BEC9C5]/15 shadow-[0_-4px_24px_rgba(0,79,69,0.04)] flex justify-around items-center px-4 py-3 pb-6 w-full">
+<a class="flex flex-col items-center justify-center text-[#004F45] dark:text-teal-100 opacity-60 hover:bg-[#ECF4FF] dark:hover:bg-slate-800 rounded-full transition-all duration-300 ease-out p-2" href="#">
+<span class="material-symbols-outlined" data-icon="map">map</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-widest mt-1">Map</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-[#FDC003] text-[#785900] rounded-full px-5 py-2 transition-all duration-300 ease-out" href="#">
+<span class="material-symbols-outlined" data-icon="explore">explore</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-widest mt-1">Waypoints</span>
+</a>
+<a class="flex flex-col items-center justify-center text-[#004F45] dark:text-teal-100 opacity-60 hover:bg-[#ECF4FF] dark:hover:bg-slate-800 rounded-full transition-all duration-300 ease-out p-2" href="#">
+<span class="material-symbols-outlined" data-icon="person">person</span>
+<span class="font-['Space_Grotesk'] text-[10px] uppercase tracking-widest mt-1">Profile</span>
+</a>
+</nav>
+<!-- Contextual FAB - Suggest Route -->
+<button class="fixed right-6 bottom-28 w-14 h-14 bg-secondary-container text-on-secondary-container rounded-full shadow-2xl flex items-center justify-center active:scale-95 transition-all duration-200 z-40">
+<span class="material-symbols-outlined text-2xl" data-icon="route" style="font-variation-settings: 'FILL' 1;">route</span>
+</button>
+</body></html>
