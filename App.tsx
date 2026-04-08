@@ -11,6 +11,7 @@ import TabNavigator from './navigation/TabNavigator';
 import ReviewsScreen from './screens/ReviewsScreen';
 import AddReviewScreen from './screens/AddReviewScreen';
 import WriteReviewScreen from './screens/WriteReviewScreen';
+import LeaderboardScreen from './screens/LeaderboardScreen';
 import ServiceAreaScreen from './screens/ServiceAreaScreen';
 import LoginScreen from './screens/LoginScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
@@ -84,6 +85,11 @@ function RootNavigator() {
           name="WriteReview"
           component={WriteReviewScreen}
           options={{ headerShown: false, presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="Leaderboard"
+          component={LeaderboardScreen}
+          options={{ headerShown: false }}
         />
       </Stack.Navigator>
     </NavigationContainer>
