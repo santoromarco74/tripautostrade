@@ -189,10 +189,11 @@ export default function WriteReviewScreen({ route, navigation }: WriteReviewScre
               </TouchableOpacity>
             ))}
           </View>
-          {stelle > 0 && (
+          {stelle > 0 ? (
             <Text style={styles.starLabel}>{STAR_LABELS[stelle]}</Text>
+          ) : (
+            <Text style={styles.tapToRate}>TAP PER VALUTARE</Text>
           )}
-          <Text style={styles.tapToRate}>TAP PER VALUTARE</Text>
         </View>
 
         {/* ── COMMENT AREA ───────────────────────────────────────────────── */}
@@ -206,7 +207,11 @@ export default function WriteReviewScreen({ route, navigation }: WriteReviewScre
             onChangeText={setCommento}
             textAlignVertical="top"
           />
-          <Text style={styles.charCounter}>{commento.length} caratteri</Text>
+          <Text style={[styles.charCounter, commento.length > 0 && commento.length < 10 && styles.charCounterWarn]}>
+            {commento.length < 10 && commento.length > 0
+              ? `min. 10 caratteri (${10 - commento.length} mancanti)`
+              : `${commento.length} caratteri`}
+          </Text>
         </View>
 
         {/* ── MEDIA: bento grid ──────────────────────────────────────────── */}
@@ -431,6 +436,9 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     paddingHorizontal: 16,
     paddingBottom: 12,
+  },
+  charCounterWarn: {
+    color: '#E53935',
   },
 
   // ── Media grid ────────────────────────────────────────────────────────────────
