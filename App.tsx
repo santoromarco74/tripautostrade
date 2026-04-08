@@ -13,6 +13,7 @@ import AddReviewScreen from './screens/AddReviewScreen';
 import WriteReviewScreen from './screens/WriteReviewScreen';
 import LeaderboardScreen from './screens/LeaderboardScreen';
 import ActivityFeedScreen from './screens/ActivityFeedScreen';
+import StatsScreen from './screens/StatsScreen';
 import ServiceAreaScreen from './screens/ServiceAreaScreen';
 import LoginScreen from './screens/LoginScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
@@ -95,6 +96,11 @@ function RootNavigator() {
         <Stack.Screen
           name="ActivityFeed"
           component={ActivityFeedScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Stats"
+          component={StatsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
