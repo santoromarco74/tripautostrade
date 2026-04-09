@@ -216,6 +216,23 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         clusterFontFamily="System"
         radius={40}
         onPress={() => setSelectedArea(null)}
+        renderCluster={(cluster: any) => {
+          const { id, geometry, properties, onPress } = cluster;
+          return (
+            <Marker
+              key={`cluster-${id}`}
+              coordinate={{ latitude: geometry.coordinates[1], longitude: geometry.coordinates[0] }}
+              onPress={onPress}
+              tracksViewChanges={false}
+            >
+              <View style={styles.markerWrapper}>
+                <View style={styles.labelTagCluster}>
+                  <Text style={styles.labelTagClusterText}>{properties.point_count}</Text>
+                </View>
+              </View>
+            </Marker>
+          );
+        }}
       >
         {filteredAreas.map((area) => (
           <Marker
@@ -224,8 +241,22 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             title={area.name}
             description={area.brand}
             onPress={() => selezionaArea(area)}
-            pinColor={selectedArea?.id === area.id ? '#FDC003' : '#004F45'}
-          />
+            tracksViewChanges={false}
+          >
+            <View style={styles.markerWrapper}>
+              <View style={[styles.labelTag, selectedArea?.id === area.id && styles.labelTagSelected]}>
+                <MaterialIcons
+                  name="local-gas-station"
+                  size={12}
+                  color={selectedArea?.id === area.id ? '#004F45' : '#fff'}
+                  style={{ marginRight: 4 }}
+                />
+                <Text style={[styles.labelTagText, selectedArea?.id === area.id && styles.labelTagTextSelected]}>
+                  {area.brand}
+                </Text>
+              </View>
+            </View>
+          </Marker>
         ))}
         {isLoading && <HomeLoadingOverlay />}
       </MapView>
@@ -404,6 +435,45 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
+  },
+  markerWrapper: {
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
+  labelTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#004F45',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+  },
+  labelTagSelected: {
+    backgroundColor: '#FDC003',
+  },
+  labelTagText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  labelTagTextSelected: {
+    color: '#004F45',
+  },
+  labelTagCluster: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#004F45',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+  },
+  labelTagClusterText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   fallback: {
     flex: 1,
