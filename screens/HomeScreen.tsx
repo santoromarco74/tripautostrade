@@ -20,7 +20,7 @@ import * as Location from 'expo-location';
 import MapView from 'react-native-map-clustering';
 import { Marker } from 'react-native-maps';
 import type RNMapView from 'react-native-maps';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ServiceArea } from '../data/serviceAreas';
 import { HomeScreenProps } from '../types/navigation';
@@ -220,6 +220,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         clusterTextColor="#fff"
         clusterFontFamily="System"
         radius={40}
+        onPress={() => setSelectedArea(null)}
       >
         {filteredAreas.map((area) => (
           <Marker
@@ -350,7 +351,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       {selectedArea && (
         <View style={styles.pannello}>
           <TouchableOpacity style={styles.btnChiudi} onPress={() => setSelectedArea(null)}>
-            <Text style={styles.btnChiudiTesto}>✕</Text>
+            <MaterialIcons name="close" size={24} color="#6E7976" />
           </TouchableOpacity>
 
           <View style={styles.pannelloTitleRow}>
@@ -565,10 +566,6 @@ const styles = StyleSheet.create({
     height: 32,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  btnChiudiTesto: {
-    fontSize: 18,
-    color: '#888',
   },
   pannelloTitleRow: {
     flexDirection: 'row',
