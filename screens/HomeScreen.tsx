@@ -17,9 +17,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { HomeLoadingOverlay } from '../components/SkeletonLoader';
 import * as Location from 'expo-location';
-import MapView from 'react-native-map-clustering';
-import { Marker } from 'react-native-maps';
-import type RNMapView from 'react-native-maps';
+import MapView, { Marker, Region } from 'react-native-maps';
+import SuperCluster from 'supercluster';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ServiceArea } from '../data/serviceAreas';
@@ -56,7 +55,9 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [selectedBrand, setSelectedBrand] = useState('Tutti');
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
-  const mapRef = useRef<RNMapView>(null);
+  const mapRef = useRef<MapView>(null);
+  const superclusterIndex = useRef(new SuperCluster<{ areaId: number }>({ radius: 60, maxZoom: 16 }));
+  const [mapRegion, setMapRegion] = useState<Region | null>(null);
   const { isFavorite, toggleFavorite } = useFavorites();
 
   // Intercetta il tasto Back su Android solo su questa schermata
@@ -86,6 +87,12 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         setPermissionGranted(true);
         const loc = await Location.getCurrentPositionAsync({});
         setLocation(loc);
+        setMapRegion({
+          latitude: loc.coords.latitude,
+          longitude: loc.coords.longitude,
+          latitudeDelta: 2.5,
+          longitudeDelta: 2.5,
+        });
       } else {
         setPermissionGranted(false);
       }
@@ -141,6 +148,31 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       return matchesName && matchesBrand && matchesService;
     });
   }, [areas, searchQuery, selectedBrand, activeFilter]);
+
+  const areasById = useMemo(
+    () => new Map(filteredAreas.map(a => [a.id, a])),
+    [filteredAreas]
+  );
+
+  const clusters = useMemo(() => {
+    superclusterIndex.current.load(
+      filteredAreas.map(area => ({
+        type: 'Feature' as const,
+        properties: { areaId: area.id },
+        geometry: { type: 'Point' as const, coordinates: [area.longitude, area.latitude] as [number, number] },
+      }))
+    );
+    if (!mapRegion) return [];
+    const { latitude, longitude, latitudeDelta, longitudeDelta } = mapRegion;
+    const bbox: [number, number, number, number] = [
+      longitude - longitudeDelta / 2,
+      latitude - latitudeDelta / 2,
+      longitude + longitudeDelta / 2,
+      latitude + latitudeDelta / 2,
+    ];
+    const zoom = Math.max(0, Math.min(Math.round(Math.log2(360 / longitudeDelta)), 20));
+    return superclusterIndex.current.getClusters(bbox, zoom);
+  }, [mapRegion, filteredAreas]);
 
   const handleNavigation = async (area: ServiceArea) => {
     const { latitude: lat, longitude: lng } = area;
@@ -211,17 +243,40 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           latitudeDelta: 2.5,
           longitudeDelta: 2.5,
         }}
-        clusterColor={Colors.primary}
-        clusterTextColor="#fff"
-        clusterFontFamily="System"
-        radius={40}
+        onRegionChangeComplete={(region) => setMapRegion(region)}
         onPress={() => setSelectedArea(null)}
       >
-        {filteredAreas.map((area) => {
+        {clusters.map((point) => {
+          const [lng, lat] = point.geometry.coordinates;
+          const props = point.properties as any;
+
+          if (props.cluster) {
+            // Marker cluster
+            return (
+              <Marker
+                key={`cluster-${point.id}`}
+                coordinate={{ latitude: lat, longitude: lng }}
+                tracksViewChanges={false}
+                {...(Platform.OS === 'android' ? { pinColor: Colors.primary } : {})}
+              >
+                {Platform.OS === 'ios' && (
+                  <View style={[styles.markerWrapper, { width: 60, height: 60 }]}>
+                    <View style={[styles.pinCircle, { width: 44, height: 44, borderRadius: 22 }]}>
+                      <Text style={styles.pinClusterCount}>{props.point_count}</Text>
+                    </View>
+                  </View>
+                )}
+              </Marker>
+            );
+          }
+
+          // Marker singolo
+          const area = areasById.get(props.areaId);
+          if (!area) return null;
           const selected = selectedArea?.id === area.id;
           return (
             <Marker
-              key={`${area.id}-${activeFilter || 'all'}-${selected ? 'sel' : 'unsel'}`}
+              key={`area-${area.id}`}
               coordinate={{ latitude: area.latitude, longitude: area.longitude }}
               title={area.name}
               description={area.brand}
