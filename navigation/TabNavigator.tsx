@@ -25,21 +25,20 @@ export default function TabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: '#94A3B8',
+        tabBarActiveTintColor: '#004F45',
+        tabBarInactiveTintColor: '#BEC9C5',
         tabBarShowLabel: false,
         tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopWidth: 1,
-          borderTopColor: Colors.border,
+          backgroundColor: '#FFFFFF',
+          borderTopWidth: 0,
           height: tabBarHeight,
           paddingTop: 8,
           paddingBottom: insets.bottom + 4,
-          elevation: 8,
-          shadowColor: '#000',
+          elevation: 10,
+          shadowColor: '#004F45',
           shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 10,
+          shadowOpacity: 0.1,
+          shadowRadius: 15,
         },
         tabBarIcon: ({ color, size, focused }) => {
           const icons = TAB_ICONS[route.name as keyof TabParamList];
