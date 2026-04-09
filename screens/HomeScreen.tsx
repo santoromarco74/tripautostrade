@@ -231,24 +231,24 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             tracksViewChanges={false}
           >
             {/*
-             * ANDROID CLIPPING FIX:
-             * Il wrapper ha sempre dimensioni fisse (64x64) maggiori del pin
-             * selezionato (48x48). Android misura la clip region al primo render:
-             * se il wrapper è già 64x64, non taglia mai il contenuto interno.
-             * L'elevation è RIMOSSA dai pin — su Android l'elevation estende i
-             * bounds visivi oltre quelli misurati, causando il taglio in basso/destra.
+             * ANDROID CLIPPING FIX (v3):
+             * Dimensione FISSA per tutti gli stati del pin. Su Android la clip
+             * region viene fissata al primo render del bitmap nativo; se la View
+             * cambia dimensione (es. 36→48 al tap) il nuovo contenuto eccede la
+             * clip e viene tagliato. Soluzione: stessa width/height sempre,
+             * solo colore e borderWidth cambiano tra normale e selezionato.
+             * NO elevation/shadow: su Android estendono i bounds visivi oltre
+             * quelli misurati, causando il taglio in basso/destra.
              */}
-            <View style={styles.pinWrapper}>
-              <View style={[
-                styles.pin,
-                selectedArea?.id === area.id && styles.pinSelezionato,
-              ]}>
-                <Ionicons
-                  name={BRAND_ICON[area.brand] ?? 'restaurant'}
-                  size={selectedArea?.id === area.id ? 20 : 16}
-                  color="#fff"
-                />
-              </View>
+            <View style={[
+              styles.pin,
+              selectedArea?.id === area.id && styles.pinSelezionato,
+            ]}>
+              <Ionicons
+                name={BRAND_ICON[area.brand] ?? 'restaurant'}
+                size={18}
+                color="#fff"
+              />
             </View>
           </Marker>
         ))}
@@ -446,34 +446,24 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  // Il wrapper è SEMPRE 64x64 — Android misura la clip region qui.
-  // Deve essere più grande del pin selezionato (48px) + margine.
-  // NON usare elevation/shadow sul wrapper: estende i bounds oltre la misura.
-  pinWrapper: {
-    width: 64,
-    height: 64,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  // Dimensione FISSA 40x40 per tutti gli stati — nessun cambio di size tra
+  // normale e selezionato, quindi Android non può mai avere una clip region
+  // troppo piccola. NO elevation/shadow: su Android estendono i bounds visivi
+  // oltre quelli misurati causando il taglio bottom-right.
   pin: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#fff',
-    // NO elevation, NO shadow* — causano il clipping su Android
   },
+  // Solo colore e bordo cambiano — dimensioni invariate
   pinSelezionato: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
     backgroundColor: Colors.accent,
     borderWidth: 3,
-    borderColor: '#fff',
-    // NO elevation — vedi commento sopra
   },
   fallback: {
     flex: 1,
