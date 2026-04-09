@@ -226,38 +226,37 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               tracksViewChanges={false}
             >
               <View style={styles.markerWrapper}>
-                <View style={styles.labelTagCluster}>
-                  <Text style={styles.labelTagClusterText}>{properties.point_count}</Text>
+                <View style={styles.pinCircle}>
+                  <Text style={styles.pinClusterCount}>{properties.point_count}</Text>
                 </View>
               </View>
             </Marker>
           );
         }}
       >
-        {filteredAreas.map((area) => (
-          <Marker
-            key={`${area.id}-${activeFilter || 'all'}-${selectedArea?.id === area.id ? 'sel' : 'unsel'}`}
-            coordinate={{ latitude: area.latitude, longitude: area.longitude }}
-            title={area.name}
-            description={area.brand}
-            onPress={() => selezionaArea(area)}
-            tracksViewChanges={false}
-          >
-            <View style={styles.markerWrapper}>
-              <View style={[styles.labelTag, selectedArea?.id === area.id && styles.labelTagSelected]}>
-                <MaterialIcons
-                  name="local-gas-station"
-                  size={12}
-                  color={selectedArea?.id === area.id ? '#004F45' : '#fff'}
-                  style={{ marginRight: 4 }}
-                />
-                <Text style={[styles.labelTagText, selectedArea?.id === area.id && styles.labelTagTextSelected]}>
-                  {area.brand}
-                </Text>
+        {filteredAreas.map((area) => {
+          const selected = selectedArea?.id === area.id;
+          return (
+            <Marker
+              key={`${area.id}-${activeFilter || 'all'}-${selected ? 'sel' : 'unsel'}`}
+              coordinate={{ latitude: area.latitude, longitude: area.longitude }}
+              title={area.name}
+              description={area.brand}
+              onPress={() => selezionaArea(area)}
+              tracksViewChanges={false}
+            >
+              <View style={styles.markerWrapper}>
+                <View style={[styles.pinCircle, selected && styles.pinCircleSelected]}>
+                  <MaterialIcons
+                    name="local-gas-station"
+                    size={18}
+                    color={selected ? '#004F45' : '#fff'}
+                  />
+                </View>
               </View>
-            </View>
-          </Marker>
-        ))}
+            </Marker>
+          );
+        })}
         {isLoading && <HomeLoadingOverlay />}
       </MapView>
 
@@ -437,40 +436,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   markerWrapper: {
+    width: 50,
     height: 50,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
-  labelTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  pinCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     backgroundColor: '#004F45',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-  },
-  labelTagSelected: {
-    backgroundColor: '#FDC003',
-  },
-  labelTagText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  labelTagTextSelected: {
-    color: '#004F45',
-  },
-  labelTagCluster: {
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#004F45',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#fff',
   },
-  labelTagClusterText: {
+  pinCircleSelected: {
+    backgroundColor: '#FDC003',
+  },
+  pinClusterCount: {
     color: '#fff',
     fontSize: 12,
     fontWeight: 'bold',
