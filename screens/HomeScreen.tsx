@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, memo } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   BackHandler,
@@ -44,61 +44,6 @@ const SERVICE_FILTERS: { key: keyof ServiceArea; label: string }[] = [
 ];
 
 
-
-const ClusterPin = memo(({ latitude, longitude, count, onPress }: {
-  latitude: number;
-  longitude: number;
-  count: number;
-  onPress: () => void;
-}) => {
-  const [tracksViewChanges, setTracksViewChanges] = useState(true);
-  return (
-    <Marker
-      coordinate={{ latitude, longitude }}
-      onPress={onPress}
-      tracksViewChanges={tracksViewChanges}
-    >
-      <View style={styles.markerWrapper}>
-        <View
-          style={styles.pinCircle}
-          onLayout={() => setTracksViewChanges(false)}
-        >
-          <Text style={styles.pinClusterCount}>{count}</Text>
-        </View>
-      </View>
-    </Marker>
-  );
-});
-
-const MarkerPin = memo(({ area, selected, onPress }: {
-  area: ServiceArea;
-  selected: boolean;
-  onPress: () => void;
-}) => {
-  const [tracksViewChanges, setTracksViewChanges] = useState(true);
-  return (
-    <Marker
-      coordinate={{ latitude: area.latitude, longitude: area.longitude }}
-      title={area.name}
-      description={area.brand}
-      onPress={onPress}
-      tracksViewChanges={tracksViewChanges}
-    >
-      <View style={styles.markerWrapper}>
-        <View
-          style={[styles.pinCircle, selected && styles.pinCircleSelected]}
-          onLayout={() => setTracksViewChanges(false)}
-        >
-          <MaterialIcons
-            name="local-gas-station"
-            size={18}
-            color={selected ? '#004F45' : '#fff'}
-          />
-        </View>
-      </View>
-    </Marker>
-  );
-});
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
@@ -271,28 +216,34 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         clusterFontFamily="System"
         radius={40}
         onPress={() => setSelectedArea(null)}
-        renderCluster={(cluster: any) => {
-          const { id, geometry, properties, onPress } = cluster;
-          return (
-            <ClusterPin
-              key={`cluster-${id}`}
-              latitude={geometry.coordinates[1]}
-              longitude={geometry.coordinates[0]}
-              count={properties.point_count}
-              onPress={onPress}
-            />
-          );
-        }}
       >
         {filteredAreas.map((area) => {
           const selected = selectedArea?.id === area.id;
           return (
-            <MarkerPin
+            <Marker
               key={`${area.id}-${activeFilter || 'all'}-${selected ? 'sel' : 'unsel'}`}
-              area={area}
-              selected={selected}
+              coordinate={{ latitude: area.latitude, longitude: area.longitude }}
+              title={area.name}
+              description={area.brand}
               onPress={() => selezionaArea(area)}
-            />
+              tracksViewChanges={false}
+              {...(Platform.OS === 'android'
+                ? { pinColor: selected ? '#FDC003' : '#004F45' }
+                : {}
+              )}
+            >
+              {Platform.OS === 'ios' && (
+                <View style={styles.markerWrapper}>
+                  <View style={[styles.pinCircle, selected && styles.pinCircleSelected]}>
+                    <MaterialIcons
+                      name="local-gas-station"
+                      size={18}
+                      color={selected ? '#004F45' : '#fff'}
+                    />
+                  </View>
+                </View>
+              )}
+            </Marker>
           );
         })}
         {isLoading && <HomeLoadingOverlay />}
