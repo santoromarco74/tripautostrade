@@ -114,13 +114,14 @@ export default function ProfileScreen() {
         <Text style={styles.nomeHero}>{nomeCompleto}</Text>
         <Text style={styles.emailHero}>{user?.email ?? '—'}</Text>
 
-        {/* Badge livello */}
-        <View style={styles.levelBadge}>
+        {/* Badge livello — tappable → BadgeDetail */}
+        <TouchableOpacity style={styles.levelBadge} onPress={() => navigation.navigate('BadgeDetail')}>
           <Text style={styles.levelEmoji}>{calcolaTitolo(points).emoji}</Text>
           <Text style={styles.levelTitolo}>{calcolaTitolo(points).titolo}</Text>
           <View style={styles.levelDot} />
           <Text style={styles.levelPunti}>{points} pt</Text>
-        </View>
+          <Ionicons name="chevron-forward" size={14} color="rgba(255,255,255,0.5)" />
+        </TouchableOpacity>
       </View>
 
       {/* Stats card fluttuante */}
@@ -156,7 +157,7 @@ export default function ProfileScreen() {
         </View>
       </View>
 
-      {/* ── Navigazione rapida ── */}
+      {/* ── Navigazione rapida (riga 1) ── */}
       <View style={styles.quickNavRow}>
         <TouchableOpacity style={styles.quickNavBtn} onPress={() => navigation.navigate('Leaderboard')}>
           <Ionicons name="trophy-outline" size={22} color={Colors.primary} />
@@ -166,6 +167,24 @@ export default function ProfileScreen() {
         <TouchableOpacity style={styles.quickNavBtn} onPress={() => navigation.navigate('Stats')}>
           <Ionicons name="bar-chart-outline" size={22} color={Colors.primary} />
           <Text style={styles.quickNavLabel}>Statistiche</Text>
+        </TouchableOpacity>
+      </View>
+
+      {/* ── Navigazione rapida (riga 2) ── */}
+      <View style={styles.quickNavRow}>
+        <TouchableOpacity style={styles.quickNavBtn} onPress={() => navigation.navigate('PointsHistory')}>
+          <Ionicons name="star-outline" size={22} color={Colors.primary} />
+          <Text style={styles.quickNavLabel}>Punti</Text>
+        </TouchableOpacity>
+        <View style={styles.quickNavDivider} />
+        <TouchableOpacity style={styles.quickNavBtn} onPress={() => navigation.navigate('BadgeDetail')}>
+          <Ionicons name="ribbon-outline" size={22} color={Colors.primary} />
+          <Text style={styles.quickNavLabel}>Badge</Text>
+        </TouchableOpacity>
+        <View style={styles.quickNavDivider} />
+        <TouchableOpacity style={styles.quickNavBtn} onPress={() => navigation.navigate('CompleteProfile')}>
+          <Ionicons name="person-add-outline" size={22} color={Colors.primary} />
+          <Text style={styles.quickNavLabel}>Profilo</Text>
         </TouchableOpacity>
       </View>
 

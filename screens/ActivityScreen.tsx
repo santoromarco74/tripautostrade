@@ -208,6 +208,15 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
           }}
         />
       )}
+
+      {/* ── FAB: Crea Post ── */}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate('CreatePost')}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="add" size={28} color="#785900" />
+      </TouchableOpacity>
     </View>
   );
 }
@@ -353,5 +362,21 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '600',
     color: Colors.primary,
+  },
+  fab: {
+    position: 'absolute',
+    right: 20,
+    bottom: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#FDC003',
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 8,
+    shadowColor: '#FDC003',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 12,
   },
 });

@@ -347,6 +347,18 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         </ScrollView>
       </View>
 
+      {/* ── FAB: Pianifica Percorso ── */}
+      {!selectedArea && (
+        <TouchableOpacity
+          style={styles.fabPercorso}
+          onPress={() => navigation.navigate('PlanRoute')}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="map-outline" size={20} color="#fff" />
+          <Text style={styles.fabPercorsoText}>Percorso</Text>
+        </TouchableOpacity>
+      )}
+
       {selectedArea && (
         <View style={styles.pannello}>
           <TouchableOpacity style={styles.btnChiudi} onPress={() => setSelectedArea(null)}>
@@ -409,6 +421,13 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
               <Text style={styles.btnTestoSecondario}>Recensioni</Text>
             </TouchableOpacity>
           </View>
+          <TouchableOpacity
+            style={styles.btnSosteConsigliate}
+            onPress={() => navigation.navigate('SuggestedStops')}
+          >
+            <Ionicons name="bulb-outline" size={16} color={Colors.primary} />
+            <Text style={styles.btnSosteConsigliateText}>Soste Consigliate</Text>
+          </TouchableOpacity>
         </View>
       )}
     </View>
@@ -670,5 +689,42 @@ const styles = StyleSheet.create({
   dropdownVuotoTesto: {
     fontSize: 14,
     color: Colors.textSecondary,
+  },
+  fabPercorso: {
+    position: 'absolute',
+    right: 16,
+    bottom: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Colors.primary,
+    borderRadius: 28,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
+    elevation: 8,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+  fabPercorsoText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  btnSosteConsigliate: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 10,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
+  },
+  btnSosteConsigliateText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.primary,
   },
 });
