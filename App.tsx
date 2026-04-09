@@ -17,6 +17,12 @@ import StatsScreen from './screens/StatsScreen';
 import ServiceAreaScreen from './screens/ServiceAreaScreen';
 import LoginScreen from './screens/LoginScreen';
 import OnboardingScreen from './screens/OnboardingScreen';
+import CompleteProfileScreen from './screens/CompleteProfileScreen';
+import CreatePostScreen from './screens/CreatePostScreen';
+import PointsHistoryScreen from './screens/PointsHistoryScreen';
+import BadgeDetailScreen from './screens/BadgeDetailScreen';
+import PlanRouteScreen from './screens/PlanRouteScreen';
+import SuggestedStopsScreen from './screens/SuggestedStopsScreen';
 import { RootStackParamList } from './types/navigation';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -71,12 +77,12 @@ function RootNavigator() {
         <Stack.Screen
           name="ServiceArea"
           component={ServiceAreaScreen}
-          options={{ title: 'Area di Servizio' }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Reviews"
           component={ReviewsScreen}
-          options={{ title: 'Recensioni' }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="AddReview"
@@ -101,6 +107,36 @@ function RootNavigator() {
         <Stack.Screen
           name="Stats"
           component={StatsScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CompleteProfile"
+          component={CompleteProfileScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="CreatePost"
+          component={CreatePostScreen}
+          options={{ headerShown: false, presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="PointsHistory"
+          component={PointsHistoryScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="BadgeDetail"
+          component={BadgeDetailScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="PlanRoute"
+          component={PlanRouteScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="SuggestedStops"
+          component={SuggestedStopsScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

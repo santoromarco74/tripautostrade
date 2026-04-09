@@ -26,6 +26,13 @@ export type RootStackParamList = {
   Leaderboard: undefined;
   ActivityFeed: undefined;
   Stats: undefined;
+  // ── New screens ────────────────────────────────────────────────────────────
+  CompleteProfile: undefined;
+  CreatePost: undefined;
+  PointsHistory: undefined;
+  BadgeDetail: undefined;
+  PlanRoute: undefined;
+  SuggestedStops: undefined;
 };
 
 export type TabParamList = {
