@@ -216,10 +216,27 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           latitudeDelta: 2.5,
           longitudeDelta: 2.5,
         }}
-        clusterColor={Colors.primary}
-        clusterTextColor="#fff"
-        clusterFontFamily="System"
         radius={40}
+        renderCluster={(cluster) => {
+          const { id, geometry, onPress, properties } = cluster;
+          const count = properties.point_count;
+          return (
+            <Marker
+              key={`cluster-${id}`}
+              coordinate={{
+                longitude: geometry.coordinates[0],
+                latitude: geometry.coordinates[1],
+              }}
+              onPress={onPress}
+              tracksViewChanges={false}
+            >
+              {/* Stessa regola dei pin individuali: dimensione FISSA, no elevation */}
+              <View style={styles.cluster}>
+                <Text style={styles.clusterText}>{count}</Text>
+              </View>
+            </Marker>
+          );
+        }}
       >
         {filteredAreas.map((area) => (
           <Marker
@@ -464,6 +481,22 @@ const styles = StyleSheet.create({
   pinSelezionato: {
     backgroundColor: Colors.accent,
     borderWidth: 3,
+  },
+  // Cluster: stessa regola — dimensione FISSA, no elevation/shadow
+  cluster: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#fff',
+  },
+  clusterText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 14,
   },
   fallback: {
     flex: 1,
