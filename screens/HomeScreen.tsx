@@ -223,27 +223,32 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       >
         {filteredAreas.map((area) => (
           <Marker
-            // IL TRUCCO DEFINITIVO: Aggiungi lo stato "selezionato" alla chiave!
-            // Quando selectedArea cambia, la chiave cambia, forzando Android a ricalcolare
-            // le dimensioni del pin selezionato da zero, senza tagliarlo.
             key={`${area.id}-${activeFilter || 'all'}-${selectedArea?.id === area.id ? 'sel' : 'unsel'}`}
             coordinate={{ latitude: area.latitude, longitude: area.longitude }}
             title={area.name}
             description={area.brand}
             onPress={() => selezionaArea(area)}
-            // tracksViewChanges= RIMOSSO. Lascia che Android tracci il cambiamento
-            // mentre ricalcola la dimensione del pin selezionato.
+            tracksViewChanges={false}
           >
-            {/* Struttura semplificata, un solo View circolare direttamente */}
-            <View style={[
-              styles.pin,
-              selectedArea?.id === area.id && styles.pinSelezionato,
-            ]}>
-              <Ionicons
-                name={BRAND_ICON[area.brand] ?? 'restaurant'}
-                size={selectedArea?.id === area.id ? 20 : 16}
-                color="#fff"
-              />
+            {/*
+             * ANDROID CLIPPING FIX:
+             * Il wrapper ha sempre dimensioni fisse (64x64) maggiori del pin
+             * selezionato (48x48). Android misura la clip region al primo render:
+             * se il wrapper è già 64x64, non taglia mai il contenuto interno.
+             * L'elevation è RIMOSSA dai pin — su Android l'elevation estende i
+             * bounds visivi oltre quelli misurati, causando il taglio in basso/destra.
+             */}
+            <View style={styles.pinWrapper}>
+              <View style={[
+                styles.pin,
+                selectedArea?.id === area.id && styles.pinSelezionato,
+              ]}>
+                <Ionicons
+                  name={BRAND_ICON[area.brand] ?? 'restaurant'}
+                  size={selectedArea?.id === area.id ? 20 : 16}
+                  color="#fff"
+                />
+              </View>
             </View>
           </Marker>
         ))}
@@ -441,34 +446,34 @@ const styles = StyleSheet.create({
   map: {
     flex: 1,
   },
-  // pinWrapper RIMOSSO (non serve più)
-
+  // Il wrapper è SEMPRE 64x64 — Android misura la clip region qui.
+  // Deve essere più grande del pin selezionato (48px) + margine.
+  // NON usare elevation/shadow sul wrapper: estende i bounds oltre la misura.
+  pinWrapper: {
+    width: 64,
+    height: 64,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   pin: {
-    // Dimensioni fisse per Android
     width: 36,
     height: 36,
-    borderRadius: 18, // Metà esatta di 36
+    borderRadius: 18,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
     borderColor: '#fff',
-    
-    // Ombra più decisa per Android (elevation) e iOS
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
+    // NO elevation, NO shadow* — causano il clipping su Android
   },
   pinSelezionato: {
-    // Dimensioni fisse e più grandi per il pin selezionato
     width: 48,
     height: 48,
-    borderRadius: 24, // Metà esatta di 48
+    borderRadius: 24,
     backgroundColor: Colors.accent,
     borderWidth: 3,
-    elevation: 10, // Più elevation per farlo "risaltare"
+    borderColor: '#fff',
+    // NO elevation — vedi commento sopra
   },
   fallback: {
     flex: 1,
