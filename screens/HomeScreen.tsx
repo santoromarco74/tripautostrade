@@ -43,11 +43,6 @@ const SERVICE_FILTERS: { key: keyof ServiceArea; label: string }[] = [
   { key: 'ev_charging',    label: '⚡ EV' },
 ];
 
-const BRAND_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> = {
-  Autogrill: 'restaurant',
-  'Chef Express': 'cafe',
-  Sarni: 'fast-food',
-};
 
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
@@ -229,21 +224,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             title={area.name}
             description={area.brand}
             onPress={() => selezionaArea(area)}
-            tracksViewChanges={false}
-          >
-            <View style={{ padding: 8, backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center' }}>
-              <View style={[
-                styles.pin,
-                selectedArea?.id === area.id && styles.pinSelezionato,
-              ]}>
-                <Ionicons
-                  name={BRAND_ICON[area.brand] ?? 'restaurant'}
-                  size={selectedArea?.id === area.id ? 20 : 16}
-                  color="#fff"
-                />
-              </View>
-            </View>
-          </Marker>
+            pinColor={selectedArea?.id === area.id ? '#FDC003' : '#004F45'}
+          />
         ))}
         {isLoading && <HomeLoadingOverlay />}
       </MapView>
@@ -347,26 +329,29 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
 
       {selectedArea && (
         <View style={styles.pannello}>
-          <TouchableOpacity style={styles.btnChiudi} onPress={() => setSelectedArea(null)}>
-            <MaterialIcons name="close" size={24} color="#6E7976" />
-          </TouchableOpacity>
-
-          <View style={styles.pannelloTitleRow}>
-            <TouchableOpacity style={{ flex: 1 }} onPress={() => navigation.navigate('ServiceArea', { area: selectedArea })}>
-              <Text style={[styles.pannelloNome, styles.pannelloNomeLink]}>{selectedArea.name}</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => toggleFavorite(selectedArea.id)}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-            >
-              <Ionicons
-                name={isFavorite(selectedArea.id) ? 'bookmark' : 'bookmark-outline'}
-                size={22}
-                color={isFavorite(selectedArea.id) ? Colors.accent : Colors.textSecondary}
-              />
-            </TouchableOpacity>
+          <View style={styles.pannelloHeader}>
+            <View style={{ flex: 1 }}>
+              <TouchableOpacity onPress={() => navigation.navigate('ServiceArea', { area: selectedArea })}>
+                <Text style={[styles.pannelloNome, styles.pannelloNomeLink]}>{selectedArea.name}</Text>
+              </TouchableOpacity>
+              <Text style={styles.pannelloBrand}>{selectedArea.brand}</Text>
+            </View>
+            <View style={{ flexDirection: 'row', gap: 16, alignItems: 'center' }}>
+              <TouchableOpacity
+                onPress={() => toggleFavorite(selectedArea.id)}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons
+                  name={isFavorite(selectedArea.id) ? 'bookmark' : 'bookmark-outline'}
+                  size={22}
+                  color={isFavorite(selectedArea.id) ? Colors.accent : Colors.textSecondary}
+                />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setSelectedArea(null)}>
+                <MaterialIcons name="close" size={24} color="#6E7976" />
+              </TouchableOpacity>
+            </View>
           </View>
-          <Text style={styles.pannelloBrand}>{selectedArea.brand}</Text>
 
           {(selectedArea.highway || selectedArea.km != null) && (
             <Text style={styles.pannelloInfo}>
@@ -419,35 +404,6 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-  },
-  // pinWrapper RIMOSSO (non serve più)
-
-  pin: {
-    // Dimensioni fisse per Android
-    width: 36,
-    height: 36,
-    borderRadius: 18, // Metà esatta di 36
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
-    
-    // Ombra più decisa per Android (elevation) e iOS
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  pinSelezionato: {
-    // Dimensioni fisse e più grandi per il pin selezionato
-    width: 48,
-    height: 48,
-    borderRadius: 24, // Metà esatta di 48
-    backgroundColor: Colors.accent,
-    borderWidth: 3,
-    elevation: 10, // Più elevation per farlo "risaltare"
   },
   fallback: {
     flex: 1,
@@ -555,19 +511,11 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 12,
   },
-  btnChiudi: {
-    position: 'absolute',
-    top: 16,
-    right: 16,
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  pannelloTitleRow: {
+  pannelloHeader: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 8,
+    marginBottom: 4,
   },
   pannelloNome: {
     fontSize: 22,
