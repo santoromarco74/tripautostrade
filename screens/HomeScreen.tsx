@@ -224,27 +224,24 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       >
         {filteredAreas.map((area) => (
           <Marker
-            // IL TRUCCO DEFINITIVO: Aggiungi lo stato "selezionato" alla chiave!
-            // Quando selectedArea cambia, la chiave cambia, forzando Android a ricalcolare
-            // le dimensioni del pin selezionato da zero, senza tagliarlo.
             key={`${area.id}-${activeFilter || 'all'}-${selectedArea?.id === area.id ? 'sel' : 'unsel'}`}
             coordinate={{ latitude: area.latitude, longitude: area.longitude }}
             title={area.name}
             description={area.brand}
             onPress={() => selezionaArea(area)}
-            // tracksViewChanges= RIMOSSO. Lascia che Android tracci il cambiamento
-            // mentre ricalcola la dimensione del pin selezionato.
+            tracksViewChanges={false}
           >
-            {/* Struttura semplificata, un solo View circolare direttamente */}
-            <View style={[
-              styles.pin,
-              selectedArea?.id === area.id && styles.pinSelezionato,
-            ]}>
-              <Ionicons
-                name={BRAND_ICON[area.brand] ?? 'restaurant'}
-                size={selectedArea?.id === area.id ? 20 : 16}
-                color="#fff"
-              />
+            <View style={{ padding: 8, backgroundColor: 'transparent', alignItems: 'center', justifyContent: 'center' }}>
+              <View style={[
+                styles.pin,
+                selectedArea?.id === area.id && styles.pinSelezionato,
+              ]}>
+                <Ionicons
+                  name={BRAND_ICON[area.brand] ?? 'restaurant'}
+                  size={selectedArea?.id === area.id ? 20 : 16}
+                  color="#fff"
+                />
+              </View>
             </View>
           </Marker>
         ))}
