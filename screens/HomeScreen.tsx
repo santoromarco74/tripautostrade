@@ -182,7 +182,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   if (!location) {
     return (
       <View style={{ flex: 1, backgroundColor: '#dde8d8' }}>
-        <View style={[styles.searchContainer, { top: (Platform.OS === 'android' ? (StatusBar.currentHeight || 24) : insets.top) + 12 }]}>
+        <View style={[styles.searchContainer, { paddingTop: (Platform.OS === 'android' ? (StatusBar.currentHeight || 24) : insets.top) + 12 }]}>
           <HomeLoadingOverlay />
         </View>
       </View>
@@ -251,7 +251,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       </MapView>
 
       {/* Barra di ricerca + filtri brand */}
-      <View style={[styles.searchContainer, { top: insets.top + 12 }]}>
+      <View style={[styles.searchContainer, { paddingTop: insets.top + 12 }]}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={18} color={searchFocused ? Colors.primary : '#94A3B8'} style={styles.searchIcon} />
           <TextInput
@@ -466,9 +466,12 @@ const styles = StyleSheet.create({
   // ── Ricerca e filtri ──────────────────────────────────────────────────────
   searchContainer: {
     position: 'absolute',
-    left: 12,
-    right: 12,
+    top: 0,
+    width: '100%',
     zIndex: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.85)',
+    paddingHorizontal: 12,
+    paddingBottom: 8,
   },
   searchBar: {
     flexDirection: 'row',
@@ -492,7 +495,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 15,
-    color: Colors.text,
+    color: '#004F45',
     padding: 0,
   },
   loadingDot: {
