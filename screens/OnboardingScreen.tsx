@@ -1,18 +1,19 @@
 import { useRef, useState } from 'react';
 import {
-  Dimensions,
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
+  Dimensions, FlatList, StyleSheet, Text, TouchableOpacity, View,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Colors } from '../constants/Colors';
 import { RootStackParamList } from '../types/navigation';
+
+// ─── Design System "The Modern Wayfarer" ─────────────────────────────────────
+const P   = '#004F45';
+const PC  = '#00695C';
+const A   = '#FDC003';
+const AD  = '#785900';
+const BG  = '#F7F9FF';
 
 const { width } = Dimensions.get('window');
 
@@ -21,27 +22,30 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Onboarding'>;
 const SLIDES = [
   {
     id: '1',
-    icon: 'map-outline' as const,
-    iconColor: Colors.primary,
-    bgColor: '#E8F5E9',
+    icon: 'map' as const,
+    iconColor: '#A0F2E1',
+    bgColor: P,
+    accent: A,
     titolo: "Trova l'area giusta",
-    testo: 'Scopri le aree di servizio lungo il tuo percorso con tutti i dettagli.',
+    testo: 'Scopri le aree di servizio lungo il tuo percorso con tutti i dettagli e le recensioni della community.',
   },
   {
     id: '2',
-    icon: 'star-outline' as const,
-    iconColor: '#F59E0B',
-    bgColor: '#FFFBEB',
+    icon: 'star' as const,
+    iconColor: A,
+    bgColor: '#1A3A35',
+    accent: A,
     titolo: 'La voce dei viaggiatori',
-    testo: 'Leggi le recensioni autentiche e scopri i posti migliori per la tua sosta.',
+    testo: 'Leggi le recensioni autentiche e scopri i posti migliori per la tua sosta in autostrada.',
   },
   {
     id: '3',
-    icon: 'people-outline' as const,
-    iconColor: '#6366F1',
-    bgColor: '#EEF2FF',
-    titolo: 'Fai la tua parte',
-    testo: "Segnala i servizi attivi e scrivi recensioni per aiutare l'intera community.",
+    icon: 'emoji-events' as const,
+    iconColor: A,
+    bgColor: PC,
+    accent: A,
+    titolo: 'Guadagna punti viaggio',
+    testo: 'Scrivi recensioni, completa sfide e scala la classifica dei viaggiatori più esperti.',
   },
 ];
 
@@ -67,7 +71,12 @@ export default function OnboardingScreen({ navigation }: Props) {
   };
 
   return (
-    <View style={[styles.container, { paddingBottom: insets.bottom + 24 }]}>
+    <View style={[styles.container, { paddingTop: insets.top, paddingBottom: insets.bottom + 24 }]}>
+      {/* ── SLIDE HEADER ────────────────────────────────────────────────── */}
+      <View style={styles.brandBar}>
+        <Text style={styles.brandText}>TripAutostrade</Text>
+      </View>
+
       <FlatList
         ref={flatListRef}
         data={SLIDES}
@@ -78,17 +87,24 @@ export default function OnboardingScreen({ navigation }: Props) {
         onMomentumScrollEnd={handleScroll}
         renderItem={({ item }) => (
           <View style={styles.slide}>
-            {/* Icona con cerchio colorato */}
+            {/* Icon circle */}
             <View style={[styles.iconCircle, { backgroundColor: item.bgColor }]}>
-              <Ionicons name={item.icon} size={72} color={item.iconColor} />
+              {/* Decorative rings */}
+              <View style={[styles.iconRingOuter, { borderColor: `${item.accent}20` }]} />
+              <View style={[styles.iconRingInner, { borderColor: `${item.accent}30` }]} />
+              <MaterialIcons name={item.icon} size={72} color={item.iconColor} />
             </View>
-            <Text style={styles.titolo}>{item.titolo}</Text>
-            <Text style={styles.testo}>{item.testo}</Text>
+
+            {/* Content */}
+            <View style={styles.slideContent}>
+              <Text style={styles.titolo}>{item.titolo}</Text>
+              <Text style={styles.testo}>{item.testo}</Text>
+            </View>
           </View>
         )}
       />
 
-      {/* Indicatori di pagina */}
+      {/* ── DOTS ────────────────────────────────────────────────────────── */}
       <View style={styles.dotsRow}>
         {SLIDES.map((_, i) => (
           <View
@@ -101,16 +117,21 @@ export default function OnboardingScreen({ navigation }: Props) {
         ))}
       </View>
 
-      {/* Bottone: "Avanti" nelle prime slide, "Inizia a Viaggiare" nell'ultima */}
+      {/* ── ACTIONS ─────────────────────────────────────────────────────── */}
       <View style={styles.btnArea}>
         {activeIndex < SLIDES.length - 1 ? (
-          <TouchableOpacity style={styles.btnNext} onPress={handleNext} activeOpacity={0.8}>
-            <Text style={styles.btnNextTesto}>Avanti</Text>
-            <Ionicons name="arrow-forward" size={18} color={Colors.primary} />
-          </TouchableOpacity>
+          <View style={styles.btnRow}>
+            <TouchableOpacity onPress={handleStart} activeOpacity={0.7}>
+              <Text style={styles.skipText}>Salta</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.btnNext} onPress={handleNext} activeOpacity={0.8}>
+              <Text style={styles.btnNextTesto}>Avanti</Text>
+              <MaterialIcons name="arrow-forward" size={18} color={AD} />
+            </TouchableOpacity>
+          </View>
         ) : (
           <TouchableOpacity style={styles.btnStart} onPress={handleStart} activeOpacity={0.85}>
-            <Ionicons name="car-outline" size={22} color="#fff" />
+            <MaterialIcons name="directions-car" size={22} color={AD} />
             <Text style={styles.btnStartTesto}>Inizia a Viaggiare</Text>
           </TouchableOpacity>
         )}
@@ -121,101 +142,69 @@ export default function OnboardingScreen({ navigation }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: Colors.background,
-    alignItems: 'center',
+    flex: 1, backgroundColor: BG, alignItems: 'center',
   },
 
-  // Slide
+  // ── Brand bar ─────────────────────────────────────────────────────────────
+  brandBar: { paddingTop: 16, paddingBottom: 8 },
+  brandText: {
+    fontSize: 20, fontWeight: '900', color: P, fontStyle: 'italic', letterSpacing: -0.5,
+  },
+
+  // ── Slide ─────────────────────────────────────────────────────────────────
   slide: {
     width,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 36,
-    paddingTop: 80,
-    paddingBottom: 40,
+    paddingHorizontal: 32,
+    paddingTop: 24,
+    paddingBottom: 24,
   },
   iconCircle: {
-    width: 160,
-    height: 160,
-    borderRadius: 80,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 48,
+    width: 200, height: 200, borderRadius: 100,
+    alignItems: 'center', justifyContent: 'center',
+    marginBottom: 40,
+    elevation: 8, shadowColor: P, shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.2, shadowRadius: 20,
   },
+  iconRingOuter: {
+    position: 'absolute', top: -12, left: -12, right: -12, bottom: -12,
+    borderRadius: 112, borderWidth: 2,
+  },
+  iconRingInner: {
+    position: 'absolute', top: -6, left: -6, right: -6, bottom: -6,
+    borderRadius: 106, borderWidth: 1.5,
+  },
+  slideContent: { alignItems: 'center' },
   titolo: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: Colors.text,
-    textAlign: 'center',
-    marginBottom: 16,
-    letterSpacing: 0.2,
+    fontSize: 28, fontWeight: '800', color: P,
+    textAlign: 'center', marginBottom: 16, letterSpacing: -0.3,
   },
   testo: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-    lineHeight: 24,
+    fontSize: 16, color: '#3E4946',
+    textAlign: 'center', lineHeight: 24,
   },
 
-  // Dots
-  dotsRow: {
-    flexDirection: 'row',
-    gap: 8,
-    marginBottom: 32,
-  },
-  dot: {
-    height: 8,
-    borderRadius: 4,
-  },
-  dotAttivo: {
-    width: 24,
-    backgroundColor: Colors.primary,
-  },
-  dotInattivo: {
-    width: 8,
-    backgroundColor: Colors.border,
-  },
+  // ── Dots ──────────────────────────────────────────────────────────────────
+  dotsRow: { flexDirection: 'row', gap: 8, marginVertical: 24 },
+  dot:        { height: 8, borderRadius: 4 },
+  dotAttivo:  { width: 28, backgroundColor: P },
+  dotInattivo:{ width: 8,  backgroundColor: '#BEC9C5' },
 
-  // Bottoni
-  btnArea: {
-    width: '100%',
-    paddingHorizontal: 28,
-  },
+  // ── Buttons ───────────────────────────────────────────────────────────────
+  btnArea: { width: '100%', paddingHorizontal: 28 },
+  btnRow:  { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  skipText: { fontSize: 15, fontWeight: '600', color: '#6E7976' },
   btnNext: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 16,
-    borderRadius: 28,
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
-    backgroundColor: 'transparent',
+    flexDirection: 'row', alignItems: 'center', gap: 8,
+    paddingVertical: 14, paddingHorizontal: 28, borderRadius: 999,
+    backgroundColor: A,
   },
-  btnNextTesto: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: Colors.primary,
-  },
+  btnNextTesto:  { fontSize: 16, fontWeight: '700', color: AD },
   btnStart: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
-    paddingVertical: 18,
-    borderRadius: 28,
-    backgroundColor: Colors.primary,
-    elevation: 4,
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 8,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+    paddingVertical: 18, borderRadius: 999, backgroundColor: A,
+    elevation: 6, shadowColor: A, shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35, shadowRadius: 12,
   },
-  btnStartTesto: {
-    fontSize: 17,
-    fontWeight: '800',
-    color: '#fff',
-    letterSpacing: 0.3,
-  },
+  btnStartTesto: { fontSize: 17, fontWeight: '800', color: AD, letterSpacing: 0.2 },
 });
