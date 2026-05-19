@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
 import { decode } from 'base64-arraybuffer';
 import { supabase } from '../lib/supabase';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface Recensione {
   id: string;
@@ -78,205 +79,217 @@ interface ReviewsContextValue {
 
 const ReviewsContext = createContext<ReviewsContextValue | null>(null);
 
-export function ReviewsProvider({ children }: { children: ReactNode }) {
-  const [recensioni, setRecensioni] = useState<Recensione[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+const fetchReviewsFn = async (): Promise<Recensione[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  const currentUserId = user?.id;
 
-  useEffect(() => {
-    fetchReviews();
-  }, []);
+  const { data: reviews, error } = await supabase
+    .from('reviews')
+    .select('*, profiles(full_name, avatar_url)')
+    .order('created_at', { ascending: false });
 
-  const fetchReviews = async () => {
-    setIsLoading(true);
+  if (error || !reviews) {
+    return [];
+  }
 
-    const { data: { user } } = await supabase.auth.getUser();
-    const currentUserId = user?.id;
+  const reviewIds = (reviews as DbRow[]).map((r) => r.id);
 
-    const { data: reviews, error } = await supabase
-      .from('reviews')
-      .select('*, profiles(full_name, avatar_url)')
-      .order('created_at', { ascending: false });
+  const { data: likeCounts } = await supabase
+    .from('review_likes')
+    .select('review_id')
+    .in('review_id', reviewIds);
 
-    if (error || !reviews) {
-      setIsLoading(false);
-      return;
-    }
+  const countMap: Record<string, number> = {};
+  for (const like of likeCounts ?? []) {
+    countMap[like.review_id] = (countMap[like.review_id] ?? 0) + 1;
+  }
 
-    const reviewIds = (reviews as DbRow[]).map((r) => r.id);
-
-    const { data: likeCounts } = await supabase
+  const myLikes = new Set<string>();
+  if (currentUserId) {
+    const { data: userLikes } = await supabase
       .from('review_likes')
       .select('review_id')
+      .eq('user_id', currentUserId)
       .in('review_id', reviewIds);
 
-    const countMap: Record<string, number> = {};
-    for (const like of likeCounts ?? []) {
-      countMap[like.review_id] = (countMap[like.review_id] ?? 0) + 1;
+    for (const like of userLikes ?? []) {
+      myLikes.add(like.review_id);
     }
+  }
 
-    const myLikes = new Set<string>();
-    if (currentUserId) {
-      const { data: userLikes } = await supabase
-        .from('review_likes')
-        .select('review_id')
-        .eq('user_id', currentUserId)
-        .in('review_id', reviewIds);
+  return (reviews as DbRow[]).map((row) =>
+    dbToRecensione(row, countMap[row.id] ?? 0, myLikes.has(row.id)),
+  );
+};
 
-      for (const like of userLikes ?? []) {
-        myLikes.add(like.review_id);
+export function ReviewsProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
+
+  const { data: recensioni, isLoading } = useQuery({
+    queryKey: ['reviews'],
+    queryFn: fetchReviewsFn,
+  });
+
+  const toggleLikeMutation = useMutation({
+    mutationFn: async (reviewId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non autenticato');
+
+      const reviewsData = queryClient.getQueryData<Recensione[]>(['reviews']);
+      const review = reviewsData?.find((r) => r.id === reviewId);
+      if (!review) throw new Error('Recensione non trovata');
+
+      const wasLiked = review.likedByMe;
+
+      if (wasLiked) {
+        const { error } = await supabase
+          .from('review_likes')
+          .delete()
+          .eq('review_id', reviewId)
+          .eq('user_id', user.id);
+
+        if (error) throw new Error(error.message);
+      } else {
+        const { error } = await supabase
+          .from('review_likes')
+          .insert({ review_id: reviewId, user_id: user.id });
+
+        if (error) throw new Error(error.message);
       }
-    }
+    },
+    onMutate: async (reviewId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['reviews'] });
+      const previousReviews = queryClient.getQueryData<Recensione[]>(['reviews']);
 
-    setRecensioni(
-      (reviews as DbRow[]).map((row) =>
-        dbToRecensione(row, countMap[row.id] ?? 0, myLikes.has(row.id)),
-      ),
-    );
-    setIsLoading(false);
-  };
-
-  const toggleLike = async (reviewId: string) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const review = recensioni.find((r) => r.id === reviewId);
-    if (!review) return;
-
-    const wasLiked = review.likedByMe;
-
-    setRecensioni((prev) =>
-      prev.map((r) =>
-        r.id === reviewId
-          ? {
-              ...r,
-              likedByMe: !wasLiked,
-              likeCount: wasLiked ? r.likeCount - 1 : r.likeCount + 1,
-            }
-          : r,
-      ),
-    );
-
-    if (wasLiked) {
-      const { error } = await supabase
-        .from('review_likes')
-        .delete()
-        .eq('review_id', reviewId)
-        .eq('user_id', user.id);
-
-      if (error) {
-        setRecensioni((prev) =>
-          prev.map((r) =>
+      if (previousReviews) {
+        queryClient.setQueryData<Recensione[]>(['reviews'], (old) => {
+          if (!old) return old;
+          return old.map((r) =>
             r.id === reviewId
-              ? { ...r, likedByMe: true, likeCount: r.likeCount + 1 }
-              : r,
-          ),
-        );
+              ? {
+                  ...r,
+                  likedByMe: !r.likedByMe,
+                  likeCount: r.likedByMe ? r.likeCount - 1 : r.likeCount + 1,
+                }
+              : r
+          );
+        });
       }
-    } else {
-      const { error } = await supabase
-        .from('review_likes')
-        .insert({ review_id: reviewId, user_id: user.id });
 
-      if (error) {
-        setRecensioni((prev) =>
-          prev.map((r) =>
-            r.id === reviewId
-              ? { ...r, likedByMe: false, likeCount: r.likeCount - 1 }
-              : r,
-          ),
-        );
+      return { previousReviews };
+    },
+    onError: (err, reviewId, context) => {
+      if (context?.previousReviews) {
+        queryClient.setQueryData(['reviews'], context.previousReviews);
       }
-    }
-  };
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+    },
+  });
 
-  const addReview = async (params: {
-    areaId: string | number;
-    stelle: number;
-    testo: string;
-    fotoBase64?: string;
-  }) => {
-    const { data: { user } } = await supabase.auth.getUser();
+  const addMutation = useMutation({
+    mutationFn: async (params: {
+      areaId: string | number;
+      stelle: number;
+      testo: string;
+      fotoBase64?: string;
+    }) => {
+      const { data: { user } } = await supabase.auth.getUser();
 
-    let imageUrl: string | undefined;
-    if (params.fotoBase64) {
-      const fileName = `review_${Date.now()}.jpg`;
-      const { error: uploadError } = await supabase.storage
-        .from('review-photos')
-        .upload(fileName, decode(params.fotoBase64), { contentType: 'image/jpeg' });
-      if (uploadError) throw new Error(uploadError.message);
-      const { data: urlData } = supabase.storage
-        .from('review-photos')
-        .getPublicUrl(fileName);
-      imageUrl = urlData.publicUrl;
-    }
+      let imageUrl: string | undefined;
+      if (params.fotoBase64) {
+        const fileName = `review_${Date.now()}.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from('review-photos')
+          .upload(fileName, decode(params.fotoBase64), { contentType: 'image/jpeg' });
+        if (uploadError) throw new Error(uploadError.message);
+        const { data: urlData } = supabase.storage
+          .from('review-photos')
+          .getPublicUrl(fileName);
+        imageUrl = urlData.publicUrl;
+      }
 
-    const { data, error } = await supabase
-      .from('reviews')
-      .insert({
-        service_area_id: params.areaId,
-        user_id: user?.id,
-        rating: params.stelle,
-        comment: params.testo,
-        ...(imageUrl ? { image_url: imageUrl } : {}),
-      })
-      .select('*, profiles(full_name, avatar_url)')
-      .single();
+      const { data, error } = await supabase
+        .from('reviews')
+        .insert({
+          service_area_id: params.areaId,
+          user_id: user?.id,
+          rating: params.stelle,
+          comment: params.testo,
+          ...(imageUrl ? { image_url: imageUrl } : {}),
+        })
+        .select('*, profiles(full_name, avatar_url)')
+        .single();
 
-    if (error) throw new Error(error.message);
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+    },
+  });
 
-    setRecensioni((prev) => [dbToRecensione(data as DbRow, 0, false), ...prev]);
-  };
+  const updateMutation = useMutation({
+    mutationFn: async (params: {
+      id: string;
+      stelle: number;
+      testo: string;
+      fotoBase64?: string;
+    }) => {
+      let imageUrl: string | undefined;
+      if (params.fotoBase64) {
+        const fileName = `review_${Date.now()}.jpg`;
+        const { error: uploadError } = await supabase.storage
+          .from('review-photos')
+          .upload(fileName, decode(params.fotoBase64), { contentType: 'image/jpeg' });
+        if (uploadError) throw new Error(uploadError.message);
+        const { data: urlData } = supabase.storage
+          .from('review-photos')
+          .getPublicUrl(fileName);
+        imageUrl = urlData.publicUrl;
+      }
 
-  const updateReview = async (params: {
-    id: string;
-    stelle: number;
-    testo: string;
-    fotoBase64?: string;
-  }) => {
-    let imageUrl: string | undefined;
-    if (params.fotoBase64) {
-      const fileName = `review_${Date.now()}.jpg`;
-      const { error: uploadError } = await supabase.storage
-        .from('review-photos')
-        .upload(fileName, decode(params.fotoBase64), { contentType: 'image/jpeg' });
-      if (uploadError) throw new Error(uploadError.message);
-      const { data: urlData } = supabase.storage
-        .from('review-photos')
-        .getPublicUrl(fileName);
-      imageUrl = urlData.publicUrl;
-    }
+      const { data, error } = await supabase
+        .from('reviews')
+        .update({
+          rating: params.stelle,
+          comment: params.testo,
+          ...(imageUrl ? { image_url: imageUrl } : {}),
+        })
+        .eq('id', params.id)
+        .select()
+        .single();
 
-    const { data, error } = await supabase
-      .from('reviews')
-      .update({
-        rating: params.stelle,
-        comment: params.testo,
-        ...(imageUrl ? { image_url: imageUrl } : {}),
-      })
-      .eq('id', params.id)
-      .select()
-      .single();
+      if (error) throw new Error(error.message);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+    },
+  });
 
-    if (error) throw new Error(error.message);
-
-    const existing = recensioni.find((r) => r.id === params.id);
-    setRecensioni((prev) =>
-      prev.map((r) =>
-        r.id === params.id
-          ? dbToRecensione(data as DbRow, existing?.likeCount ?? 0, existing?.likedByMe ?? false)
-          : r,
-      ),
-    );
-  };
-
-  const deleteReview = async (id: string) => {
-    const { error } = await supabase.from('reviews').delete().eq('id', id);
-    if (error) throw new Error(error.message);
-    setRecensioni((prev) => prev.filter((r) => r.id !== id));
-  };
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('reviews').delete().eq('id', id);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+    },
+  });
 
   return (
-    <ReviewsContext.Provider value={{ recensioni, isLoading, addReview, updateReview, deleteReview, toggleLike }}>
+    <ReviewsContext.Provider
+      value={{
+        recensioni: recensioni ?? [],
+        isLoading: isLoading,
+        addReview: async (params) => { await addMutation.mutateAsync(params); },
+        updateReview: async (params) => { await updateMutation.mutateAsync(params); },
+        deleteReview: async (id) => { await deleteMutation.mutateAsync(id); },
+        toggleLike: async (reviewId) => { await toggleLikeMutation.mutateAsync(reviewId); },
+      }}
+    >
       {children}
     </ReviewsContext.Provider>
   );

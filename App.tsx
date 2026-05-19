@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReviewsProvider } from './context/ReviewsContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FavoritesProvider } from './context/FavoritesContext';
@@ -84,16 +85,20 @@ function RootNavigator() {
   );
 }
 
+const queryClient = new QueryClient();
+
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <FavoritesProvider>
-          <ReviewsProvider>
-            <RootNavigator />
-          </ReviewsProvider>
-        </FavoritesProvider>
-      </AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <FavoritesProvider>
+            <ReviewsProvider>
+              <RootNavigator />
+            </ReviewsProvider>
+          </FavoritesProvider>
+        </AuthProvider>
+      </QueryClientProvider>
     </SafeAreaProvider>
   );
 }
