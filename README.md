@@ -9,9 +9,13 @@ L'obiettivo è creare un database affidabile generato dagli utenti per sapere se
 ## ✨ Funzionalità Principali
 
 * **🗺️ Mappa Interattiva:** Visualizzazione di tutte le aree di servizio tramite pin geolocalizzati con clustering automatico. Filtri rapidi per brand (Autogrill, Chef Express, Sarni) e per servizio (Bar, Wi-Fi, Pet, Docce, EV).
+* **📍 Vicino a te:** FAB sulla mappa che apre un bottom sheet con le aree di servizio più vicine alla posizione GPS, ordinate per distanza.
 * **🔍 Ricerca con Autocomplete:** Barra di ricerca fluttuante con dropdown risultati e animazione `animateToRegion` sulla mappa.
-* **✍️ Sistema di Recensioni:** Testo, voto da 1 a 5 stelle e foto opzionale per ogni area di servizio.
-* **❤️ Mi Piace Globali:** Like interattivi sulle recensioni, disponibili in tutte le schermate (area di servizio, profilo, attività).
+* **✍️ Sistema di Recensioni:** Testo, voto da 1 a 5 stelle e foto opzionale (compressa automaticamente prima dell'upload) per ogni area di servizio. Ordinamento per data, voto e utilità.
+* **❤️ Mi Piace Globali:** Like interattivi sulle recensioni con optimistic update (React Query), disponibili in tutte le schermate (area di servizio, profilo, attività).
+* **🔖 Preferiti:** Segnalibri sulle aree di servizio, consultabili dall'Activity Feed.
+* **🚩 Segnalazioni:** Modal per segnalare contenuti inappropriati nelle recensioni.
+* **📴 Modalità Offline:** Banner globale quando manca la connessione, cache locale di aree e recensioni, refetch automatico al ritorno online.
 * **🏆 Gamification:** Sistema a punti e livelli nel profilo utente — da *Novellino del Casello* a *Leggenda dell'Asfalto*. I punti vengono gestiti automaticamente da Trigger SQL su Supabase.
 * **👤 Profilo Utente:** Hero con avatar, badge livello, statistiche (recensioni, media stelle, like ricevuti) e lista delle proprie recensioni con possibilità di eliminare.
 * **🎬 Onboarding:** Tutorial di benvenuto scorrevole alla prima apertura, con 3 slide animate e salvataggio su AsyncStorage.
@@ -23,12 +27,14 @@ L'obiettivo è creare un database affidabile generato dagli utenti per sapere se
 ## 🛠️ Stack Tecnologico
 
 * **Frontend:** React Native 0.81 + Expo 54 (TypeScript)
+* **Stato server:** `@tanstack/react-query` v5 (recensioni, optimistic updates)
 * **Navigazione:** React Navigation (Native Stack + Bottom Tabs)
 * **Backend & Database:** Supabase (PostgreSQL + Auth + Storage)
 * **Mappe:** `react-native-maps` + `react-native-map-clustering`
 * **Storage locale:** `@react-native-async-storage/async-storage`
-* **Foto:** `expo-image-picker` + `base64-arraybuffer`
+* **Foto:** `expo-image-picker` + `expo-image-manipulator` + `base64-arraybuffer`
 * **GPS:** `expo-location`
+* **Rete/Offline:** `expo-network`
 
 ---
 
