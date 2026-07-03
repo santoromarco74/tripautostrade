@@ -6,6 +6,7 @@ export const Colors = {
   textSecondary: '#64748B',
   surface: '#FFFFFF',
   border: '#E2E8F0',
+  warning: '#B45309',
   spacing: 16,
 
   brand: {

@@ -4,8 +4,10 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
+import * as Network from 'expo-network';
 import { ReviewsProvider } from './context/ReviewsContext';
+import OfflineBanner from './components/OfflineBanner';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import TabNavigator from './navigation/TabNavigator';
@@ -87,6 +89,15 @@ function RootNavigator() {
 
 const queryClient = new QueryClient();
 
+// Collega React Query allo stato rete reale del dispositivo (expo-network):
+// le query stale vengono rifetchate automaticamente al ritorno online.
+onlineManager.setEventListener((setOnline) => {
+  const sub = Network.addNetworkStateListener((state) => {
+    setOnline(state.isConnected !== false);
+  });
+  return () => sub.remove();
+});
+
 export default function App() {
   return (
     <SafeAreaProvider>
@@ -94,7 +105,10 @@ export default function App() {
         <AuthProvider>
           <FavoritesProvider>
             <ReviewsProvider>
-              <RootNavigator />
+              <View style={{ flex: 1 }}>
+                <RootNavigator />
+                <OfflineBanner />
+              </View>
             </ReviewsProvider>
           </FavoritesProvider>
         </AuthProvider>
