@@ -173,3 +173,17 @@ Per buildare con EAS (`eas build`), la cartella `assets/` deve contenere:
 - `splash.png` — splash screen con sfondo `#00695C`
 
 Il `backgroundColor` dello splash in `app.json` è impostato su `#00695C` per fondere i bordi dell'immagine con lo schermo.
+
+### Profili EAS (`eas.json`)
+
+| Profilo | Comando | Uso |
+|---|---|---|
+| `development` | `eas build --profile development --platform android` | Dev build con dev client — **richiesta per le notifiche push** (non supportate in Expo Go da SDK 53+) |
+| `preview` | `eas build --profile preview --platform android` | APK interno per test su dispositivi reali |
+| `production` | `eas build --profile production` | Build store (AAB/IPA), `autoIncrement` attivo |
+
+Prerequisiti: `npm i -g eas-cli`, `eas login` con l'account Expo del progetto (projectId già configurato in `app.json`).
+
+### Notifiche push (futuro)
+
+Le notifiche push remote richiedono `expo-notifications` **più una dev build** (Expo Go non le supporta da SDK 53). Implementarle solo dopo la prima build `development`: registrazione token Expo Push, salvataggio in una colonna `push_token` su `profiles`, invio lato server via Supabase Edge Functions.
