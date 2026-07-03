@@ -5,6 +5,38 @@ Il formato segue [Keep a Changelog](https://keepachangelog.com/it/1.0.0/).
 
 ---
 
+## [1.1.0] - Unreleased
+
+### Added
+
+#### 📍 Vicino a te (2026-07)
+- FAB sulla mappa (`HomeScreen`) che apre un bottom sheet Material 3 con le 8 aree di servizio più vicine alla posizione GPS
+- Ordinamento per distanza haversine con distanza formattata (m/km), brand e autostrada
+- Tap su una voce: animazione della mappa sull'area e apertura del pannello dettaglio
+
+#### 📴 Modalità Offline (2026-07)
+- Nuovo componente `OfflineBanner.tsx`: pillola globale sopra la tab bar quando `expo-network` rileva l'assenza di connessione
+- Cache locale delle recensioni su `AsyncStorage` (chiave `@reviews_cache`) come fallback quando il fetch da Supabase fallisce
+- `onlineManager` di React Query collegato a `expo-network`: refetch automatico delle query stale al ritorno online
+- Nuovo token `Colors.warning` (`#B45309`)
+
+#### ✨ Prime 5 feature v1.1 (2026-04, PR #12)
+- Compressione immagini pre-upload (`expo-image-manipulator`, resize 1200px + JPEG 70%)
+- Segnalazione contenuti inappropriati (`ReportModal` + icona flag su `ReviewCard`)
+- Preferiti / Segnalibri (`FavoritesContext` + bookmark in `ServiceAreaScreen` e `HomeScreen`)
+- Ordinamento recensioni (`SortFilterBar`: recenti, più votate, meno votate, più utili)
+- Activity Feed potenziato (`SegmentedControl` con tab Preferiti + Le mie recensioni)
+
+### Changed
+
+#### ⚙️ Refactor React Query (2026-05, PR #15)
+- `ReviewsContext` migrato a `@tanstack/react-query` (`useQuery` + `useMutation`)
+- Optimistic update su `toggleLike` con rollback in caso di errore
+- Interfaccia pubblica del context invariata (`recensioni`, `addReview`, `updateReview`, `deleteReview`, `toggleLike`, `isLoading`)
+- `App.tsx` avvolto in `QueryClientProvider`
+
+---
+
 ## [1.0.0-beta] - 2026-04-07
 
 ### Added

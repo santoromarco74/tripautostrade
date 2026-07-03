@@ -12,8 +12,10 @@ Questo file contiene le regole architetturali, le convenzioni di stile e le note
 | Expo | 54 | `npx expo start --clear` per avviare |
 | TypeScript | strict mode | `tsconfig.json` con `jsx: react-native` |
 | Supabase | client JS v2 | Configurato in `lib/supabase.ts` |
+| React Query | `@tanstack/react-query` v5 | Stato server delle recensioni (`ReviewsContext`) |
 | React Navigation | v7 | Stack + Bottom Tabs |
 | react-native-maps | latest | Con `react-native-map-clustering` |
+| expo-network | ~8.0 | Rilevamento offline (`OfflineBanner`, `onlineManager`) |
 
 ---
 
@@ -29,6 +31,7 @@ Colors.surface      = '#FFFFFF'   // Card, modal, pannelli
 Colors.text         = '#1E293B'   // Testo principale
 Colors.textSecondary= '#64748B'   // Sottotitoli, date, label secondari
 Colors.border       = '#E2E8F0'   // Divisori, bordi card
+Colors.warning      = '#B45309'   // Banner offline, avvisi
 ```
 
 **Regola:** non usare mai colori hardcoded nelle schermate. Importare sempre da `Colors`.
@@ -49,8 +52,9 @@ Colors.border       = '#E2E8F0'   // Divisori, bordi card
 
 ### Context globali
 
-- **`ReviewsContext`** (`context/ReviewsContext.tsx`): stato globale di tutte le recensioni. Espone `recensioni`, `addReview`, `updateReview`, `deleteReview`, `toggleLike`, `isLoading`. Non fare fetch di recensioni localmente nelle schermate — usare sempre il context.
+- **`ReviewsContext`** (`context/ReviewsContext.tsx`): stato globale di tutte le recensioni. Espone `recensioni`, `addReview`, `updateReview`, `deleteReview`, `toggleLike`, `isLoading`. Non fare fetch di recensioni localmente nelle schermate — usare sempre il context. **Internamente è implementato con React Query** (`useQuery`/`useMutation`, queryKey `['reviews']`, optimistic update sul like): l'interfaccia esposta resta invariata, quindi non usare `useQuery` direttamente nelle schermate.
 - **`AuthContext`** (`context/AuthContext.tsx`): sessione utente. Espone `user`, `session`, `signOut`, `isLoading`.
+- **`FavoritesContext`** (`context/FavoritesContext.tsx`): aree preferite/segnalibri. Espone `isFavorite`, `toggleFavorite`.
 
 ### Navigazione
 
@@ -76,6 +80,12 @@ useFocusEffect(
 ### Cache stale-while-revalidate
 
 `HomeScreen` usa `AsyncStorage` con chiave `@service_areas_cache` per mostrare i dati immediatamente mentre fetcha in background da Supabase. Rispettare questo pattern per dati che cambiano raramente.
+
+### Offline
+
+- `components/OfflineBanner.tsx` è montato globalmente in `App.tsx` e mostra una pillola quando `expo-network` rileva l'assenza di connessione. Non aggiungere banner offline locali nelle schermate.
+- `onlineManager` di React Query è collegato a `expo-network` in `App.tsx`: al ritorno online le query stale vengono rifetchate automaticamente.
+- Le recensioni hanno un fallback offline su `AsyncStorage` (chiave `@reviews_cache`) dentro `fetchReviewsFn`; la query usa `networkMode: 'always'` perché la queryFn deve girare anche offline per servire la cache.
 
 ---
 
@@ -140,12 +150,16 @@ supabase.from('profiles').update({ points: points + 10 }).eq('id', user.id)
 | `ReviewCard` | `components/ReviewCard.tsx` | Card recensione con like + cestino opzionale. Usarla in tutte le schermate che mostrano recensioni |
 | `EmptyState` | `components/EmptyState.tsx` | Stato vuoto con icona e testo |
 | `SkeletonLoader` | `components/SkeletonLoader.tsx` | Placeholder durante il caricamento |
+| `OfflineBanner` | `components/OfflineBanner.tsx` | Pillola offline globale (montata solo in `App.tsx`) |
+| `ReportModal` | `components/ReportModal.tsx` | Segnalazione contenuti inappropriati |
+| `SortFilterBar` | `components/SortFilterBar.tsx` | Ordinamento liste recensioni |
+| `SegmentedControl` | `components/SegmentedControl.tsx` | Tab interne (es. ActivityScreen) |
 
 ---
 
 ## 8. Git workflow
 
-- Branch di sviluppo: `claude/continue-app-development-GaHch`
+- Branch di sviluppo: assegnato per sessione (prefisso `claude/`) — usare il branch indicato nella sessione corrente
 - Mai pushare direttamente su `main` — aprire PR
 - Prima di pushare: `git fetch origin && git rebase origin/<branch>` per evitare conflitti
 - Il remote GitHub è sempre la **source of truth** — in caso di conflitti usare `git reset --hard origin/<branch>`
@@ -159,3 +173,17 @@ Per buildare con EAS (`eas build`), la cartella `assets/` deve contenere:
 - `splash.png` — splash screen con sfondo `#00695C`
 
 Il `backgroundColor` dello splash in `app.json` è impostato su `#00695C` per fondere i bordi dell'immagine con lo schermo.
+
+### Profili EAS (`eas.json`)
+
+| Profilo | Comando | Uso |
+|---|---|---|
+| `development` | `eas build --profile development --platform android` | Dev build con dev client — **richiesta per le notifiche push** (non supportate in Expo Go da SDK 53+) |
+| `preview` | `eas build --profile preview --platform android` | APK interno per test su dispositivi reali |
+| `production` | `eas build --profile production` | Build store (AAB/IPA), `autoIncrement` attivo |
+
+Prerequisiti: `npm i -g eas-cli`, `eas login` con l'account Expo del progetto (projectId già configurato in `app.json`).
+
+### Notifiche push (futuro)
+
+Le notifiche push remote richiedono `expo-notifications` **più una dev build** (Expo Go non le supporta da SDK 53). Implementarle solo dopo la prima build `development`: registrazione token Expo Push, salvataggio in una colonna `push_token` su `profiles`, invio lato server via Supabase Edge Functions.

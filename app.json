@@ -13,6 +13,7 @@
       "backgroundColor": "#00695C"
     },
     "ios": {
+      "bundleIdentifier": "com.santoromarco74.tripautostrade",
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "Questa app usa la tua posizione per trovare le aree di servizio vicine."

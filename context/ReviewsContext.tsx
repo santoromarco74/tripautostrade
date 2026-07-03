@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { decode } from 'base64-arraybuffer';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -79,6 +80,17 @@ interface ReviewsContextValue {
 
 const ReviewsContext = createContext<ReviewsContextValue | null>(null);
 
+const REVIEWS_CACHE_KEY = '@reviews_cache';
+
+async function readReviewsCache(): Promise<Recensione[]> {
+  try {
+    const cached = await AsyncStorage.getItem(REVIEWS_CACHE_KEY);
+    return cached ? (JSON.parse(cached) as Recensione[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 const fetchReviewsFn = async (): Promise<Recensione[]> => {
   const { data: { user } } = await supabase.auth.getUser();
   const currentUserId = user?.id;
@@ -89,7 +101,8 @@ const fetchReviewsFn = async (): Promise<Recensione[]> => {
     .order('created_at', { ascending: false });
 
   if (error || !reviews) {
-    return [];
+    // Offline o errore di rete: fallback stale-while-revalidate dalla cache
+    return readReviewsCache();
   }
 
   const reviewIds = (reviews as DbRow[]).map((r) => r.id);
@@ -117,9 +130,17 @@ const fetchReviewsFn = async (): Promise<Recensione[]> => {
     }
   }
 
-  return (reviews as DbRow[]).map((row) =>
+  const result = (reviews as DbRow[]).map((row) =>
     dbToRecensione(row, countMap[row.id] ?? 0, myLikes.has(row.id)),
   );
+
+  try {
+    await AsyncStorage.setItem(REVIEWS_CACHE_KEY, JSON.stringify(result));
+  } catch {
+    // errore di scrittura cache non critico
+  }
+
+  return result;
 };
 
 export function ReviewsProvider({ children }: { children: ReactNode }) {
@@ -128,6 +149,8 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
   const { data: recensioni, isLoading } = useQuery({
     queryKey: ['reviews'],
     queryFn: fetchReviewsFn,
+    // 'always': la queryFn gira anche offline così può servire la cache locale
+    networkMode: 'always',
   });
 
   const toggleLikeMutation = useMutation({
