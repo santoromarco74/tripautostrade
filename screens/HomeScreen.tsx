@@ -61,6 +61,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [selectedBrand, setSelectedBrand] = useState('Tutti');
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [nearbyVisible, setNearbyVisible] = useState(false);
   const mapRef = useRef<RNMapView>(null);
   const { isFavorite, toggleFavorite } = useFavorites();
 
@@ -147,6 +148,22 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
     });
   }, [areas, searchQuery, selectedBrand, activeFilter]);
 
+  const nearbyAreas = useMemo(() => {
+    if (!location) return [];
+    return areas
+      .map((area) => ({
+        area,
+        distanza: haversineDistance(
+          location.coords.latitude,
+          location.coords.longitude,
+          area.latitude,
+          area.longitude,
+        ),
+      }))
+      .sort((a, b) => a.distanza - b.distanza)
+      .slice(0, 8);
+  }, [areas, location]);
+
   const handleNavigation = async (area: ServiceArea) => {
     const { latitude: lat, longitude: lng } = area;
 
@@ -192,6 +209,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const selezionaArea = (area: ServiceArea) => {
     setSelectedArea(area);
     setSearchQuery('');
+    setNearbyVisible(false);
     Keyboard.dismiss();
     mapRef.current?.animateToRegion(
       {
@@ -346,6 +364,63 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
           })}
         </ScrollView>
       </View>
+
+      {/* FAB "Vicino a te" */}
+      {!selectedArea && !nearbyVisible && (
+        <TouchableOpacity
+          style={styles.fabNearby}
+          onPress={() => setNearbyVisible(true)}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="navigate" size={26} color="#fff" />
+        </TouchableOpacity>
+      )}
+
+      {/* Bottom sheet aree più vicine */}
+      {nearbyVisible && (
+        <View style={styles.nearbySheet}>
+          <View style={styles.nearbyHeader}>
+            <Text style={styles.nearbyTitolo}>📍 Vicino a te</Text>
+            <TouchableOpacity
+              onPress={() => setNearbyVisible(false)}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            >
+              <Text style={styles.btnChiudiTesto}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          <FlatList
+            data={nearbyAreas}
+            keyExtractor={(item) => String(item.area.id)}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={styles.nearbyItem}
+                onPress={() => selezionaArea(item.area)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.nearbyIcona}>
+                  <Ionicons
+                    name={BRAND_ICON[item.area.brand] ?? 'restaurant'}
+                    size={18}
+                    color={Colors.primary}
+                  />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.nearbyNome} numberOfLines={1}>{item.area.name}</Text>
+                  <Text style={styles.nearbySub} numberOfLines={1}>
+                    {[item.area.brand, item.area.highway].filter(Boolean).join(' · ')}
+                  </Text>
+                </View>
+                <Text style={styles.nearbyDistanza}>{formatDistance(item.distanza)}</Text>
+              </TouchableOpacity>
+            )}
+            ListEmptyComponent={
+              <View style={styles.dropdownVuoto}>
+                <Text style={styles.dropdownVuotoTesto}>Nessuna area disponibile</Text>
+              </View>
+            }
+          />
+        </View>
+      )}
 
       {selectedArea && (
         <View style={styles.pannello}>
@@ -630,6 +705,84 @@ const styles = StyleSheet.create({
     color: '#1a1a1a',
     fontWeight: '600',
     fontSize: 15,
+  },
+
+  // ── Vicino a te ──────────────────────────────────────────────────────────
+  fabNearby: {
+    position: 'absolute',
+    right: 16,
+    bottom: 24,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+  },
+  nearbySheet: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: Colors.surface,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 32,
+    maxHeight: '55%',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 12,
+  },
+  nearbyHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  nearbyTitolo: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: Colors.text,
+  },
+  nearbyItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+    gap: 12,
+  },
+  nearbyIcona: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  nearbyNome: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  nearbySub: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 1,
+  },
+  nearbyDistanza: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: Colors.primary,
   },
 
   // ── Dropdown ricerca ─────────────────────────────────────────────────────
