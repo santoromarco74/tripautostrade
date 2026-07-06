@@ -62,19 +62,8 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [nearbyVisible, setNearbyVisible] = useState(false);
-  const [pinTracking, setPinTracking] = useState(true);
   const mapRef = useRef<RNMapView>(null);
   const { isFavorite, toggleFavorite } = useFavorites();
-
-  // Android scatta lo snapshot del marker al mount: se il pin non è ancora
-  // disegnato lo snapshot è vuoto e il pin resta invisibile. Teniamo il
-  // tracking attivo per una breve finestra dopo ogni remount (cambio filtro,
-  // selezione, nuovi dati), poi lo spegniamo per performance (CLAUDE.md §4).
-  useEffect(() => {
-    setPinTracking(true);
-    const t = setTimeout(() => setPinTracking(false), 800);
-    return () => clearTimeout(t);
-  }, [areas, searchQuery, selectedBrand, activeFilter, selectedArea]);
 
   // Intercetta il tasto Back su Android solo su questa schermata
   useFocusEffect(
@@ -252,34 +241,21 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       >
         {filteredAreas.map((area) => (
           <Marker
-            // La chiave include filtro attivo e stato di selezione: al cambio
-            // il marker viene rimontato da zero e Android riscatta lo snapshot
-            // con le dimensioni corrette (vedi CLAUDE.md §4).
-            key={`${area.id}-${activeFilter || 'all'}-${selectedArea?.id === area.id ? 'sel' : 'unsel'}`}
+            // Pin come immagine PNG nativa (prop image): nessuna view custom,
+            // quindi niente snapshot Android e niente pin tagliati/invisibili
+            // (vedi CLAUDE.md §4). La key con lo stato di selezione forza il
+            // remount e quindi lo swap affidabile dell'immagine.
+            key={`${area.id}-${selectedArea?.id === area.id ? 'sel' : 'unsel'}`}
             coordinate={{ latitude: area.latitude, longitude: area.longitude }}
             title={area.name}
             description={area.brand}
             onPress={() => selezionaArea(area)}
-            anchor={{ x: 0.5, y: 0.5 }}
-            tracksViewChanges={pinTracking}
-          >
-            {/* Wrapper esterno a dimensioni fisse (max del pin selezionato):
-                tiene costante la clip region tra stato normale e selezionato.
-                collapsable={false} impedisce ad Android di ottimizzare via la
-                view e produrre uno snapshot vuoto. */}
-            <View style={styles.pinWrapper} collapsable={false}>
-              <View style={[
-                styles.pin,
-                selectedArea?.id === area.id && styles.pinSelezionato,
-              ]}>
-                <Ionicons
-                  name={BRAND_ICON[area.brand] ?? 'restaurant'}
-                  size={selectedArea?.id === area.id ? 20 : 16}
-                  color="#fff"
-                />
-              </View>
-            </View>
-          </Marker>
+            image={
+              selectedArea?.id === area.id
+                ? require('../assets/pins/pin-selected.png')
+                : require('../assets/pins/pin.png')
+            }
+          />
         ))}
         {isLoading && <HomeLoadingOverlay />}
       </MapView>
@@ -512,42 +488,6 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-  },
-  pinWrapper: {
-    // Dimensioni fisse pari al pin più grande (48 + bordo): la clip region
-    // del marker resta identica in entrambi gli stati e Android non taglia nulla
-    width: 56,
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'transparent',
-  },
-  pin: {
-    // Dimensioni fisse per Android
-    width: 36,
-    height: 36,
-    borderRadius: 18, // Metà esatta di 36
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: '#fff',
-    
-    // Ombra più decisa per Android (elevation) e iOS
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-  },
-  pinSelezionato: {
-    // Dimensioni fisse e più grandi per il pin selezionato
-    width: 48,
-    height: 48,
-    borderRadius: 24, // Metà esatta di 48
-    backgroundColor: Colors.accent,
-    borderWidth: 3,
-    elevation: 10, // Più elevation per farlo "risaltare"
   },
   fallback: {
     flex: 1,
