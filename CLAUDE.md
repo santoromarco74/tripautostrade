@@ -91,30 +91,25 @@ useFocusEffect(
 
 ## 4. Mappe — Regole critiche per Android
 
-### Chiave dinamica sui Marker
+### Pin: SOLO immagini native, mai view custom
 
-**SEMPRE** includere il filtro attivo nella `key` del `<Marker>`:
+**Non usare mai view React (`<View>`, `<Ionicons>`, ecc.) come children di `<Marker>`.** Con la New Architecture attiva in `app.json`, Android rasterizza le view custom in uno snapshot bitmap e ogni combinazione di `tracksViewChanges` produce bug: `false` fisso → pin invisibili (snapshot scattato prima del disegno), `true` fisso → pin tagliati (race condition sugli snapshot continui). Sono stati provati anche key dinamiche, wrapper a dimensioni fisse, `collapsable={false}` e il tracking "a finestra": nessuno è affidabile al 100%.
+
+La soluzione stabile è la prop **`image`** del `<Marker>`, che passa un bitmap direttamente alla mappa nativa senza alcuno snapshot:
 
 ```tsx
 <Marker
-  key={`${area.id}-${activeFilter || 'all'}`}
+  key={`${area.id}-${selected ? 'sel' : 'unsel'}`}
+  image={selected
+    ? require('../assets/pins/pin-selected.png')
+    : require('../assets/pins/pin.png')}
   ...
->
+/>
 ```
 
-Questo forza Android a ricostruire il pin da zero ad ogni cambio filtro, evitando il bug classico di `react-native-maps` in cui i marker personalizzati vengono tagliati o diventano invisibili.
-
-### tracksViewChanges
-
-**Mai `false` fisso, mai `true` fisso** — entrambi rompono i pin su Android (con la New Architecture attiva in `app.json`):
-- `false` fisso: lo snapshot viene scattato al mount prima che il pin sia disegnato → pin invisibili
-- `true` fisso (o prop omessa): snapshot continui → race condition con pin tagliati o mancanti
-
-Usare il pattern a finestra implementato in `HomeScreen`: uno stato `pinTracking` che torna `true` ad ogni causa di remount dei marker (cambio filtri, selezione, nuovi dati) e viene rimesso a `false` da un timeout di ~800ms. Inoltre la view radice dentro il `<Marker>` deve avere `collapsable={false}`, altrimenti Android può ottimizzarla via e lo snapshot risulta vuoto.
-
-### Dimensioni pin
-
-La `<View>` dentro il `<Marker>` deve avere **sempre dimensioni fisse in `width` e `height`** (non `flex`, non percentuali). Usare un wrapper esterno con le dimensioni massime del pin per tenere costante la clip region.
+- Le immagini vivono in `assets/pins/` nelle tre densità (`pin.png`, `pin@2x.png`, `pin@3x.png` e varianti `-selected`); si rigenerano con `python3 scripts/gen_pins.py` (richiede Pillow)
+- La `key` deve includere lo stato di selezione: il remount garantisce lo swap dell'immagine su Android
+- Niente `tracksViewChanges` sui marker a immagine: non serve più
 
 ---
 
