@@ -106,7 +106,11 @@ Questo forza Android a ricostruire il pin da zero ad ogni cambio filtro, evitand
 
 ### tracksViewChanges
 
-Impostare sempre `tracksViewChanges={false}` sui marker con vista personalizzata. Usare `true` solo temporaneamente se si devono mostrare aggiornamenti dinamici critici, e reimpostare a `false` dopo il render.
+**Mai `false` fisso, mai `true` fisso** — entrambi rompono i pin su Android (con la New Architecture attiva in `app.json`):
+- `false` fisso: lo snapshot viene scattato al mount prima che il pin sia disegnato → pin invisibili
+- `true` fisso (o prop omessa): snapshot continui → race condition con pin tagliati o mancanti
+
+Usare il pattern a finestra implementato in `HomeScreen`: uno stato `pinTracking` che torna `true` ad ogni causa di remount dei marker (cambio filtri, selezione, nuovi dati) e viene rimesso a `false` da un timeout di ~800ms. Inoltre la view radice dentro il `<Marker>` deve avere `collapsable={false}`, altrimenti Android può ottimizzarla via e lo snapshot risulta vuoto.
 
 ### Dimensioni pin
 

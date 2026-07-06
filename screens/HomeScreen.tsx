@@ -62,8 +62,19 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [nearbyVisible, setNearbyVisible] = useState(false);
+  const [pinTracking, setPinTracking] = useState(true);
   const mapRef = useRef<RNMapView>(null);
   const { isFavorite, toggleFavorite } = useFavorites();
+
+  // Android scatta lo snapshot del marker al mount: se il pin non è ancora
+  // disegnato lo snapshot è vuoto e il pin resta invisibile. Teniamo il
+  // tracking attivo per una breve finestra dopo ogni remount (cambio filtro,
+  // selezione, nuovi dati), poi lo spegniamo per performance (CLAUDE.md §4).
+  useEffect(() => {
+    setPinTracking(true);
+    const t = setTimeout(() => setPinTracking(false), 800);
+    return () => clearTimeout(t);
+  }, [areas, searchQuery, selectedBrand, activeFilter, selectedArea]);
 
   // Intercetta il tasto Back su Android solo su questa schermata
   useFocusEffect(
@@ -250,11 +261,13 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
             description={area.brand}
             onPress={() => selezionaArea(area)}
             anchor={{ x: 0.5, y: 0.5 }}
-            tracksViewChanges={false}
+            tracksViewChanges={pinTracking}
           >
             {/* Wrapper esterno a dimensioni fisse (max del pin selezionato):
-                tiene costante la clip region tra stato normale e selezionato */}
-            <View style={styles.pinWrapper}>
+                tiene costante la clip region tra stato normale e selezionato.
+                collapsable={false} impedisce ad Android di ottimizzare via la
+                view e produrre uno snapshot vuoto. */}
+            <View style={styles.pinWrapper} collapsable={false}>
               <View style={[
                 styles.pin,
                 selectedArea?.id === area.id && styles.pinSelezionato,
