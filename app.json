@@ -21,6 +21,11 @@
     },
     "android": {
       "package": "com.santoromarco74.tripautostrade",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyDBs2NzQARBAqraqHVNZk1iDFNrpym51gw"
+        }
+      },
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#00695C"
