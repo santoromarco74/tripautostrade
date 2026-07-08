@@ -6,8 +6,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { QueryClient, QueryClientProvider, onlineManager } from '@tanstack/react-query';
 import * as Network from 'expo-network';
+import { initSentry, Sentry } from './lib/sentry';
 import { ReviewsProvider } from './context/ReviewsContext';
 import OfflineBanner from './components/OfflineBanner';
+
+initSentry();
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { FavoritesProvider } from './context/FavoritesContext';
 import TabNavigator from './navigation/TabNavigator';
@@ -98,7 +101,7 @@ onlineManager.setEventListener((setOnline) => {
   return () => sub.remove();
 });
 
-export default function App() {
+function App() {
   return (
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
@@ -116,3 +119,5 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+
+export default Sentry.wrap(App);

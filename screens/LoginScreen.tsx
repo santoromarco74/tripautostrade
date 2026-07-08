@@ -14,6 +14,9 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
+import { supabase } from '../lib/supabase';
+
+const RESET_PASSWORD_URL = 'https://santoromarco74.github.io/tripautostrade/reset-password.html';
 
 export default function LoginScreen() {
   const { signIn, signUp } = useAuth();
@@ -21,6 +24,33 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const gestisciResetPassword = async () => {
+    const emailTrimmed = email.trim().toLowerCase();
+    if (!emailTrimmed) {
+      Alert.alert(
+        'Inserisci la tua email',
+        'Scrivi la tua email nel campo qui sopra, poi tocca di nuovo "Password dimenticata?".'
+      );
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(emailTrimmed, {
+        redirectTo: RESET_PASSWORD_URL,
+      });
+      if (error) throw new Error(error.message);
+      Alert.alert(
+        'Email inviata',
+        `Se ${emailTrimmed} è registrata, riceverai un link per impostare una nuova password. Controlla anche lo spam.`
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Errore sconosciuto';
+      Alert.alert('Errore', msg);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const gestisciSubmit = async () => {
     const emailTrimmed = email.trim().toLowerCase();
@@ -105,6 +135,16 @@ export default function LoginScreen() {
               </Text>
             )}
           </TouchableOpacity>
+
+          {!isRegistrazione && (
+            <TouchableOpacity
+              style={styles.btnResetPassword}
+              onPress={gestisciResetPassword}
+              disabled={isLoading}
+            >
+              <Text style={styles.btnResetPasswordTesto}>Password dimenticata?</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <TouchableOpacity
@@ -190,6 +230,16 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: '700',
     fontSize: 16,
+  },
+  btnResetPassword: {
+    alignSelf: 'center',
+    paddingVertical: 10,
+  },
+  btnResetPasswordTesto: {
+    color: Colors.textSecondary,
+    fontSize: 13,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
   btnToggle: {
     paddingVertical: 8,
