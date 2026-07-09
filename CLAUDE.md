@@ -183,6 +183,9 @@ Il `backgroundColor` dello splash in `app.json` è impostato su `#00695C` per fo
 
 Prerequisiti: `npm i -g eas-cli`, `eas login` con l'account Expo del progetto (projectId già configurato in `app.json`).
 
-### Notifiche push (futuro)
+### Notifiche push
 
-Le notifiche push remote richiedono `expo-notifications` **più una dev build** (Expo Go non le supporta da SDK 53). Implementarle solo dopo la prima build `development`: registrazione token Expo Push, salvataggio in una colonna `push_token` su `profiles`, invio lato server via Supabase Edge Functions.
+Implementate end-to-end (non funzionano in Expo Go da SDK 53+, solo nelle build):
+- **Client**: `lib/pushNotifications.ts` — al login `AuthContext` chiama `registraPushToken` (permesso → token Expo Push → salvataggio in `profiles.push_token`); al logout il token viene rimosso. Fallisce in silenzio su emulatori/Expo Go.
+- **Server**: Edge Function `supabase/functions/notify-like` — invia la push all'autore della recensione quando riceve un like (via `exp.host/--/api/v2/push/send`).
+- **Attivazione** (una tantum): eseguire `scripts/add_push_token.sql`; `supabase functions deploy notify-like --no-verify-jwt`; creare un Database Webhook su INSERT in `review_likes` che chiama la function; configurare le credenziali **FCM V1** del progetto Firebase su EAS (`eas credentials -p android`) — senza FCM le push Android non partono.

@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
+import { registraPushToken, rimuoviPushToken } from '../lib/pushNotifications';
 
 interface AuthContextValue {
   session: Session | null;
@@ -16,6 +17,7 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const pushRegistrato = useRef<string | null>(null);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -32,6 +34,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Registra il token push una volta per sessione utente
+  useEffect(() => {
+    const userId = session?.user?.id;
+    if (userId && pushRegistrato.current !== userId) {
+      pushRegistrato.current = userId;
+      registraPushToken(userId);
+    }
+  }, [session]);
+
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw new Error(error.message);
@@ -43,6 +54,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    const userId = session?.user?.id;
+    if (userId) {
+      await rimuoviPushToken(userId);
+      pushRegistrato.current = null;
+    }
     const { error } = await supabase.auth.signOut();
     if (error) throw new Error(error.message);
   };
