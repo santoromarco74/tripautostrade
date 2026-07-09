@@ -20,6 +20,14 @@ import { EmptyState } from '../components/EmptyState';
 import { ActivityScreenProps } from '../types/navigation';
 import * as Location from 'expo-location';
 import { haversineDistance, formatDistance } from '../utils/distance';
+import { calcolaTitolo } from '../utils/livelli';
+
+interface ProfiloClassifica {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  points: number;
+}
 
 function Stelle({ numero }: { numero: number }) {
   return (
@@ -37,6 +45,20 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
   const [areaMap, setAreaMap] = useState<Record<string, ServiceArea>>({});
   const [allAreas, setAllAreas] = useState<ServiceArea[]>([]);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [classifica, setClassifica] = useState<ProfiloClassifica[] | null>(null);
+
+  // Carica la classifica quando si apre la tab (e la ricarica ad ogni rientro)
+  useEffect(() => {
+    if (activeTab !== 2) return;
+    supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url, points')
+      .order('points', { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (data) setClassifica(data as ProfiloClassifica[]);
+      });
+  }, [activeTab]);
 
   useEffect(() => {
     supabase.from('service_areas').select('*').then(({ data }) => {
@@ -80,7 +102,7 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
 
       <View style={styles.segmentContainer}>
         <SegmentedControl
-          segments={['Preferiti', 'Le mie recensioni']}
+          segments={['Preferiti', 'Le mie recensioni', 'Classifica']}
           activeIndex={activeTab}
           onChange={setActiveTab}
         />
@@ -145,7 +167,7 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
             );
           }}
         />
-      ) : (
+      ) : activeTab === 1 ? (
         /* ── TAB LE MIE RECENSIONI ── */
         <FlatList
           data={mieRecensioni}
@@ -199,6 +221,61 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
                     </Text>
                   </View>
                 )}
+              </View>
+            );
+          }}
+        />
+      ) : (
+        /* ── TAB CLASSIFICA ── */
+        <FlatList
+          data={classifica ?? []}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.lista}
+          ListHeaderComponent={
+            classifica && classifica.length > 0 ? (
+              <Text style={styles.subConteggio}>I 20 viaggiatori con più punti</Text>
+            ) : null
+          }
+          ListEmptyComponent={
+            classifica === null ? (
+              <View style={styles.centrato}>
+                <ActivityIndicator size="large" color={Colors.primary} />
+              </View>
+            ) : (
+              <EmptyState
+                icon="trophy-outline"
+                title="Classifica vuota"
+                subtitle="Scrivi recensioni e ricevi like per guadagnare punti"
+              />
+            )
+          }
+          renderItem={({ item, index }) => {
+            const livello = calcolaTitolo(item.points);
+            const isMe = item.id === user?.id;
+            const medaglie = ['🥇', '🥈', '🥉'];
+            return (
+              <View style={[styles.rankCard, isMe && styles.rankCardMe]}>
+                <Text style={styles.rankPos}>
+                  {index < 3 ? medaglie[index] : `${index + 1}`}
+                </Text>
+                {item.avatar_url ? (
+                  <Image source={{ uri: item.avatar_url }} style={styles.rankAvatar} />
+                ) : (
+                  <View style={styles.rankAvatarPlaceholder}>
+                    <Text style={styles.rankAvatarIniziale}>
+                      {(item.full_name ?? 'U').charAt(0).toUpperCase()}
+                    </Text>
+                  </View>
+                )}
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.rankNome} numberOfLines={1}>
+                    {item.full_name ?? 'Utente Autostradale'}{isMe ? ' (tu)' : ''}
+                  </Text>
+                  <Text style={styles.rankLivello} numberOfLines={1}>
+                    {livello.emoji} {livello.titolo}
+                  </Text>
+                </View>
+                <Text style={styles.rankPunti}>{item.points} pt</Text>
               </View>
             );
           }}
@@ -335,6 +412,67 @@ const styles = StyleSheet.create({
   btnNavigaText: {
     fontSize: 14,
     fontWeight: '600',
+    color: Colors.primary,
+  },
+
+  // ── Classifica ────────────────────────────────────────────────────────────
+  rankCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  rankCardMe: {
+    borderColor: Colors.accent,
+    borderWidth: 2,
+  },
+  rankPos: {
+    width: 34,
+    fontSize: 17,
+    fontWeight: '800',
+    color: Colors.textSecondary,
+    textAlign: 'center',
+  },
+  rankAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  rankAvatarPlaceholder: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rankAvatarIniziale: {
+    color: '#fff',
+    fontSize: 17,
+    fontWeight: '700',
+  },
+  rankNome: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  rankLivello: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    marginTop: 1,
+  },
+  rankPunti: {
+    fontSize: 15,
+    fontWeight: '800',
     color: Colors.primary,
   },
 });

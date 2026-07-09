@@ -237,7 +237,10 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         clusterColor={Colors.primary}
         clusterTextColor="#fff"
         clusterFontFamily="System"
-        radius={40}
+        // Raggio di clustering contenuto: i cluster si separano nei singoli
+        // pin già a zoom medio invece che solo a zoom ravvicinato
+        radius={22}
+        maxZoom={13}
       >
         {filteredAreas.map((area) => (
           <Marker
