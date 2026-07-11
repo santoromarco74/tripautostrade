@@ -110,6 +110,7 @@ La soluzione stabile è la prop **`image`** del `<Marker>`, che passa un bitmap 
 - Le immagini vivono in `assets/pins/` nelle tre densità (`pin.png`, `pin@2x.png`, `pin@3x.png` e varianti `-selected`); si rigenerano con `python3 scripts/gen_pins.py` (richiede Pillow)
 - La `key` deve includere lo stato di selezione: il remount garantisce lo swap dell'immagine su Android
 - Niente `tracksViewChanges` sui marker a immagine: non serve più
+- **Vale anche per i cluster**: il cluster marker di default di `react-native-map-clustering` è una view custom e si taglia. `HomeScreen` usa `renderCluster` con `Marker image` e i PNG `cluster-*.png` per fascia di conteggio (2-9, 10+, 20+, 50+, 99+), generati dallo stesso script
 
 ---
 
