@@ -49,6 +49,31 @@ const BRAND_ICON: Record<string, React.ComponentProps<typeof Ionicons>['name']> 
   Sarni: 'fast-food',
 };
 
+// Cluster come immagini native (stesse motivazioni dei pin, CLAUDE.md §4):
+// un PNG per fascia di conteggio, niente view custom → niente snapshot tagliati
+const CLUSTER_IMAGES = {
+  2: require('../assets/pins/cluster-2.png'),
+  3: require('../assets/pins/cluster-3.png'),
+  4: require('../assets/pins/cluster-4.png'),
+  5: require('../assets/pins/cluster-5.png'),
+  6: require('../assets/pins/cluster-6.png'),
+  7: require('../assets/pins/cluster-7.png'),
+  8: require('../assets/pins/cluster-8.png'),
+  9: require('../assets/pins/cluster-9.png'),
+  '10p': require('../assets/pins/cluster-10p.png'),
+  '20p': require('../assets/pins/cluster-20p.png'),
+  '50p': require('../assets/pins/cluster-50p.png'),
+  '99p': require('../assets/pins/cluster-99p.png'),
+} as const;
+
+function clusterImage(count: number) {
+  if (count <= 9) return CLUSTER_IMAGES[count as 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9];
+  if (count < 20) return CLUSTER_IMAGES['10p'];
+  if (count < 50) return CLUSTER_IMAGES['20p'];
+  if (count < 99) return CLUSTER_IMAGES['50p'];
+  return CLUSTER_IMAGES['99p'];
+}
+
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
   const insets = useSafeAreaInsets();
@@ -237,7 +262,27 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         clusterColor={Colors.primary}
         clusterTextColor="#fff"
         clusterFontFamily="System"
-        radius={40}
+        // Raggio di clustering contenuto: i cluster si separano nei singoli
+        // pin già a zoom medio invece che solo a zoom ravvicinato
+        radius={22}
+        maxZoom={13}
+        renderCluster={(cluster: {
+          id: string | number;
+          geometry: { coordinates: [number, number] };
+          properties: { point_count: number };
+          onPress: () => void;
+        }) => (
+          <Marker
+            key={`cluster-${cluster.id}`}
+            coordinate={{
+              latitude: cluster.geometry.coordinates[1],
+              longitude: cluster.geometry.coordinates[0],
+            }}
+            onPress={cluster.onPress}
+            anchor={{ x: 0.5, y: 0.5 }}
+            image={clusterImage(cluster.properties.point_count)}
+          />
+        )}
       >
         {filteredAreas.map((area) => (
           <Marker

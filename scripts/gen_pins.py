@@ -89,3 +89,46 @@ def make_pin(fill_color, name):
 make_pin(GREEN, "pin")
 make_pin(AMBER, "pin-selected")
 print("OK:", sorted(os.listdir(OUT)))
+
+
+# ── Cluster: cerchi numerati come immagini native ────────────────────────────
+# Stesse motivazioni dei pin (CLAUDE.md §4): le view custom dei cluster della
+# libreria react-native-map-clustering soffrono degli snapshot Android.
+# Fasce: 2..9 esatti, poi 10+, 20+, 50+, 99+.
+
+from PIL import ImageFont
+
+CL_BASE = 44  # dimensione base 1x del cerchio cluster
+CL_W = CL_BASE * S
+
+
+def make_cluster(label, name):
+    img = Image.new("RGBA", (CL_W, CL_W), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    c = CL_W / 2
+
+    # bordo bianco + corpo verde
+    d.ellipse([c - 21 * S, c - 21 * S, c + 21 * S, c + 21 * S], fill=WHITE)
+    d.ellipse([c - 18.5 * S, c - 18.5 * S, c + 18.5 * S, c + 18.5 * S], fill=GREEN)
+
+    # numero centrato
+    size = int((17 if len(label) <= 2 else 13.5) * S)
+    font = ImageFont.truetype(
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", size)
+    box = d.textbbox((0, 0), label, font=font)
+    d.text(
+        (c - (box[0] + box[2]) / 2, c - (box[1] + box[3]) / 2),
+        label, font=font, fill=WHITE)
+
+    for mult, suffix in ((1, ""), (2, "@2x"), (3, "@3x")):
+        out = img.resize((CL_BASE * mult, CL_BASE * mult), Image.LANCZOS)
+        out.save(f"{OUT}/{name}{suffix}.png")
+
+
+for n in range(2, 10):
+    make_cluster(str(n), f"cluster-{n}")
+make_cluster("10+", "cluster-10p")
+make_cluster("20+", "cluster-20p")
+make_cluster("50+", "cluster-50p")
+make_cluster("99+", "cluster-99p")
+print("cluster OK")

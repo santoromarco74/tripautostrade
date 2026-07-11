@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "928581893388",
+    "project_id": "tripautostrade",
+    "storage_bucket": "tripautostrade.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:928581893388:android:d11e0ba74ad1f536b59d29",
+        "android_client_info": {
+          "package_name": "com.santoromarco74.tripautostrade"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBue_-z_g3oKWr-OJiGQcCrtbhOCLqSuj4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

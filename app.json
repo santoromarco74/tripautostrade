@@ -29,6 +29,7 @@
     },
     "android": {
       "package": "com.santoromarco74.tripautostrade",
+      "googleServicesFile": "./google-services.json",
       "config": {
         "googleMaps": {
           "apiKey": "AIzaSyDBs2NzQARBAqraqHVNZk1iDFNrpym51gw"

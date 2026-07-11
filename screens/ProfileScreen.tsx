@@ -16,13 +16,7 @@ import { Colors } from '../constants/Colors';
 import { supabase } from '../lib/supabase';
 import { useFocusEffect } from '@react-navigation/native';
 import { ReviewCard } from '../components/ReviewCard';
-
-function calcolaTitolo(points: number): { titolo: string; emoji: string } {
-  if (points >= 100) return { titolo: "Leggenda dell'Asfalto",      emoji: '🏆' };
-  if (points >= 50)  return { titolo: 'Veterano delle Aree di Sosta', emoji: '🥇' };
-  if (points >= 20)  return { titolo: 'Esploratore Autostradale',    emoji: '🧭' };
-  return               { titolo: 'Novellino del Casello',            emoji: '🚗' };
-}
+import { calcolaTitolo } from '../utils/livelli';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
