@@ -37,8 +37,8 @@ Mappa con pin e cluster **come immagini PNG native** (mai view custom nei Marker
 
 Percorso concordato, in ordine:
 
-1. **Privacy policy** — pagina `docs/privacy.html` collegata dal footer della landing (obbligatoria). Contenuti: dati raccolti (email, nome, recensioni, foto, push token, crash Sentry; la posizione è usata solo on-device, non salvata), fornitori (Supabase, Google Maps, Expo, Sentry), diritti GDPR, contatto santoromarco@gmail.com
-2. **Eliminazione account** (requisito Play per app con registrazione) — bottone in ProfileScreen con doppia conferma + Edge Function `delete-account` (service role: elimina foto storage, like dati/ricevuti, recensioni, profilo, utente auth; poi signOut locale)
+1. ✅ **Privacy policy** — fatta: `docs/privacy.html` collegata dal footer della landing e da ProfileScreen. URL per la console Play: https://santoromarco74.github.io/tripautostrade/privacy.html (live dopo il merge su main)
+2. ✅ **Eliminazione account** — fatta lato codice: bottone in ProfileScreen con doppia conferma + Edge Function `delete-account` (verifica JWT, poi con service role elimina foto storage, segnalazioni fatte/ricevute, like dati/ricevuti, recensioni, preferiti, profilo, utente auth; poi signOut locale). ⚠️ **Deploy manuale richiesto**: `supabase functions deploy delete-account` (SENZA `--no-verify-jwt`) — finché non è deployata il bottone mostra errore
 3. **Account sviluppatore Play** (25 $, verifica identità) — ⚠️ account personali: serve **closed testing con 12+ tester per 14 giorni** prima della produzione; reclutare dai beta tester della landing
 4. **Build AAB**: `eas build --profile production --platform android` (profilo già pronto, autoIncrement attivo)
 5. **Store listing**: testi con l'agente `marketing` (titolo 30c, breve 80c, lunga 4000c), screenshot dal telefono, feature graphic 1024×500 (generabile con Pillow come i pin), icona 512×512 (c'è)
