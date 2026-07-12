@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   FlatList,
+  Linking,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -23,6 +24,7 @@ export default function ProfileScreen() {
   const { recensioni, deleteReview, toggleLike } = useReviews();
   const insets = useSafeAreaInsets();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [isDeletingAccount, setIsDeletingAccount] = useState(false);
   const [points, setPoints] = useState(0);
 
   useFocusEffect(
@@ -69,6 +71,56 @@ export default function ProfileScreen() {
               setIsLoggingOut(false);
             }
           },
+        },
+      ]
+    );
+  };
+
+  // Eliminazione account (requisito Google Play): doppia conferma,
+  // poi la Edge Function delete-account cancella dati e utente auth
+  const eseguiEliminaAccount = async () => {
+    setIsDeletingAccount(true);
+    try {
+      const { error } = await supabase.functions.invoke('delete-account');
+      if (error) throw error;
+
+      // L'utente auth non esiste più: basta chiudere la sessione locale
+      try {
+        await signOut();
+      } catch {
+        await supabase.auth.signOut({ scope: 'local' });
+      }
+    } catch {
+      Alert.alert(
+        'Errore',
+        "Impossibile eliminare l'account. Controlla la connessione e riprova, oppure scrivi a santoromarco@gmail.com."
+      );
+      setIsDeletingAccount(false);
+    }
+  };
+
+  const gestisciEliminaAccount = () => {
+    Alert.alert(
+      'Elimina account',
+      'Verranno cancellati definitivamente il tuo profilo, le recensioni, le foto, i like e i preferiti. Vuoi continuare?',
+      [
+        { text: 'Annulla', style: 'cancel' },
+        {
+          text: 'Continua',
+          style: 'destructive',
+          onPress: () =>
+            Alert.alert(
+              'Sei davvero sicuro?',
+              "L'operazione è definitiva e non può essere annullata.",
+              [
+                { text: 'Annulla', style: 'cancel' },
+                {
+                  text: 'Elimina definitivamente',
+                  style: 'destructive',
+                  onPress: eseguiEliminaAccount,
+                },
+              ]
+            ),
         },
       ]
     );
@@ -162,6 +214,33 @@ export default function ProfileScreen() {
             <Text style={styles.btnLogoutTesto}>Esci dall'account</Text>
           </>
         )}
+      </TouchableOpacity>
+
+      {/* Elimina account (requisito Google Play) */}
+      <TouchableOpacity
+        style={[styles.btnEliminaAccount, isDeletingAccount && { opacity: 0.6 }]}
+        onPress={gestisciEliminaAccount}
+        disabled={isDeletingAccount}
+        activeOpacity={0.75}
+      >
+        {isDeletingAccount ? (
+          <ActivityIndicator size="small" color={Colors.textSecondary} />
+        ) : (
+          <>
+            <Ionicons name="trash-outline" size={16} color={Colors.textSecondary} />
+            <Text style={styles.btnEliminaAccountTesto}>Elimina account</Text>
+          </>
+        )}
+      </TouchableOpacity>
+
+      {/* Link privacy policy */}
+      <TouchableOpacity
+        onPress={() =>
+          Linking.openURL('https://santoromarco74.github.io/tripautostrade/privacy.html')
+        }
+        activeOpacity={0.7}
+      >
+        <Text style={styles.linkPrivacy}>Privacy Policy</Text>
       </TouchableOpacity>
     </View>
   );
@@ -388,6 +467,27 @@ const styles = StyleSheet.create({
     color: '#E53935',
     fontWeight: '700',
     fontSize: 15,
+  },
+
+  // ── Elimina account + privacy ─────────────────────────────────────────────
+  btnEliminaAccount: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  btnEliminaAccountTesto: {
+    color: Colors.textSecondary,
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  linkPrivacy: {
+    color: Colors.textSecondary,
+    fontSize: 12,
+    textDecorationLine: 'underline',
+    paddingVertical: 4,
   },
 
   // ── Badge livello ─────────────────────────────────────────────────────────
