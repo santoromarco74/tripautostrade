@@ -189,7 +189,7 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
       .slice(0, 8);
   }, [areas, location]);
 
-  const handleNavigation = async (area: ServiceArea) => {
+  const apriGoogleMaps = async (area: ServiceArea) => {
     const { latitude: lat, longitude: lng } = area;
 
     if (Platform.OS === 'android') {
@@ -209,6 +209,25 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         await Linking.openURL(appleMaps);
       }
     }
+  };
+
+  // Universal link https: se Waze è installato parte la navigazione,
+  // altrimenti rimanda allo store — nessuna dichiarazione <queries> richiesta
+  const apriWaze = (area: ServiceArea) =>
+    Linking.openURL(`https://waze.com/ul?ll=${area.latitude},${area.longitude}&navigate=yes`);
+
+  // Scelta esplicita del navigatore: rende chiaro che si sta uscendo
+  // dall'app (gli utenti confondevano la schermata di Maps con TripAutostrade)
+  const handleNavigation = (area: ServiceArea) => {
+    Alert.alert(
+      `Naviga verso ${area.name}`,
+      "Stai per aprire un'app di navigazione esterna. Per tornare a TripAutostrade usa il tasto Indietro.",
+      [
+        { text: 'Annulla', style: 'cancel' },
+        { text: 'Waze', onPress: () => { apriWaze(area); } },
+        { text: 'Google Maps', onPress: () => { apriGoogleMaps(area); } },
+      ]
+    );
   };
 
   if (permissionGranted === false) {
