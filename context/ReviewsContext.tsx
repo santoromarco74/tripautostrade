@@ -158,11 +158,21 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Non autenticato');
 
-      const reviewsData = queryClient.getQueryData<Recensione[]>(['reviews']);
-      const review = reviewsData?.find((r) => r.id === reviewId);
-      if (!review) throw new Error('Recensione non trovata');
+      // NB: non leggere lo stato del like dalla cache di React Query: onMutate
+      // gira PRIMA di mutationFn e ha già invertito `likedByMe` per l'optimistic
+      // update, quindi la cache riflette lo stato NUOVO. Interrogare il DB dà lo
+      // stato reale ed evita di eseguire l'operazione opposta (bug: like che
+      // parte come DELETE e si annulla da solo).
+      const { data: existing, error: selError } = await supabase
+        .from('review_likes')
+        .select('review_id')
+        .eq('review_id', reviewId)
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      const wasLiked = review.likedByMe;
+      if (selError) throw new Error(selError.message);
+
+      const wasLiked = !!existing;
 
       if (wasLiked) {
         const { error } = await supabase
