@@ -44,6 +44,16 @@ Percorso concordato, in ordine:
 5. **Store listing**: testi con l'agente `marketing` (titolo 30c, breve 80c, lunga 4000c), screenshot dal telefono, feature graphic 1024×500 (generabile con Pillow come i pin), icona 512×512 (c'è)
 6. Data safety form + content rating in console; eventuale `eas submit -p android` con service account Play
 
+### Checklist sicurezza pre-Play (da revisione codice)
+- ⚠️ **`scripts/security_rls.sql` — DA ESEGUIRE in Supabase SQL Editor**:
+  - **CRITICO**: `reviews` aveva RLS **disattivato** → con la chiave publishable chiunque poteva creare recensioni a nome altrui o modificare/cancellare qualsiasi recensione. Lo script attiva RLS + policy (SELECT pubblico, INSERT/UPDATE/DELETE solo proprie)
+  - Integrità classifica: `profiles.points` era scrivibile dal client → lo script rende `update_user_points` SECURITY DEFINER e revoca l'UPDATE sulla colonna `points` ad authenticated/anon
+- ⚠️ **Ristringere la chiave Google Maps** (`AIza…` in `app.json`) su Google Cloud Console: Application restrictions → Android (package `com.santoromarco74.tripautostrade` + SHA-1 keystore) + API restrictions → solo "Maps SDK for Android"
+- Verificare policy Storage bucket `review-photos`: upload solo autenticati, lettura pubblica ok
+- Supabase Auth: attivare "Leaked password protection" + lunghezza minima password ≥8
+- ✅ già ok: nessun segreto nel repo, `service_role` solo lato Edge Functions, `delete-account` verifica JWT, Sentry `sendDefaultPii:false`, posizione solo on-device
+- Design (non bug): `service_areas` è modificabile da qualsiasi autenticato (crowdsourcing servizi via ServiceAreaScreen) — nessuna moderazione
+
 ## 4. Rifiniture note (non bloccanti)
 
 - **Zoom iniziale mappa**: a livello nazione i pin appaiono solo zoomando (clustering). Tuning possibile: `minPoints` sul MapView, o cluster più aggressivi solo sopra certe soglie. L'utente lo considera un dettaglio
