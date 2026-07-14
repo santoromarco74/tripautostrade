@@ -133,6 +133,47 @@
     .qr-box img { width: 220px; max-width: 80%; height: auto; }
     .qr-box p { color: var(--text-secondary); font-size: .95rem; margin-top: 12px; }
 
+    /* ── Diventa tester ───────────────────────────────── */
+    .tester {
+      background: linear-gradient(160deg, rgba(0,105,92,.06), rgba(0,105,92,.10));
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .perks {
+      list-style: none;
+      max-width: 620px;
+      margin: 0 auto 36px;
+      display: grid;
+      gap: 12px;
+    }
+    .perks li {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: .95rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.05);
+    }
+    .perks .check {
+      flex: 0 0 auto;
+      font-size: 1.2rem;
+      line-height: 1.4;
+    }
+    .perks strong { color: var(--text); }
+    .perks span.desc { color: var(--text-secondary); }
+    .cta-center { text-align: center; }
+    .cta-center .btn-download { color: #3A2A00; }
+    .tester-note {
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: .9rem;
+      max-width: 560px;
+      margin: 20px auto 0;
+    }
+
     /* ── Footer ───────────────────────────────────────── */
     footer {
       background: var(--primary-dark);
@@ -185,6 +226,32 @@
         <div class="step"><span class="num">1</span><p><strong>Scarica l'APK</strong> dal bottone qui sopra, direttamente dal telefono Android.</p></div>
         <div class="step"><span class="num">2</span><p><strong>Autorizza l'installazione</strong>: alla richiesta di Android, consenti le app da origini sconosciute per il browser.</p></div>
         <div class="step"><span class="num">3</span><p><strong>Apri TripAutostrade</strong>, registrati con la tua email e inizia a recensire le aree di servizio.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="tester" aria-labelledby="tester-title">
+    <div class="container">
+      <h2 id="tester-title">Diventa tester ufficiale</h2>
+      <p class="section-sub">TripAutostrade sta per arrivare sul Play Store: per le prossime 2 settimane cerchiamo qualche viaggiatore che la provi e ci aiuti a portarla al traguardo.</p>
+
+      <ul class="perks">
+        <li><span class="check" aria-hidden="true">⭐</span><span><strong>Tra i primi utenti ufficiali.</strong> <span class="desc">Entri nella community fondatrice, prima ancora del lancio pubblico sullo store.</span></span></li>
+        <li><span class="check" aria-hidden="true">🔄</span><span><strong>Aggiornamenti automatici.</strong> <span class="desc">Ricevi ogni nuova versione direttamente dal Play Store, senza reinstallare APK a mano.</span></span></li>
+        <li><span class="check" aria-hidden="true">🏆</span><span><strong>Vantaggio in classifica.</strong> <span class="desc">Più tempo in strada a recensire significa più punti e livelli: parti avanti a tutti gli altri.</span></span></li>
+      </ul>
+
+      <div class="steps">
+        <div class="step"><span class="num">1</span><p><strong>Unisciti al gruppo tester</strong> tramite il bottone qui sotto, con lo stesso account Google del tuo telefono.</p></div>
+        <div class="step"><span class="num">2</span><p><strong>Installa dal Play Store</strong>: una volta iscritto vedrai TripAutostrade come una normale app da scaricare.</p></div>
+        <div class="step"><span class="num">3</span><p><strong>Tienila installata ~14 giorni</strong> e usala nei tuoi viaggi: bastano un paio di settimane per darci una mano.</p></div>
+      </div>
+
+      <div class="cta-center">
+        <a class="btn-download" href="https://play.google.com/apps/testing/com.santoromarco74.tripautostrade" target="_blank" rel="noopener">
+          🚀&nbsp; Entra nel programma tester
+        </a>
+        <p class="tester-note">Oggi l'app è in beta pubblica via APK; il programma tester ti porta sul Play Store non appena sarà disponibile. Grazie e buon viaggio!</p>
       </div>
     </div>
   </section>
