@@ -653,7 +653,21 @@ insert into service_areas (name, brand, latitude, longitude)
 select n.name, n.brand, n.latitude, n.longitude
 from nuovi n
 where not exists (
-  select 1 from service_areas s where lower(s.name) = lower(n.name)
+  select 1 from service_areas s
+  where
+    -- (a) stesso nome esatto (case-insensitive)
+    lower(s.name) = lower(n.name)
+    -- (b) oppure stesso nome NORMALIZZATO entro ~300 m: evita di reinserire
+    --     una variante ("Area di servizio X") vicino a una già presente ("X")
+    or (
+      btrim(regexp_replace(lower(s.name),
+        '^(area di servizio|area servizio|a\.?d\.?s\.?)[\s\-]*', '')) = lower(n.name)
+      and sqrt(
+            ( (s.longitude - n.longitude) * 111320
+                * cos(radians((s.latitude + n.latitude) / 2)) )^2
+          + ( (s.latitude  - n.latitude ) * 110540 )^2
+          ) < 300
+    )
 );
 
 -- Variante con id esplicito (solo se la colonna id non ha default):

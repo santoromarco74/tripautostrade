@@ -108,8 +108,9 @@ begin;
          and f2.service_area_id::text = m.keeper_id
      );
 
+  -- favorites.service_area_id è UUID (diverso da reviews che è TEXT): cast keeper a uuid
   update favorites f
-     set service_area_id = m.keeper_id
+     set service_area_id = m.keeper_id::uuid
     from _dedup_map m
    where f.service_area_id::text = m.dup_id;
 
