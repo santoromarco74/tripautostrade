@@ -66,7 +66,10 @@ ranked as (
          ) as rn
   from peer
 )
-select id as dup_id, peer_id as keeper_id
+-- NB: service_areas.id è UUID, ma reviews/favorites.service_area_id sono TEXT.
+-- Per allineare i tipi la mappa memorizza gli id come TEXT e ogni confronto usa
+-- ::text, così i join text=text funzionano su tutte le tabelle.
+select id::text as dup_id, peer_id::text as keeper_id
 from ranked
 where rn = 1
   and peer_id <> id;   -- solo le righe che verranno rimosse
@@ -79,8 +82,8 @@ select d.dup_id,
        sd.name as nome_eliminato,
        k.name  as nome_tenuto
 from _dedup_map d
-join service_areas sd on sd.id = d.dup_id
-join service_areas k  on k.id  = d.keeper_id
+join service_areas sd on sd.id::text = d.dup_id
+join service_areas k  on k.id::text  = d.keeper_id
 order by k.name
 limit 60;
 
@@ -88,7 +91,7 @@ limit 60;
 -- 3) >>> ESECUZIONE — lancia questo blocco solo dopo aver visto l'anteprima
 begin;
 
-  -- recensioni → riagganciate al keeper
+  -- recensioni → riagganciate al keeper (service_area_id è TEXT)
   update reviews r
      set service_area_id = m.keeper_id
     from _dedup_map m
@@ -98,22 +101,22 @@ begin;
   -- già iscritto al keeper), poi riaggancia i restanti
   delete from favorites f
    using _dedup_map m
-   where f.service_area_id = m.dup_id
+   where f.service_area_id::text = m.dup_id
      and exists (
        select 1 from favorites f2
        where f2.user_id = f.user_id
-         and f2.service_area_id = m.keeper_id
+         and f2.service_area_id::text = m.keeper_id
      );
 
   update favorites f
      set service_area_id = m.keeper_id
     from _dedup_map m
-   where f.service_area_id = m.dup_id;
+   where f.service_area_id::text = m.dup_id;
 
   -- infine cancella le righe duplicate
   delete from service_areas s
    using _dedup_map m
-   where s.id = m.dup_id;
+   where s.id::text = m.dup_id;
 
 commit;
 
