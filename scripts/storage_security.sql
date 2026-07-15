@@ -25,28 +25,23 @@ order by cmd, policyname;
 
 
 -- ─────────────────────────────────────────────────────────────────────────
--- 2) FIX — policy corrette per review-photos (idempotenti sui nostri nomi)
+-- 2) FIX — diagnostica del 14/07: la policy corretta ESISTE GIÀ
+--    ("Utenti loggati possono caricare", INSERT con auth.role()='authenticated').
+--    Il buco era una policy permissiva parallela che va solo ELIMINATA.
 -- ─────────────────────────────────────────────────────────────────────────
--- RLS su storage.objects è attiva di default su Supabase; la riattiviamo per
--- sicurezza (no-op se già attiva).
-alter table storage.objects enable row level security;
 
--- Upload: SOLO utenti autenticati, SOLO nel bucket review-photos
-drop policy if exists "review-photos upload autenticati" on storage.objects;
-create policy "review-photos upload autenticati"
-  on storage.objects for insert
-  to authenticated
-  with check (bucket_id = 'review-photos');
+-- IL BUCO: INSERT per {public} con check solo su bucket_id (nessun controllo
+-- auth) → consentiva l'upload anonimo. Eliminala.
+drop policy if exists "Permetti upload a tutti 1tsy3yu_0" on storage.objects;
 
--- Lettura: pubblica (le foto sono pubbliche)
-drop policy if exists "review-photos lettura pubblica" on storage.objects;
-create policy "review-photos lettura pubblica"
-  on storage.objects for select
-  using (bucket_id = 'review-photos');
+-- SELECT pubblica ridondante (duplica "Foto pubbliche") → rimozione di pulizia.
+drop policy if exists "Permetti upload a tutti 1tsy3yu_1" on storage.objects;
 
--- (Opzionale) Cancellazione/aggiornamento: nessuna policy → di default negati
--- al client. La pulizia foto in fase di eliminazione account la fa la Edge
--- Function delete-account con la service_role, che bypassa la RLS.
+-- Dopo il drop: per l'INSERT resta solo "Utenti loggati possono caricare"
+-- (richiede authenticated) → anonimo bloccato. La lettura pubblica continua
+-- grazie a "Foto pubbliche". Cancellazione/aggiornamento: nessuna policy →
+-- negati al client; la pulizia foto in eliminazione account la fa la Edge
+-- Function delete-account con la service_role (bypassa la RLS).
 
 
 -- ─────────────────────────────────────────────────────────────────────────
