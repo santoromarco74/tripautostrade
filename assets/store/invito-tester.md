@@ -28,6 +28,8 @@ Dove trovare 12 persone: chi ha già scaricato l'APK dalla landing, amici/parent
 > 2. Ti giro un link, tocchi "Diventa tester" e installi l'app da Play
 > 3. La tieni installata ~14 giorni (non devi farci nulla di che!)
 >
+> 💛 Bonus: se conosci qualche area di servizio, dà i voti alla sua **pagella** (bagni, caffè, prezzi, pulizia, cibo) — bastano due tap e aiuti tutti gli altri viaggiatori.
+>
 > In cambio sei tra i **primi utenti ufficiali** e parti avanti con punti e recensioni. Ci stai? 😊
 
 ---
@@ -45,6 +47,7 @@ TripAutostrade — l'app per scoprire e recensire le aree di servizio delle auto
 1. Rispondi a questa email con la tua **email Gmail** (mi serve per abilitarti al test).
 2. Ti invierò un link: lo apri dal telefono Android, tocchi **"Diventa tester"** e poi installi l'app dal Play Store.
 3. **Tieni l'app installata per circa 14 giorni.** Non devi usarla per forza — ma se provi la mappa e lasci una recensione, mi aiuti tantissimo.
+4. **Se conosci delle aree di servizio**, compila la loro **pagella** (voti veloci su bagni, caffè, prezzi, pulizia, cibo): è la cosa che rende l'app davvero utile e mi aiuta a farla partire già "piena".
 
 **Perché farlo:**
 - Sei tra i **primi utenti ufficiali** dell'app e parti avvantaggiato nella classifica (punti e livelli).
