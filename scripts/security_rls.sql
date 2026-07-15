@@ -88,7 +88,26 @@ grant update (push_token) on public.profiles to authenticated;
 
 
 -- ─────────────────────────────────────────────────────────────────────────
--- SEZIONE 3 — Verifiche finali
+-- SEZIONE 3 — `push_token` NON leggibile dal client  [fuga PII / spam push]
+-- ─────────────────────────────────────────────────────────────────────────
+-- Problema (emerso dal pentest): `profiles` ha SELECT pubblica (policy true) e
+-- concede la SELECT di tabella ad anon/authenticated → con la sola chiave
+-- pubblica chiunque può fare `select push_token from profiles` e raccogliere i
+-- token Expo di TUTTI gli utenti. I token Expo permettono di inviare notifiche
+-- push a quei dispositivi tramite l'API pubblica di Expo → spam a tutta l'utenza.
+--
+-- Il client NON legge mai push_token: da `profiles` legge solo
+-- id, full_name, avatar_url, points (ProfileScreen, ActivityScreen, join
+-- recensioni). notify-like legge push_token con la service_role (bypassa i grant).
+-- Fix: revoca la SELECT di tabella e riconcedila solo sulle colonne pubbliche.
+
+revoke select on public.profiles from authenticated, anon;
+grant select (id, full_name, avatar_url, points)
+  on public.profiles to authenticated, anon;
+
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- SEZIONE 4 — Verifiche finali
 -- ─────────────────────────────────────────────────────────────────────────
 
 -- RLS attivo su tutte le tabelle applicative (atteso: tutte true)
@@ -104,12 +123,13 @@ from pg_proc p
 where p.proname = 'update_user_points';
 
 -- Privilegi colonna su profiles per authenticated/anon.
--- Atteso dopo lo script: UPDATE presente SOLO su push_token (authenticated);
--- su `points` NON deve più comparire UPDATE (resta SELECT/INSERT/REFERENCES).
+-- Atteso dopo lo script:
+--   • UPDATE  → SOLO su push_token (authenticated). Su `points` niente UPDATE.
+--   • SELECT  → SOLO su id, full_name, avatar_url, points. Su `push_token`
+--               NON deve comparire nessuna riga SELECT.
 select grantee, privilege_type, column_name
 from information_schema.column_privileges
 where table_name = 'profiles'
-  and column_name in ('points','push_token')
   and grantee in ('authenticated','anon')
-  and privilege_type = 'UPDATE'
-order by column_name, grantee;
+  and privilege_type in ('UPDATE','SELECT')
+order by privilege_type, column_name, grantee;
