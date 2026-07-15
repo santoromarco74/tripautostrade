@@ -2,6 +2,7 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
 import { Recensione } from '../context/ReviewsContext';
+import { CATEGORIE_PAGELLA } from '../constants/pagelle';
 
 interface ReviewCardProps {
   item: Recensione;
@@ -77,6 +78,19 @@ export function ReviewCard({
       <Text style={[styles.stelle, onDelete && styles.stelleConTrash]}>
         {'★'.repeat(item.stelle)}{'☆'.repeat(5 - item.stelle)}
       </Text>
+
+      {/* Pagella per categoria (solo le voci compilate) */}
+      {item.pagelle && Object.keys(item.pagelle).length > 0 && (
+        <View style={styles.pagelleRow}>
+          {CATEGORIE_PAGELLA.filter((c) => item.pagelle?.[c.key] != null).map((c) => (
+            <View key={c.key} style={styles.pagellaChip}>
+              <Text style={styles.pagellaChipTesto}>
+                {c.emoji} {item.pagelle![c.key]}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
 
       {/* Testo recensione */}
       <Text style={styles.testo}>{item.testo}</Text>
@@ -161,6 +175,24 @@ const styles = StyleSheet.create({
   },
   stelleConTrash: {
     marginRight: 32, // evita sovrapposizione col cestino
+  },
+
+  pagelleRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 10,
+  },
+  pagellaChip: {
+    backgroundColor: '#F1F5F9',
+    borderRadius: 8,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  pagellaChipTesto: {
+    fontSize: 12,
+    color: Colors.text,
+    fontWeight: '600',
   },
 
   testo: {

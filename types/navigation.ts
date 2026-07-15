@@ -2,6 +2,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { ServiceArea } from '../data/serviceAreas';
+import { Pagelle } from '../constants/pagelle';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -13,6 +14,7 @@ export type RecensioneEsistente = {
   stelle: number;
   testo: string;
   imageUrl?: string;
+  pagelle?: Pagelle;
 };
 
 export type RootStackParamList = {

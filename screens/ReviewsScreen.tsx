@@ -154,6 +154,7 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
                             stelle: item.stelle,
                             testo: item.testo,
                             imageUrl: item.imageUrl,
+                            pagelle: item.pagelle,
                           },
                         })
                       }

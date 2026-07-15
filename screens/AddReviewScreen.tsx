@@ -18,6 +18,7 @@ import { useReviews } from '../context/ReviewsContext';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 import { compressImage } from '../utils/imageCompression';
+import { CATEGORIE_PAGELLA, Pagelle } from '../constants/pagelle';
 
 export default function AddReviewScreen({ route, navigation }: AddReviewScreenProps) {
   const { area, recensioneEsistente } = route.params;
@@ -27,6 +28,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
   const { user } = useAuth();
 
   const [stelle, setStelle] = useState(recensioneEsistente?.stelle ?? 0);
+  const [pagelle, setPagelle] = useState<Pagelle>(recensioneEsistente?.pagelle ?? {});
   const [commento, setCommento] = useState(recensioneEsistente?.testo ?? '');
   const [foto, setFoto] = useState<{ uri: string; base64: string } | null>(null);
   const [fotoUrlEsistente, setFotoUrlEsistente] = useState<string | undefined>(
@@ -83,6 +85,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
           id: recensioneEsistente.id,
           stelle,
           testo: commento.trim(),
+          pagelle,
           ...(foto ? { fotoBase64: foto.base64 } : {}),
         });
         Alert.alert('Recensione aggiornata!', undefined, [
@@ -93,6 +96,7 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
           areaId: area.id,
           stelle,
           testo: commento.trim(),
+          pagelle,
           ...(foto ? { fotoBase64: foto.base64 } : {}),
         });
         Alert.alert('Recensione inviata con successo!', undefined, [
@@ -140,6 +144,39 @@ export default function AddReviewScreen({ route, navigation }: AddReviewScreenPr
             {['', 'Pessimo', 'Scarso', 'Nella norma', 'Buono', 'Eccellente'][stelle]}
           </Text>
         )}
+      </View>
+
+      {/* Pagella per categoria */}
+      <View style={styles.sezione}>
+        <Text style={styles.label}>
+          La pagella dell'area <Text style={styles.opzionale}>· opzionale</Text>
+        </Text>
+        {CATEGORIE_PAGELLA.map((c) => {
+          const val = pagelle[c.key] ?? 0;
+          return (
+            <View key={c.key} style={styles.pagellaRow}>
+              <Text style={styles.pagellaLabel}>{c.emoji}  {c.label}</Text>
+              <View style={styles.pagellaStelle}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <TouchableOpacity
+                    key={n}
+                    onPress={() =>
+                      setPagelle((p) => ({ ...p, [c.key]: p[c.key] === n ? undefined : n }))
+                    }
+                    hitSlop={{ top: 6, bottom: 6, left: 3, right: 3 }}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons
+                      name={n <= val ? 'star' : 'star-outline'}
+                      size={22}
+                      color={n <= val ? '#f4b400' : '#d1d5db'}
+                    />
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+          );
+        })}
       </View>
 
       {/* Commento */}
@@ -233,6 +270,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.accent,
     fontWeight: '600',
+  },
+  opzionale: {
+    fontSize: 13,
+    fontWeight: '400',
+    color: '#aaa',
+  },
+  pagellaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+  },
+  pagellaLabel: {
+    fontSize: 15,
+    color: '#1a1a1a',
+  },
+  pagellaStelle: {
+    flexDirection: 'row',
+    gap: 2,
   },
   textInput: {
     backgroundColor: '#fff',
