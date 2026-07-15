@@ -6,11 +6,29 @@
 //
 // Deploy:  supabase functions deploy notify-like --no-verify-jwt
 // (--no-verify-jwt perché a chiamarla è il webhook interno, non un utente)
+//
+// SICUREZZA — la function è pubblica (--no-verify-jwt): senza protezione
+// chiunque ne conosca l'URL potrebbe inviarle payload arbitrari e spammare
+// notifiche. Si difende con un SEGRETO CONDIVISO:
+//   1. imposta il secret sulla function:
+//        supabase secrets set NOTIFY_LIKE_SECRET=<stringa-lunga-casuale>
+//   2. nel Database Webhook aggiungi un header HTTP:
+//        x-webhook-secret: <stessa-stringa>
+// Se NOTIFY_LIKE_SECRET è impostato, le richieste senza header corretto
+// vengono respinte (401). Se non è impostato, la function resta compatibile
+// col comportamento attuale (nessun controllo) — configura il secret appena
+// puoi per chiudere il vettore di abuso.
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
 Deno.serve(async (req) => {
   try {
+    // Verifica del segreto condiviso col Database Webhook (se configurato)
+    const secret = Deno.env.get('NOTIFY_LIKE_SECRET');
+    if (secret && req.headers.get('x-webhook-secret') !== secret) {
+      return new Response('unauthorized', { status: 401 });
+    }
+
     const payload = await req.json();
     const like = payload.record as { review_id: string; user_id: string } | undefined;
     if (!like?.review_id) {
