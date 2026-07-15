@@ -5,10 +5,9 @@
 
 ---
 
-## 0. Ultima sessione (14 luglio 2026) — tutto nel branch `claude/google-play-integration-ya7kbc`, **PR #26**
+## 0. Ultima sessione (14 luglio 2026)
 
-Da mergiare e poi distribuire agli utenti con un solo `eas update` (tutto JS, nessun modulo nativo):
-`eas update --channel preview --platform android --message "fix like + notifiche + navigatore + privacy/eliminazione account"`
+Lavoro principale **MERGIATO** (era PR #26) e distribuito via `eas update`. Config lato Supabase/Google **applicata**. Ultimo giro di hardening da Advisor in **PR #35** (`scripts/supabase_advisor_fixes.sql`, da eseguire in SQL Editor).
 
 - **Google Play passi 1-2 e 5**: privacy policy (`docs/privacy.html`), eliminazione account (Edge Function `delete-account` **deployata**), store listing completo (`assets/store/listing.md` + feature graphic `assets/store/feature-graphic.png`, generata da `scripts/gen_feature_graphic.py`)
 - **Fix like** (`context/ReviewsContext.tsx`): il like si annullava da solo — `onMutate` girava prima di `mutationFn` che rileggeva la cache già invertita → eseguiva INSERT/DELETE al contrario. Ora `mutationFn` interroga il DB per lo stato reale. Sbloccava anche la notifica push (l'INSERT non avveniva mai)
@@ -17,9 +16,13 @@ Da mergiare e poi distribuire agli utenti con un solo `eas update` (tutto JS, ne
 - **Sicurezza — `scripts/security_rls.sql` ESEGUITO**: attivata RLS su `reviews` (era disattivata!); `points` non più scrivibile dal client (revoke UPDATE tabella `profiles`, grant solo `push_token`; `update_user_points` reso SECURITY DEFINER). **Sez.3 aggiunta e da rieseguire**: `push_token` non più leggibile dal client (era esposto a chiunque → raccolta token Expo + spam push); ora SELECT su `profiles` solo per id/full_name/avatar_url/points
 - **Pentest automatico** (`scripts/security_pentest.mjs`, ESEGUITO): **11/11 verdi**. Ha trovato e CHIUSO 2 vulnerabilità reali: (1) `push_token` esposto → security_rls sez.3; (2) upload anonimo sul bucket `review-photos` → eliminata la policy permissiva "Permetti upload a tutti 1tsy3yu_0" (`scripts/storage_security.sql`, ESEGUITO). Rilanciabile per re-verificare in futuro
 - **`notify-like` hardening**: endpoint pubblico → aggiunto controllo header `x-webhook-secret` vs `NOTIFY_LIKE_SECRET` (retrocompatibile finché il secret non è impostato). **Da attivare**: `supabase secrets set NOTIFY_LIKE_SECRET=...` + stesso header nel Database Webhook, poi redeploy `notify-like`
-- **Deduplica aree di servizio** (`scripts/service_areas_dedup.sql` ESEGUITO): 3024 → **2809 aree**, 0 duplicati. Per nome normalizzato + prossimità <300m (Est/Ovest e marchi omonimi preservati). Seed aggiornato per non ricrearli
-- ⚠️ **Ancora da fare (fuori dal codice)**: attivare il secret di `notify-like` (`supabase secrets set NOTIFY_LIKE_SECRET=...` + header nel Database Webhook + redeploy); restringere la chiave Google Maps su Cloud Console (package + SHA-1); "Leaked password protection" in Auth; togliere il backup `service_areas_backup_dedup` a verifica fatta
-- ✅ **Sicurezza database COMPLETA**: RLS su reviews/likes/favorites/reports, points non scrivibile, push_token non leggibile, storage upload solo autenticati — tutto verificato dal pentest 11/11
+- **Deduplica aree di servizio** (`scripts/service_areas_dedup.sql` ESEGUITO): 3024 → **2809 aree**, 0 duplicati. Per nome normalizzato + prossimità <300m (Est/Ovest e marchi omonimi preservati). Seed aggiornato per non ricrearli. Backup `service_areas_backup_dedup` **rimosso**
+- **Fix Advisor Supabase** (PR #35, `scripts/supabase_advisor_fixes.sql`): `search_path` fissato su `update_user_points`; `revoke execute` su `handle_new_user`/`update_user_points` (funzioni-trigger non più chiamabili via RPC); drop policy SELECT "Foto pubbliche" (impediva l'enumerazione del bucket, foto sempre visibili via URL pubblico)
+- **Moderazione segnalazioni** (PR #35): prima le segnalazioni finivano in `review_reports` e basta (nessuna azione). Ora: (1) `scripts/review_moderation.sql` — colonna `reviews.hidden` + trigger `hide_reported_review` che nasconde a **3 segnalatori distinti** + RLS aggiornata (le nascoste non sono servite ad altri, l'autore sì); (2) Edge Function `notify-report` — push all'admin a ogni segnalazione. **Da attivare**: eseguire lo script; `supabase functions deploy notify-report --no-verify-jwt`; secrets `ADMIN_USER_ID` (id profilo di Marco) + `NOTIFY_REPORT_SECRET`; Database Webhook su INSERT in `review_reports` con header `x-webhook-secret`. Requisito Play per app UGC (segnalazione + moderazione + rimozione)
+- ✅ **Config esterna applicata**: secret `notify-like` attivato (+ header webhook + redeploy); chiave Google Maps ristretta (package + SHA-1 + solo Maps SDK for Android — API prima non abilitata)
+- ⚠️ **"Leaked password protection"**: richiede piano Supabase **Pro** → non attivabile su free, warning Advisor accettato
+- ⚠️ **Quando su Play**: aggiungere il SHA-1 di **Play App Signing** alle restrizioni della chiave Maps (Google ri-firma l'AAB con chiave diversa)
+- ✅ **Sicurezza database COMPLETA**: RLS su reviews/likes/favorites/reports, points non scrivibile, push_token non leggibile, storage upload solo autenticati — verificato dal pentest 11/11
 
 ---
 
