@@ -13,6 +13,7 @@ import { ReviewCard } from '../components/ReviewCard';
 import { ReportModal } from '../components/ReportModal';
 import { SortFilterBar, SortOption } from '../components/SortFilterBar';
 import { useFavorites } from '../context/FavoritesContext';
+import { CATEGORIE_PAGELLA } from '../constants/pagelle';
 
 type ServiceAreaScreenProps = NativeStackScreenProps<any, 'ServiceArea'>;
 
@@ -49,6 +50,25 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
   const { isFavorite, toggleFavorite } = useFavorites();
   const areaIsFavorite = isFavorite(serviceArea.id);
   const reviews = recensioni.filter((r) => r.areaId === String(serviceArea.id));
+
+  // Pagella dell'area: media per categoria su tutte le recensioni che l'hanno votata
+  const pagellaArea = useMemo(() => {
+    const acc: Record<string, { somma: number; n: number }> = {};
+    for (const r of reviews) {
+      if (!r.pagelle) continue;
+      for (const c of CATEGORIE_PAGELLA) {
+        const v = r.pagelle[c.key];
+        if (v != null) {
+          acc[c.key] = acc[c.key] ?? { somma: 0, n: 0 };
+          acc[c.key].somma += v;
+          acc[c.key].n += 1;
+        }
+      }
+    }
+    return CATEGORIE_PAGELLA
+      .filter((c) => acc[c.key])
+      .map((c) => ({ ...c, media: acc[c.key].somma / acc[c.key].n, n: acc[c.key].n }));
+  }, [reviews]);
 
   const sortedReviews = useMemo(() => {
     const sorted = [...reviews];
@@ -147,6 +167,24 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
         contentContainerStyle={styles.lista}
         ListHeaderComponent={
           <View>
+            {pagellaArea.length > 0 && (
+              <View style={styles.pagellaCard}>
+                <Text style={styles.pagellaTitolo}>La pagella dell'area</Text>
+                {pagellaArea.map((c) => (
+                  <View key={c.key} style={styles.pagellaVoceRow}>
+                    <Text style={styles.pagellaVoceLabel}>{c.emoji}  {c.label}</Text>
+                    <View style={styles.pagellaVoceRight}>
+                      <View style={styles.pagellaBarra}>
+                        <View
+                          style={[styles.pagellaBarraFill, { width: `${(c.media / 5) * 100}%` }]}
+                        />
+                      </View>
+                      <Text style={styles.pagellaVoto}>{c.media.toFixed(1)}</Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            )}
             <Text style={styles.sectionTitle}>
               Recensioni {reviews.length > 0 ? `(${reviews.length})` : ''}
             </Text>
@@ -316,6 +354,61 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.text,
     marginBottom: 12,
+  },
+
+  // ── Pagella dell'area ─────────────────────────────────────────────────────
+  pagellaCard: {
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+  },
+  pagellaTitolo: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.text,
+    marginBottom: 14,
+  },
+  pagellaVoceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  pagellaVoceLabel: {
+    fontSize: 14,
+    color: Colors.text,
+    flex: 1,
+  },
+  pagellaVoceRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    width: 130,
+  },
+  pagellaBarra: {
+    flex: 1,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.border,
+    overflow: 'hidden',
+  },
+  pagellaBarraFill: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: Colors.primary,
+  },
+  pagellaVoto: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: Colors.primary,
+    width: 28,
+    textAlign: 'right',
   },
   emptyTesto: {
     color: Colors.textSecondary,

@@ -3,6 +3,7 @@ import { decode } from 'base64-arraybuffer';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { CATEGORIE_PAGELLA, Pagelle } from '../constants/pagelle';
 
 export interface Recensione {
   id: string;
@@ -16,6 +17,8 @@ export interface Recensione {
   imageUrl?: string;
   likeCount: number;
   likedByMe: boolean;
+  /** Voti per categoria (pagella), solo quelli compilati */
+  pagelle?: Pagelle;
 }
 
 interface DbProfile {
@@ -32,6 +35,27 @@ interface DbRow {
   created_at: string;
   image_url?: string;
   profiles?: DbProfile | null;
+  [pagellaCol: string]: unknown;
+}
+
+function dbToPagelle(row: DbRow): Pagelle | undefined {
+  const pagelle: Pagelle = {};
+  for (const c of CATEGORIE_PAGELLA) {
+    const v = row[c.dbColumn];
+    if (typeof v === 'number') pagelle[c.key] = v;
+  }
+  return Object.keys(pagelle).length > 0 ? pagelle : undefined;
+}
+
+/** Da oggetto Pagelle alle colonne DB (solo quelle valorizzate). */
+function pagelleToDbCols(pagelle?: Pagelle): Record<string, number> {
+  const cols: Record<string, number> = {};
+  if (!pagelle) return cols;
+  for (const c of CATEGORIE_PAGELLA) {
+    const v = pagelle[c.key];
+    if (v != null) cols[c.dbColumn] = v;
+  }
+  return cols;
 }
 
 function dbToRecensione(
@@ -56,6 +80,7 @@ function dbToRecensione(
     imageUrl: row.image_url ?? undefined,
     likeCount,
     likedByMe,
+    pagelle: dbToPagelle(row),
   };
 }
 
@@ -67,12 +92,14 @@ interface ReviewsContextValue {
     stelle: number;
     testo: string;
     fotoBase64?: string;
+    pagelle?: Pagelle;
   }) => Promise<void>;
   updateReview: (params: {
     id: string;
     stelle: number;
     testo: string;
     fotoBase64?: string;
+    pagelle?: Pagelle;
   }) => Promise<void>;
   deleteReview: (id: string) => Promise<void>;
   toggleLike: (reviewId: string) => Promise<void>;
@@ -227,6 +254,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       stelle: number;
       testo: string;
       fotoBase64?: string;
+      pagelle?: Pagelle;
     }) => {
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -251,6 +279,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
           rating: params.stelle,
           comment: params.testo,
           ...(imageUrl ? { image_url: imageUrl } : {}),
+          ...pagelleToDbCols(params.pagelle),
         })
         .select('*, profiles(full_name, avatar_url)')
         .single();
@@ -269,6 +298,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
       stelle: number;
       testo: string;
       fotoBase64?: string;
+      pagelle?: Pagelle;
     }) => {
       let imageUrl: string | undefined;
       if (params.fotoBase64) {
@@ -289,6 +319,7 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
           rating: params.stelle,
           comment: params.testo,
           ...(imageUrl ? { image_url: imageUrl } : {}),
+          ...pagelleToDbCols(params.pagelle),
         })
         .eq('id', params.id)
         .select()
