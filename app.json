@@ -10,8 +10,8 @@
     },
     "updates": {
       "url": "https://u.expo.dev/d9d54cb4-d62a-469e-b5f4-d0a921d29a1f",
-      "checkAutomatically": "ON_LOAD",
-      "fallbackToCacheTimeout": 3000
+      "checkAutomatically": "NEVER",
+      "fallbackToCacheTimeout": 0
     },
     "userInterfaceStyle": "light",
     "newArchEnabled": true,

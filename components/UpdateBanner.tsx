@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import * as Updates from 'expo-updates';
 import { Ionicons } from '@expo/vector-icons';
@@ -10,18 +10,36 @@ import { Colors } from '../constants/Colors';
  * aggiornamento OTA (expo-updates) e, a download completato, propone
  * il riavvio per applicarlo.
  *
- * Osserva in modo reattivo gli eventi di `expo-updates`: il controllo e
- * il download partono automaticamente all'avvio (`checkAutomatically: ON_LOAD`
- * in app.json). Quando il download supera `fallbackToCacheTimeout` prosegue in
- * background con l'app già avviata: è in quel momento che mostriamo la pillola.
+ * Il controllo e il download sono guidati da JS (in app.json
+ * `checkAutomatically: NEVER`): al mount avviamo `checkForUpdateAsync` e, se
+ * disponibile, `fetchUpdateAsync`. In questo modo l'app parte subito dalla
+ * cache e la fase di download avviene con i componenti già montati, così
+ * `useUpdates()` può osservarla e mostrarla. Se il controllo fosse lasciato al
+ * nativo all'avvio (`ON_LOAD`), il download finirebbe prima che il bundle JS
+ * sia caricato e vedremmo solo lo stato "pronto", mai "in scaricamento".
  *
- * In Expo Go e sugli emulatori `Updates.isEnabled` è false: l'hook resta
- * inattivo e la pillola non compare mai (fallimento silenzioso, come le push).
+ * In Expo Go e sugli emulatori `Updates.isEnabled` è false: non avviamo nulla e
+ * la pillola non compare mai (fallimento silenzioso, come le push).
  */
 export default function UpdateBanner() {
   const { isDownloading, isUpdatePending } = Updates.useUpdates();
   const insets = useSafeAreaInsets();
   const [riavvioInCorso, setRiavvioInCorso] = useState(false);
+
+  // Avvia il controllo + download da JS, una sola volta all'avvio.
+  useEffect(() => {
+    if (!Updates.isEnabled) return;
+    (async () => {
+      try {
+        const esito = await Updates.checkForUpdateAsync();
+        if (esito.isAvailable) {
+          await Updates.fetchUpdateAsync();
+        }
+      } catch {
+        // Nessun aggiornamento o errore di rete: ignoriamo in silenzio.
+      }
+    })();
+  }, []);
 
   const riavvia = async () => {
     if (riavvioInCorso) return;
