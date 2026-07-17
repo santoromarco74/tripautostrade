@@ -9,6 +9,7 @@ import * as Network from 'expo-network';
 import { initSentry, Sentry } from './lib/sentry';
 import { ReviewsProvider } from './context/ReviewsContext';
 import OfflineBanner from './components/OfflineBanner';
+import UpdateBanner from './components/UpdateBanner';
 
 initSentry();
 import { AuthProvider, useAuth } from './context/AuthContext';
@@ -111,6 +112,7 @@ function App() {
               <View style={{ flex: 1 }}>
                 <RootNavigator />
                 <OfflineBanner />
+                <UpdateBanner />
               </View>
             </ReviewsProvider>
           </FavoritesProvider>
