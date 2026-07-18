@@ -10,11 +10,11 @@
 ### 🔴 PRIMA COSA: la PR #35 "Pre-lancio" è APERTA, da mergiare e attivare
 Contiene 3 blocchi indipendenti (`tsc` pulito):
 - **A) Fix Advisor Supabase** — `scripts/supabase_advisor_fixes.sql` (search_path su `update_user_points`; `revoke execute` sulle funzioni-trigger; drop policy SELECT "Foto pubbliche" che permetteva l'enumerazione del bucket)
-- **B) Moderazione segnalazioni** — `scripts/review_moderation.sql` (colonna `reviews.hidden` + trigger auto-nascondi a **3 segnalatori distinti** + RLS) e Edge Function `notify-report` (push all'admin). Chiude il requisito Play per app UGC
+- **B) Moderazione segnalazioni + blocco utenti** — `scripts/review_moderation.sql` (colonna `reviews.hidden` + trigger auto-nascondi a **3 segnalatori distinti** + RLS), Edge Function `notify-report` (push all'admin), e **blocco utenti** `scripts/blocked_users.sql` (tabella + RLS; le recensioni di chi blocchi spariscono; blocca da flag su recensione, gestione/sblocco in Profilo → "Utenti bloccati"). Chiude il requisito UGC di **Google Play E App Store** (segnala + modera + rimuovi + blocca)
 - **C) Pagelle aree** (differenziazione) — `scripts/review_pagelle.sql` + UI. Voti 1-5 per categoria 🚻 Bagni · ☕ Caffè · 💶 Prezzi · 🧼 Pulizia · 🍽️ Cibo; ogni area mostra le medie. Categorie in `constants/pagelle.ts` (fonte unica)
 
 **Checklist attivazione dopo il merge:**
-1. **SQL Editor**: esegui `supabase_advisor_fixes.sql`, `review_moderation.sql`, `review_pagelle.sql` → poi **rilancia l'Advisor**
+1. **SQL Editor**: esegui `supabase_advisor_fixes.sql`, `review_moderation.sql`, `review_pagelle.sql`, `blocked_users.sql` → poi **rilancia l'Advisor**
 2. **Edge Functions**: deploy `notify-report`; secrets `ADMIN_USER_ID` (id profilo Marco) + `NOTIFY_REPORT_SECRET`; Database Webhook su INSERT `review_reports` con header `x-webhook-secret`
 3. `eas update --channel preview --platform android` per distribuire pagelle + moderazione (parte JS)
 4. **Verifica in app**: foto recensioni visibili; like assegna punti; la pagella compare; 3 segnalazioni da account diversi nascondono la recensione

@@ -81,6 +81,10 @@ Deno.serve(async (req) => {
 
     await admin.from('favorites').delete().eq('user_id', user.id);
 
+    // Blocchi creati dall'utente e blocchi che lo riguardano
+    await admin.from('blocked_users').delete().eq('blocker_id', user.id);
+    await admin.from('blocked_users').delete().eq('blocked_id', user.id);
+
     const { error: delProfileError } = await admin
       .from('profiles').delete().eq('id', user.id);
     if (delProfileError) throw new Error(delProfileError.message);

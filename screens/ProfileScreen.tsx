@@ -17,6 +17,7 @@ import { Colors } from '../constants/Colors';
 import { supabase } from '../lib/supabase';
 import { useFocusEffect } from '@react-navigation/native';
 import { ReviewCard } from '../components/ReviewCard';
+import { BlockedUsersModal } from '../components/BlockedUsersModal';
 import { calcolaTitolo } from '../utils/livelli';
 
 export default function ProfileScreen() {
@@ -25,6 +26,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [blockedModalVisible, setBlockedModalVisible] = useState(false);
   const [points, setPoints] = useState(0);
 
   useFocusEffect(
@@ -199,6 +201,20 @@ export default function ProfileScreen() {
         </View>
       </View>
 
+      {/* Utenti bloccati */}
+      <TouchableOpacity
+        style={styles.infoCard}
+        onPress={() => setBlockedModalVisible(true)}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="ban-outline" size={20} color={Colors.primary} />
+        <View style={styles.infoTesti}>
+          <Text style={styles.infoTitolo}>Moderazione</Text>
+          <Text style={styles.infoValore}>Utenti bloccati</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={Colors.textSecondary} />
+      </TouchableOpacity>
+
       {/* ── 4. LOGOUT PILL OUTLINED ── */}
       <TouchableOpacity
         style={[styles.btnLogout, isLoggingOut && { opacity: 0.6 }]}
@@ -246,6 +262,7 @@ export default function ProfileScreen() {
   );
 
   return (
+    <>
     <FlatList
       style={styles.container}
       data={mieRecensioni}
@@ -300,6 +317,11 @@ export default function ProfileScreen() {
         </View>
       )}
     />
+    <BlockedUsersModal
+      visible={blockedModalVisible}
+      onClose={() => setBlockedModalVisible(false)}
+    />
+    </>
   );
 }
 

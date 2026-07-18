@@ -46,7 +46,7 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
   });
 
   const { user } = useAuth();
-  const { recensioni, toggleLike } = useReviews();
+  const { recensioni, toggleLike, blockUser } = useReviews();
   const { isFavorite, toggleFavorite } = useFavorites();
   const areaIsFavorite = isFavorite(serviceArea.id);
   const reviews = recensioni.filter((r) => r.areaId === String(serviceArea.id));
@@ -83,6 +83,44 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
         return sorted;
     }
   }, [reviews, sortOption]);
+
+  // Flag su una recensione altrui → scelta tra segnalare o bloccare l'autore
+  const handleModeration = (reviewId: string) => {
+    const r = reviews.find((x) => x.id === reviewId);
+    Alert.alert(
+      'Modera contenuto',
+      r ? `Recensione di ${r.autore}` : undefined,
+      [
+        { text: 'Segnala recensione', onPress: () => setReportingReviewId(reviewId) },
+        {
+          text: 'Blocca utente',
+          style: 'destructive',
+          onPress: () => {
+            if (!r?.userId) return;
+            Alert.alert(
+              'Blocca utente',
+              `Non vedrai più le recensioni di ${r.autore}. Puoi sbloccarlo in seguito dal tuo profilo.`,
+              [
+                { text: 'Annulla', style: 'cancel' },
+                {
+                  text: 'Blocca',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await blockUser(r.userId!);
+                    } catch {
+                      Alert.alert('Errore', 'Impossibile bloccare l\'utente. Riprova.');
+                    }
+                  },
+                },
+              ]
+            );
+          },
+        },
+        { text: 'Annulla', style: 'cancel' },
+      ]
+    );
+  };
 
   const handleSaveAmenities = async () => {
     setIsLoading(true);
@@ -202,7 +240,7 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
             showAuthor
             currentUserId={user?.id}
             onToggleLike={toggleLike}
-            onReport={(id) => setReportingReviewId(id)}
+            onReport={handleModeration}
           />
         )}
       />
