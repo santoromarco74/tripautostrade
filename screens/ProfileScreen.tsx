@@ -17,7 +17,9 @@ import { Colors } from '../constants/Colors';
 import { supabase } from '../lib/supabase';
 import { useFocusEffect } from '@react-navigation/native';
 import { ReviewCard } from '../components/ReviewCard';
+import { BlockedUsersModal } from '../components/BlockedUsersModal';
 import { calcolaTitolo } from '../utils/livelli';
+import { SUPPORT_URL } from '../constants/support';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -25,6 +27,7 @@ export default function ProfileScreen() {
   const insets = useSafeAreaInsets();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+  const [blockedModalVisible, setBlockedModalVisible] = useState(false);
   const [points, setPoints] = useState(0);
 
   useFocusEffect(
@@ -199,6 +202,32 @@ export default function ProfileScreen() {
         </View>
       </View>
 
+      {/* Tip jar — donazione (solo se il link è configurato) */}
+      {SUPPORT_URL !== '' && (
+        <TouchableOpacity
+          style={styles.btnSupport}
+          onPress={() => Linking.openURL(SUPPORT_URL)}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="cafe-outline" size={20} color={Colors.primary} />
+          <Text style={styles.btnSupportTesto}>Sostieni il progetto</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* Utenti bloccati */}
+      <TouchableOpacity
+        style={styles.infoCard}
+        onPress={() => setBlockedModalVisible(true)}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="ban-outline" size={20} color={Colors.primary} />
+        <View style={styles.infoTesti}>
+          <Text style={styles.infoTitolo}>Moderazione</Text>
+          <Text style={styles.infoValore}>Utenti bloccati</Text>
+        </View>
+        <Ionicons name="chevron-forward" size={18} color={Colors.textSecondary} />
+      </TouchableOpacity>
+
       {/* ── 4. LOGOUT PILL OUTLINED ── */}
       <TouchableOpacity
         style={[styles.btnLogout, isLoggingOut && { opacity: 0.6 }]}
@@ -246,6 +275,7 @@ export default function ProfileScreen() {
   );
 
   return (
+    <>
     <FlatList
       style={styles.container}
       data={mieRecensioni}
@@ -300,6 +330,11 @@ export default function ProfileScreen() {
         </View>
       )}
     />
+    <BlockedUsersModal
+      visible={blockedModalVisible}
+      onClose={() => setBlockedModalVisible(false)}
+    />
+    </>
   );
 }
 
@@ -488,6 +523,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textDecorationLine: 'underline',
     paddingVertical: 4,
+  },
+  btnSupport: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    alignSelf: 'stretch',
+    backgroundColor: '#EEF9F7',
+    borderRadius: 28,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: Colors.primary + '33',
+  },
+  btnSupportTesto: {
+    color: Colors.primary,
+    fontWeight: '700',
+    fontSize: 15,
   },
 
   // ── Badge livello ─────────────────────────────────────────────────────────

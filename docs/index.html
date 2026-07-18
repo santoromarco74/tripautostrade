@@ -269,10 +269,29 @@
 
   <footer>
     <div class="container">
+      <!-- Tip jar: mostrato solo se SUPPORT_URL è impostato nello script sotto -->
+      <p id="support-line" style="display:none; margin-bottom:14px;">
+        <a id="support-link" href="#" target="_blank" rel="noopener"
+           style="display:inline-block; background:var(--accent); color:#3A2A00; font-weight:700; text-decoration:none; padding:10px 22px; border-radius:24px;">
+          ☕ Sostieni il progetto
+        </a>
+      </p>
       <p><img class="pin-deco" src="pin.png" alt="">TripAutostrade — progetto beta community-driven</p>
       <p style="margin-top:8px;">Codice sorgente e segnalazioni su <a href="https://github.com/santoromarco74/tripautostrade">GitHub</a> · <a href="privacy.html">Privacy Policy</a></p>
     </div>
   </footer>
+
+  <script>
+    // Incolla qui il link di donazione (Ko-fi consigliato) per far comparire
+    // il pulsante "Sostieni il progetto". Lascia '' per tenerlo nascosto.
+    // es: 'https://ko-fi.com/tripautostrade'
+    var SUPPORT_URL = '';
+    if (SUPPORT_URL) {
+      var l = document.getElementById('support-link');
+      l.href = SUPPORT_URL;
+      document.getElementById('support-line').style.display = 'block';
+    }
+  </script>
 
 </body>
 </html>

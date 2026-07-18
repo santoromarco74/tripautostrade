@@ -51,10 +51,47 @@ function LikeButton({
 
 export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) {
   const { area } = route.params;
-  const { recensioni, isLoading, toggleLike, deleteReview } = useReviews();
+  const { recensioni, isLoading, toggleLike, deleteReview, blockUser } = useReviews();
   const { user } = useAuth();
   const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('recent');
+
+  // Flag su recensione altrui → segnala o blocca l'autore
+  const moderaContenuto = (item: Recensione) => {
+    Alert.alert(
+      'Modera contenuto',
+      `Recensione di ${item.autore}`,
+      [
+        { text: 'Segnala recensione', onPress: () => setReportingReviewId(item.id) },
+        {
+          text: 'Blocca utente',
+          style: 'destructive',
+          onPress: () => {
+            if (!item.userId) return;
+            Alert.alert(
+              'Blocca utente',
+              `Non vedrai più le recensioni di ${item.autore}. Puoi sbloccarlo in seguito dal tuo profilo.`,
+              [
+                { text: 'Annulla', style: 'cancel' },
+                {
+                  text: 'Blocca',
+                  style: 'destructive',
+                  onPress: async () => {
+                    try {
+                      await blockUser(item.userId!);
+                    } catch {
+                      Alert.alert('Errore', 'Impossibile bloccare l\'utente. Riprova.');
+                    }
+                  },
+                },
+              ]
+            );
+          },
+        },
+        { text: 'Annulla', style: 'cancel' },
+      ]
+    );
+  };
 
   const recensioniArea = recensioni.filter((r) => r.areaId === String(area.id));
 
@@ -185,7 +222,7 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
               <LikeButton item={item} currentUserId={user?.id} onToggle={toggleLike} />
               {user && item.userId !== user.id && (
                 <TouchableOpacity
-                  onPress={() => setReportingReviewId(item.id)}
+                  onPress={() => moderaContenuto(item)}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
                   <Ionicons name="flag-outline" size={16} color={Colors.textSecondary} />

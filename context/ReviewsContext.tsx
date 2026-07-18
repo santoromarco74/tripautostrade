@@ -103,6 +103,8 @@ interface ReviewsContextValue {
   }) => Promise<void>;
   deleteReview: (id: string) => Promise<void>;
   toggleLike: (reviewId: string) => Promise<void>;
+  blockUser: (userId: string) => Promise<void>;
+  unblockUser: (userId: string) => Promise<void>;
 }
 
 const ReviewsContext = createContext<ReviewsContextValue | null>(null);
@@ -132,7 +134,21 @@ const fetchReviewsFn = async (): Promise<Recensione[]> => {
     return readReviewsCache();
   }
 
-  const reviewIds = (reviews as DbRow[]).map((r) => r.id);
+  // Utenti bloccati dall'utente corrente: le loro recensioni non vanno mostrate
+  const blockedIds = new Set<string>();
+  if (currentUserId) {
+    const { data: blocks } = await supabase
+      .from('blocked_users')
+      .select('blocked_id')
+      .eq('blocker_id', currentUserId);
+    for (const b of blocks ?? []) blockedIds.add(b.blocked_id);
+  }
+
+  const visibleReviews = (reviews as DbRow[]).filter(
+    (r) => !r.user_id || !blockedIds.has(r.user_id),
+  );
+
+  const reviewIds = visibleReviews.map((r) => r.id);
 
   const { data: likeCounts } = await supabase
     .from('review_likes')
@@ -157,7 +173,7 @@ const fetchReviewsFn = async (): Promise<Recensione[]> => {
     }
   }
 
-  const result = (reviews as DbRow[]).map((row) =>
+  const result = visibleReviews.map((row) =>
     dbToRecensione(row, countMap[row.id] ?? 0, myLikes.has(row.id)),
   );
 
@@ -343,6 +359,37 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  const blockMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non autenticato');
+      const { error } = await supabase
+        .from('blocked_users')
+        .insert({ blocker_id: user.id, blocked_id: userId });
+      // 23505 = già bloccato: non è un errore per l'utente
+      if (error && error.code !== '23505') throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+    },
+  });
+
+  const unblockMutation = useMutation({
+    mutationFn: async (userId: string) => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Non autenticato');
+      const { error } = await supabase
+        .from('blocked_users')
+        .delete()
+        .eq('blocker_id', user.id)
+        .eq('blocked_id', userId);
+      if (error) throw new Error(error.message);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['reviews'] });
+    },
+  });
+
   return (
     <ReviewsContext.Provider
       value={{
@@ -352,6 +399,8 @@ export function ReviewsProvider({ children }: { children: ReactNode }) {
         updateReview: async (params) => { await updateMutation.mutateAsync(params); },
         deleteReview: async (id) => { await deleteMutation.mutateAsync(id); },
         toggleLike: async (reviewId) => { await toggleLikeMutation.mutateAsync(reviewId); },
+        blockUser: async (userId) => { await blockMutation.mutateAsync(userId); },
+        unblockUser: async (userId) => { await unblockMutation.mutateAsync(userId); },
       }}
     >
       {children}

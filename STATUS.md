@@ -5,25 +5,36 @@
 
 ---
 
-## 0. Ultima sessione (14 luglio 2026)
+## 0. Ripartenza rapida (agg. 14 luglio 2026)
 
-Lavoro principale **MERGIATO** (era PR #26) e distribuito via `eas update`. Config lato Supabase/Google **applicata**. Ultimo giro di hardening da Advisor in **PR #35** (`scripts/supabase_advisor_fixes.sql`, da eseguire in SQL Editor).
+### 🔴 PRIMA COSA: la PR #35 "Pre-lancio" è APERTA, da mergiare e attivare
+Contiene 3 blocchi indipendenti (`tsc` pulito):
+- **A) Fix Advisor Supabase** — `scripts/supabase_advisor_fixes.sql` (search_path su `update_user_points`; `revoke execute` sulle funzioni-trigger; drop policy SELECT "Foto pubbliche" che permetteva l'enumerazione del bucket)
+- **B) Moderazione segnalazioni + blocco utenti** — `scripts/review_moderation.sql` (colonna `reviews.hidden` + trigger auto-nascondi a **3 segnalatori distinti** + RLS), Edge Function `notify-report` (push all'admin), e **blocco utenti** `scripts/blocked_users.sql` (tabella + RLS; le recensioni di chi blocchi spariscono; blocca da flag su recensione, gestione/sblocco in Profilo → "Utenti bloccati"). Chiude il requisito UGC di **Google Play E App Store** (segnala + modera + rimuovi + blocca)
+- **C) Pagelle aree** (differenziazione) — `scripts/review_pagelle.sql` + UI. Voti 1-5 per categoria 🚻 Bagni · ☕ Caffè · 💶 Prezzi · 🧼 Pulizia · 🍽️ Cibo; ogni area mostra le medie. Categorie in `constants/pagelle.ts` (fonte unica)
 
-- **Google Play passi 1-2 e 5**: privacy policy (`docs/privacy.html`), eliminazione account (Edge Function `delete-account` **deployata**), store listing completo (`assets/store/listing.md` + feature graphic `assets/store/feature-graphic.png`, generata da `scripts/gen_feature_graphic.py`)
-- **Fix like** (`context/ReviewsContext.tsx`): il like si annullava da solo — `onMutate` girava prima di `mutationFn` che rileggeva la cache già invertita → eseguiva INSERT/DELETE al contrario. Ora `mutationFn` interroga il DB per lo stato reale. Sbloccava anche la notifica push (l'INSERT non avveniva mai)
-- **Notifiche push**: risolto `InvalidCredentials` caricando le credenziali **FCM V1** (service account Firebase) su EAS
-- **Scelta navigatore** (`screens/HomeScreen.tsx`): al tocco di "Naviga" un alert fa scegliere Google Maps o Waze e avvisa che si apre un'app esterna
-- **Sicurezza — `scripts/security_rls.sql` ESEGUITO**: attivata RLS su `reviews` (era disattivata!); `points` non più scrivibile dal client (revoke UPDATE tabella `profiles`, grant solo `push_token`; `update_user_points` reso SECURITY DEFINER). **Sez.3 aggiunta e da rieseguire**: `push_token` non più leggibile dal client (era esposto a chiunque → raccolta token Expo + spam push); ora SELECT su `profiles` solo per id/full_name/avatar_url/points
-- **Pentest automatico** (`scripts/security_pentest.mjs`, ESEGUITO): **11/11 verdi**. Ha trovato e CHIUSO 2 vulnerabilità reali: (1) `push_token` esposto → security_rls sez.3; (2) upload anonimo sul bucket `review-photos` → eliminata la policy permissiva "Permetti upload a tutti 1tsy3yu_0" (`scripts/storage_security.sql`, ESEGUITO). Rilanciabile per re-verificare in futuro
-- **`notify-like` hardening**: endpoint pubblico → aggiunto controllo header `x-webhook-secret` vs `NOTIFY_LIKE_SECRET` (retrocompatibile finché il secret non è impostato). **Da attivare**: `supabase secrets set NOTIFY_LIKE_SECRET=...` + stesso header nel Database Webhook, poi redeploy `notify-like`
-- **Deduplica aree di servizio** (`scripts/service_areas_dedup.sql` ESEGUITO): 3024 → **2809 aree**, 0 duplicati. Per nome normalizzato + prossimità <300m (Est/Ovest e marchi omonimi preservati). Seed aggiornato per non ricrearli. Backup `service_areas_backup_dedup` **rimosso**
-- **Fix Advisor Supabase** (PR #35, `scripts/supabase_advisor_fixes.sql`): `search_path` fissato su `update_user_points`; `revoke execute` su `handle_new_user`/`update_user_points` (funzioni-trigger non più chiamabili via RPC); drop policy SELECT "Foto pubbliche" (impediva l'enumerazione del bucket, foto sempre visibili via URL pubblico)
-- **Moderazione segnalazioni** (PR #35): prima le segnalazioni finivano in `review_reports` e basta (nessuna azione). Ora: (1) `scripts/review_moderation.sql` — colonna `reviews.hidden` + trigger `hide_reported_review` che nasconde a **3 segnalatori distinti** + RLS aggiornata (le nascoste non sono servite ad altri, l'autore sì); (2) Edge Function `notify-report` — push all'admin a ogni segnalazione. **Da attivare**: eseguire lo script; `supabase functions deploy notify-report --no-verify-jwt`; secrets `ADMIN_USER_ID` (id profilo di Marco) + `NOTIFY_REPORT_SECRET`; Database Webhook su INSERT in `review_reports` con header `x-webhook-secret`. Requisito Play per app UGC (segnalazione + moderazione + rimozione)
-- **Pagelle aree** (PR #35, differenziazione prodotto): valutazioni strutturate 1-5 per categoria (🚻 Bagni · ☕ Caffè · 💶 Prezzi · 🧼 Pulizia · 🍽️ Cibo) oltre alle stelle; ogni area mostra la "pagella" (medie community). `constants/pagelle.ts` = fonte unica categorie (cambiarle lì le propaga ovunque). **Da attivare**: eseguire `scripts/review_pagelle.sql` (5 colonne nullable su reviews) + `eas update` per la parte JS. Prossime leve differenziazione discusse: voce editoriale ("area della settimana"), feature-wedge post-lancio "Dove mi fermo?" (soste migliori lungo una tratta)
-- ✅ **Config esterna applicata**: secret `notify-like` attivato (+ header webhook + redeploy); chiave Google Maps ristretta (package + SHA-1 + solo Maps SDK for Android — API prima non abilitata)
-- ⚠️ **"Leaked password protection"**: richiede piano Supabase **Pro** → non attivabile su free, warning Advisor accettato
-- ⚠️ **Quando su Play**: aggiungere il SHA-1 di **Play App Signing** alle restrizioni della chiave Maps (Google ri-firma l'AAB con chiave diversa)
-- ✅ **Sicurezza database COMPLETA**: RLS su reviews/likes/favorites/reports, points non scrivibile, push_token non leggibile, storage upload solo autenticati — verificato dal pentest 11/11
+**Checklist attivazione dopo il merge:**
+1. **SQL Editor**: esegui `supabase_advisor_fixes.sql`, `review_moderation.sql`, `review_pagelle.sql`, `blocked_users.sql` → poi **rilancia l'Advisor**
+2. **Edge Functions**: deploy `notify-report`; secrets `ADMIN_USER_ID` (id profilo Marco) + `NOTIFY_REPORT_SECRET`; Database Webhook su INSERT `review_reports` con header `x-webhook-secret`
+3. `eas update --channel preview --platform android` per distribuire pagelle + moderazione (parte JS)
+4. **Verifica in app**: foto recensioni visibili; like assegna punti; la pagella compare; 3 segnalazioni da account diversi nascondono la recensione
+
+### ✅ Già fatto e LIVE (mergiato in main, config applicata)
+- **Google Play passi 1-2-5**: privacy (`docs/privacy.html`), eliminazione account (`delete-account` deployata), store listing (`assets/store/listing.md` + `feature-graphic.png`), materiali tester (`assets/store/invito-tester.md`) + sezione "Diventa tester" sulla landing
+- **Bug risolti**: like (INSERT/DELETE invertite in ReviewsContext), notifiche push (credenziali FCM V1 su EAS), scelta navigatore Maps/Waze
+- **Sicurezza database COMPLETA — pentest 11/11** (`scripts/security_pentest.mjs`): RLS su reviews/likes/favorites/reports, `points` non scrivibile, `push_token` non leggibile, storage upload solo autenticati. Script eseguiti: `security_rls.sql`, `storage_security.sql`. Trovate+chiuse 2 vuln reali (push_token esposto, upload anonimo storage)
+- **`notify-like`** protetto con secret condiviso (attivato) — endpoint pubblico non più spammabile
+- **Deduplica aree**: 3024 → **2809**, 0 duplicati (`service_areas_dedup.sql`), seed reso idempotente, backup rimosso
+- **Chiave Google Maps ristretta** (package + SHA-1 + solo Maps SDK Android)
+
+### ⚠️ Note e limiti
+- **"Leaked password protection"**: richiede piano Supabase **Pro** → non attivabile su free (warning Advisor accettato)
+- **Quando pubblichi su Play**: aggiungi il SHA-1 di **Play App Signing** alle restrizioni della chiave Maps (Google ri-firma l'AAB con chiave diversa)
+- **~1900 aree** hanno nome generico "Area di servizio" (OSM non ne ha di migliori) — vedi §4
+
+### 🎯 Prossimi passi
+1. **Google Play passo 3**: account sviluppatore (25$) + reclutare **12 tester** (materiali pronti in `assets/store/invito-tester.md`) → closed testing 14 giorni. Poi passo 4 (build AAB: `eas build --profile production -p android`) e passo 6 (data safety form + content rating)
+2. **Differenziazione** (roadmap discussa): (a) voce editoriale "area della settimana"/badge ironici con agente `social-content`; (b) feature-wedge post-lancio **"Dove mi fermo?"** — soste migliori lungo una tratta A→B per distanza + qualità community; (c) crowdsourcing moderato di nomi/servizi (tabella proposte + approvazione)
 
 ---
 
