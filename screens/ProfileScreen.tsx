@@ -19,6 +19,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { ReviewCard } from '../components/ReviewCard';
 import { BlockedUsersModal } from '../components/BlockedUsersModal';
 import { calcolaTitolo } from '../utils/livelli';
+import { SUPPORT_URL } from '../constants/support';
 
 export default function ProfileScreen() {
   const { user, signOut } = useAuth();
@@ -200,6 +201,18 @@ export default function ProfileScreen() {
           <Text style={styles.infoValore}>{user?.email ?? '—'}</Text>
         </View>
       </View>
+
+      {/* Tip jar — donazione (solo se il link è configurato) */}
+      {SUPPORT_URL !== '' && (
+        <TouchableOpacity
+          style={styles.btnSupport}
+          onPress={() => Linking.openURL(SUPPORT_URL)}
+          activeOpacity={0.85}
+        >
+          <Ionicons name="cafe-outline" size={20} color={Colors.primary} />
+          <Text style={styles.btnSupportTesto}>Sostieni il progetto</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Utenti bloccati */}
       <TouchableOpacity
@@ -510,6 +523,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textDecorationLine: 'underline',
     paddingVertical: 4,
+  },
+  btnSupport: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    alignSelf: 'stretch',
+    backgroundColor: '#EEF9F7',
+    borderRadius: 28,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: Colors.primary + '33',
+  },
+  btnSupportTesto: {
+    color: Colors.primary,
+    fontWeight: '700',
+    fontSize: 15,
   },
 
   // ── Badge livello ─────────────────────────────────────────────────────────
