@@ -12,12 +12,14 @@ Contiene 3 blocchi indipendenti (`tsc` pulito):
 - **A) Fix Advisor Supabase** — `scripts/supabase_advisor_fixes.sql` (search_path su `update_user_points`; `revoke execute` sulle funzioni-trigger; drop policy SELECT "Foto pubbliche" che permetteva l'enumerazione del bucket)
 - **B) Moderazione segnalazioni + blocco utenti** — `scripts/review_moderation.sql` (colonna `reviews.hidden` + trigger auto-nascondi a **3 segnalatori distinti** + RLS), Edge Function `notify-report` (push all'admin), e **blocco utenti** `scripts/blocked_users.sql` (tabella + RLS; le recensioni di chi blocchi spariscono; blocca da flag su recensione, gestione/sblocco in Profilo → "Utenti bloccati"). Chiude il requisito UGC di **Google Play E App Store** (segnala + modera + rimuovi + blocca)
 - **C) Pagelle aree** (differenziazione) — `scripts/review_pagelle.sql` + UI. Voti 1-5 per categoria 🚻 Bagni · ☕ Caffè · 💶 Prezzi · 🧼 Pulizia · 🍽️ Cibo; ogni area mostra le medie. Categorie in `constants/pagelle.ts` (fonte unica)
+- **D) Tip jar** (monetizzazione leggera) — pulsante "Sostieni il progetto" in Profilo (`constants/support.ts` → `SUPPORT_URL`) e nel footer della landing (`docs/index.html`, var `SUPPORT_URL`). Donazione **pura** via link esterno (Ko-fi consigliato, 0% commissioni): consentita fuori dalla fatturazione store finché non dà vantaggi in-app. **Nascosto finché SUPPORT_URL è vuoto** → da attivare incollando il link Ko-fi nei due punti
 
 **Checklist attivazione dopo il merge:**
 1. **SQL Editor**: esegui `supabase_advisor_fixes.sql`, `review_moderation.sql`, `review_pagelle.sql`, `blocked_users.sql` → poi **rilancia l'Advisor**
 2. **Edge Functions**: deploy `notify-report`; secrets `ADMIN_USER_ID` (id profilo Marco) + `NOTIFY_REPORT_SECRET`; Database Webhook su INSERT `review_reports` con header `x-webhook-secret`
-3. `eas update --channel preview --platform android` per distribuire pagelle + moderazione (parte JS)
-4. **Verifica in app**: foto recensioni visibili; like assegna punti; la pagella compare; 3 segnalazioni da account diversi nascondono la recensione
+3. `eas update --channel preview --platform android` per distribuire pagelle + moderazione + blocco (parte JS)
+4. (opzionale) crea account **Ko-fi** e incolla il link in `constants/support.ts` e nello script di `docs/index.html` per accendere il tip jar
+5. **Verifica in app** (già testato ✅ moderazione+blocco): foto recensioni visibili; like assegna punti; la pagella compare; 3 segnalazioni da account diversi nascondono la recensione; blocco utente funziona (serve tabella `blocked_users` creata al punto 1)
 
 ### ✅ Già fatto e LIVE (mergiato in main, config applicata)
 - **Google Play passi 1-2-5**: privacy (`docs/privacy.html`), eliminazione account (`delete-account` deployata), store listing (`assets/store/listing.md` + `feature-graphic.png`), materiali tester (`assets/store/invito-tester.md`) + sezione "Diventa tester" sulla landing
@@ -35,6 +37,8 @@ Contiene 3 blocchi indipendenti (`tsc` pulito):
 ### 🎯 Prossimi passi
 1. **Google Play passo 3**: account sviluppatore (25$) + reclutare **12 tester** (materiali pronti in `assets/store/invito-tester.md`) → closed testing 14 giorni. Poi passo 4 (build AAB: `eas build --profile production -p android`) e passo 6 (data safety form + content rating)
 2. **Differenziazione** (roadmap discussa): (a) voce editoriale "area della settimana"/badge ironici con agente `social-content`; (b) feature-wedge post-lancio **"Dove mi fermo?"** — soste migliori lungo una tratta A→B per distanza + qualità community; (c) crowdsourcing moderato di nomi/servizi (tabella proposte + approvazione)
+3. **Monetizzazione** (discussa): ora tip jar Ko-fi (donazione pura, copre i costi). Dopo, a scala: ads discrete (AdMob), premium "Plus" (route planner + no-ads, via Play Billing/RevenueCat), partnership brand/EV, dati B2B aggregati. Patreon valutato e scartato per ora (abbonamenti+perk, commissioni alte, sovradimensionato)
+4. **iOS** (fattibile, rimandato): `app.json` ha già il blocco iOS; serve profilo iOS in `eas.json`, decidere Apple Maps vs Google, credenziali APNs, account Apple 99$/anno, distribuzione via TestFlight. Il "blocca utente" (requisito Apple 1.2) è già fatto
 
 ---
 
