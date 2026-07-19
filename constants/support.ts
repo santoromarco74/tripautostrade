@@ -5,4 +5,4 @@
 // sulle donazioni singole) e incolla qui il link. Finché è vuoto, il pulsante
 // "Sostieni il progetto" NON viene mostrato nell'app.
 //   es. 'https://ko-fi.com/tripautostrade'
-export const SUPPORT_URL = '';
+export const SUPPORT_URL = 'https://ko-fi.com/tripautostrade';
