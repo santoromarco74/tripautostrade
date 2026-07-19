@@ -34,13 +34,21 @@ drop table if exists _dedup_map;
 create temp table _dedup_map as
 with n as (
   select id, name, latitude, longitude,
+         -- Normalizza il nome togliendo i prefissi generici:
+         --  • "Area di servizio" / "Area servizio" / "ADS" (con separatori opz.)
+         --  • "Area di " (senza "servizio", es. "Area di Ceriale Sud" → "ceriale sud")
+         -- L'alternativa "^area di\s+" richiede uno spazio dopo "di", così NON
+         -- intacca nomi come "Area Diana"; e "Area di servizio" ESATTO resta ''
+         -- (chiave vuota, esclusa) evitando di fondere le ~1900 generiche.
          btrim(regexp_replace(
            lower(name),
-           '^(area di servizio|area servizio|a\.?d\.?s\.?)[\s\-]*', '')) as key
+           '^(area di servizio|area servizio|a\.?d\.?s\.?)[\s\-]*|^area di\s+', '')) as key
   from service_areas
 ),
 peer as (
-  -- accoppia righe con stessa chiave entro ~300 m (self-join, include sé stessa)
+  -- accoppia righe con stessa chiave entro ~1 km (self-join, include sé stessa).
+  -- Stesso nome specifico entro 1 km = quasi certamente la stessa area importata
+  -- due volte; i marchi omonimi lontani (Eni, IP…) restano separati.
   select a.id, b.id as peer_id, b.name as peer_name
   from n a
   join n b
@@ -50,15 +58,15 @@ peer as (
          ( (a.longitude - b.longitude) * 111320
              * cos(radians((a.latitude + b.latitude) / 2)) )^2
        + ( (a.latitude  - b.latitude ) * 110540 )^2
-       ) < 300
+       ) < 1000
 ),
 ranked as (
   select id, peer_id,
          row_number() over (
            partition by id
            order by
-             -- 1) preferisci un nome proprio (non "Area di servizio…")
-             (peer_name !~* '^(area di servizio|area servizio)') desc,
+             -- 1) preferisci un nome proprio (non "Area di servizio…" né "Area di…")
+             (peer_name !~* '^(area di servizio|area servizio|area di\s)') desc,
              -- 2) a parità, il nome più corto/pulito
              length(peer_name) asc,
              -- 3) tie-break deterministico
@@ -80,12 +88,17 @@ select count(*) as righe_da_eliminare from _dedup_map;
 
 select d.dup_id,
        sd.name as nome_eliminato,
-       k.name  as nome_tenuto
+       k.name  as nome_tenuto,
+       round(sqrt(
+         ( (sd.longitude - k.longitude) * 111320
+             * cos(radians((sd.latitude + k.latitude) / 2)) )^2
+       + ( (sd.latitude  - k.latitude ) * 110540 )^2
+       )::numeric) as metri
 from _dedup_map d
 join service_areas sd on sd.id::text = d.dup_id
 join service_areas k  on k.id::text  = d.keeper_id
-order by k.name
-limit 60;
+order by metri desc, k.name
+limit 100;
 
 
 -- 3) >>> ESECUZIONE — lancia questo blocco solo dopo aver visto l'anteprima

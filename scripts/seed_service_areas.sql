@@ -657,16 +657,16 @@ where not exists (
   where
     -- (a) stesso nome esatto (case-insensitive)
     lower(s.name) = lower(n.name)
-    -- (b) oppure stesso nome NORMALIZZATO entro ~300 m: evita di reinserire
-    --     una variante ("Area di servizio X") vicino a una già presente ("X")
+    -- (b) oppure stesso nome NORMALIZZATO entro ~1 km: evita di reinserire una
+    --     variante ("Area di servizio X" o "Area di X") vicino a una già presente ("X")
     or (
       btrim(regexp_replace(lower(s.name),
-        '^(area di servizio|area servizio|a\.?d\.?s\.?)[\s\-]*', '')) = lower(n.name)
+        '^(area di servizio|area servizio|a\.?d\.?s\.?)[\s\-]*|^area di\s+', '')) = lower(n.name)
       and sqrt(
             ( (s.longitude - n.longitude) * 111320
                 * cos(radians((s.latitude + n.latitude) / 2)) )^2
           + ( (s.latitude  - n.latitude ) * 110540 )^2
-          ) < 300
+          ) < 1000
     )
 );
 
