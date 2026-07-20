@@ -16,7 +16,7 @@ import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 import { supabase } from '../lib/supabase';
 
-const RESET_PASSWORD_URL = 'https://santoromarco74.github.io/tripautostrade/reset-password.html';
+const RESET_PASSWORD_URL = 'https://tripautostrade.it/reset-password.html';
 
 export default function LoginScreen() {
   const { signIn, signUp } = useAuth();

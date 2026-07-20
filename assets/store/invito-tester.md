@@ -54,7 +54,7 @@ TripAutostrade — l'app per scoprire e recensire le aree di servizio delle auto
 - Ricevi gli aggiornamenti automaticamente dal Play Store, senza reinstallare l'APK a mano.
 - Dai una mano concreta a un progetto indipendente, fatto da chi viaggia per chi viaggia.
 
-I tuoi dati sono trattati come descritto nella privacy policy: https://santoromarco74.github.io/tripautostrade/privacy.html
+I tuoi dati sono trattati come descritto nella privacy policy: https://tripautostrade.it/privacy.html
 
 Grazie di cuore e… buon viaggio! 🛣️
 Marco

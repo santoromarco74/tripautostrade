@@ -265,7 +265,7 @@ export default function ProfileScreen() {
       {/* Link privacy policy */}
       <TouchableOpacity
         onPress={() =>
-          Linking.openURL('https://santoromarco74.github.io/tripautostrade/privacy.html')
+          Linking.openURL('https://tripautostrade.it/privacy.html')
         }
         activeOpacity={0.7}
       >
