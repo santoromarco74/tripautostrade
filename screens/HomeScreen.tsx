@@ -87,8 +87,26 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
   const [searchFocused, setSearchFocused] = useState(false);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [nearbyVisible, setNearbyVisible] = useState(false);
+  const [featured, setFeatured] = useState<{ area: ServiceArea; titolo: string; testo: string } | null>(null);
   const mapRef = useRef<RNMapView>(null);
   const { isFavorite, toggleFavorite } = useFavorites();
+
+  // Area della settimana (voce editoriale, gestita da admin sul DB)
+  useEffect(() => {
+    supabase
+      .from('editorial')
+      .select('titolo, testo, service_areas(*)')
+      .eq('attivo', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+      .then(({ data }) => {
+        const area = (data as any)?.service_areas;
+        if (data && area) {
+          setFeatured({ area: area as ServiceArea, titolo: (data as any).titolo, testo: (data as any).testo });
+        }
+      });
+  }, []);
 
   // Intercetta il tasto Back su Android solo su questa schermata
   useFocusEffect(
@@ -421,6 +439,19 @@ export default function HomeScreen({ navigation }: HomeScreenProps) {
         </ScrollView>
       </View>
 
+      {/* Area della settimana (banner editoriale) */}
+      {featured && !selectedArea && !nearbyVisible && !searchFocused && searchQuery.length === 0 && (
+        <TouchableOpacity
+          style={[styles.featuredBanner, { top: insets.top + 12 + 60 }]}
+          activeOpacity={0.9}
+          onPress={() => navigation.navigate('ServiceArea', { area: featured.area })}
+        >
+          <Text style={styles.featuredTag}>⭐ Area della settimana</Text>
+          <Text style={styles.featuredTitolo} numberOfLines={1}>{featured.titolo}</Text>
+          <Text style={styles.featuredTesto} numberOfLines={2}>{featured.testo}</Text>
+        </TouchableOpacity>
+      )}
+
       {/* FAB "Vicino a te" */}
       {!selectedArea && !nearbyVisible && (
         <TouchableOpacity
@@ -563,6 +594,42 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#666',
     textAlign: 'center',
+  },
+
+  // ── Area della settimana ──────────────────────────────────────────────────
+  featuredBanner: {
+    position: 'absolute',
+    left: 12,
+    right: 12,
+    zIndex: 9,
+    backgroundColor: Colors.surface,
+    borderRadius: 16,
+    padding: 14,
+    borderLeftWidth: 4,
+    borderLeftColor: Colors.accent,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+  },
+  featuredTag: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: Colors.primary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  featuredTitolo: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.text,
+  },
+  featuredTesto: {
+    fontSize: 13,
+    color: Colors.textSecondary,
+    marginTop: 2,
   },
 
   // ── Ricerca e filtri ──────────────────────────────────────────────────────
