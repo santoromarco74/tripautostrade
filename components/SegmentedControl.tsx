@@ -30,22 +30,22 @@ export function SegmentedControl({ segments, activeIndex, onChange }: SegmentedC
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: Colors.border,
+    backgroundColor: '#EDF1F5',
     borderRadius: 22,
-    padding: 3,
+    padding: 4,
   },
   segment: {
     flex: 1,
     paddingVertical: 10,
     alignItems: 'center',
-    borderRadius: 20,
+    borderRadius: 18,
   },
   segmentActive: {
     backgroundColor: Colors.surface,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
     elevation: 2,
   },
   label: {
@@ -55,5 +55,6 @@ const styles = StyleSheet.create({
   },
   labelActive: {
     color: Colors.primary,
+    fontWeight: '700',
   },
 });
