@@ -17,13 +17,14 @@ import { AuthStackParamList } from '../types/navigation';
 type Props = NativeStackScreenProps<AuthStackParamList, 'Register'>;
 
 export default function RegisterScreen({ navigation }: Props) {
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
-    if (!email.trim() || !password) {
-      Alert.alert('Campi mancanti', 'Inserisci email e password.');
+    if (!nome.trim() || !email.trim() || !password) {
+      Alert.alert('Campi mancanti', 'Inserisci nome, email e password.');
       return;
     }
     if (password.length < 6) {
@@ -31,7 +32,13 @@ export default function RegisterScreen({ navigation }: Props) {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({ email: email.trim(), password });
+    // full_name va nei metadata di signup: il trigger su auth.users lo copia in
+    // profiles.full_name (il client non puo' scrivere quella colonna — security_rls.sql).
+    const { error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: { data: { full_name: nome.trim() } },
+    });
     setLoading(false);
     if (error) {
       Alert.alert('Errore registrazione', error.message);
@@ -53,6 +60,14 @@ export default function RegisterScreen({ navigation }: Props) {
         <Text style={styles.titolo}>Crea account</Text>
         <Text style={styles.sottotitolo}>Registrati per scrivere recensioni</Text>
 
+        <TextInput
+          style={styles.input}
+          placeholder="Nome (visibile nelle recensioni)"
+          placeholderTextColor="#aaa"
+          autoCapitalize="words"
+          value={nome}
+          onChangeText={setNome}
+        />
         <TextInput
           style={styles.input}
           placeholder="Email"
