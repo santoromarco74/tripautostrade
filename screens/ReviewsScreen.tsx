@@ -8,6 +8,7 @@ import { Colors } from '../constants/Colors';
 import { CardSkeleton } from '../components/SkeletonLoader';
 import { EmptyState } from '../components/EmptyState';
 import { ReportModal } from '../components/ReportModal';
+import { ModerationSheet } from '../components/ModerationSheet';
 import { SortFilterBar, SortOption } from '../components/SortFilterBar';
 
 function Stelle({ numero }: { numero: number }) {
@@ -54,41 +55,30 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
   const { recensioni, isLoading, toggleLike, deleteReview, blockUser } = useReviews();
   const { user } = useAuth();
   const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
+  const [moderazioneItem, setModerazioneItem] = useState<Recensione | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('recent');
 
-  // Flag su recensione altrui → segnala o blocca l'autore
-  const moderaContenuto = (item: Recensione) => {
+  // Conferma blocco (dopo la scelta nel bottom sheet)
+  const confermaBlocco = () => {
+    const item = moderazioneItem;
+    setModerazioneItem(null);
+    if (!item?.userId) return;
     Alert.alert(
-      'Modera contenuto',
-      `Recensione di ${item.autore}`,
+      'Blocca utente',
+      `Non vedrai più le recensioni di ${item.autore}. Puoi sbloccarlo in seguito dal tuo profilo.`,
       [
-        { text: 'Segnala recensione', onPress: () => setReportingReviewId(item.id) },
+        { text: 'Annulla', style: 'cancel' },
         {
-          text: 'Blocca utente',
+          text: 'Blocca',
           style: 'destructive',
-          onPress: () => {
-            if (!item.userId) return;
-            Alert.alert(
-              'Blocca utente',
-              `Non vedrai più le recensioni di ${item.autore}. Puoi sbloccarlo in seguito dal tuo profilo.`,
-              [
-                { text: 'Annulla', style: 'cancel' },
-                {
-                  text: 'Blocca',
-                  style: 'destructive',
-                  onPress: async () => {
-                    try {
-                      await blockUser(item.userId!);
-                    } catch {
-                      Alert.alert('Errore', 'Impossibile bloccare l\'utente. Riprova.');
-                    }
-                  },
-                },
-              ]
-            );
+          onPress: async () => {
+            try {
+              await blockUser(item.userId!);
+            } catch {
+              Alert.alert('Errore', 'Impossibile bloccare l\'utente. Riprova.');
+            }
           },
         },
-        { text: 'Annulla', style: 'cancel' },
       ]
     );
   };
@@ -222,7 +212,7 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
               <LikeButton item={item} currentUserId={user?.id} onToggle={toggleLike} />
               {user && item.userId !== user.id && (
                 <TouchableOpacity
-                  onPress={() => moderaContenuto(item)}
+                  onPress={() => setModerazioneItem(item)}
                   hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                 >
                   <Ionicons name="flag-outline" size={16} color={Colors.textSecondary} />
@@ -231,6 +221,18 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
             </View>
           </View>
         )}
+      />
+
+      <ModerationSheet
+        visible={moderazioneItem !== null}
+        autore={moderazioneItem?.autore}
+        onSegnala={() => {
+          const id = moderazioneItem?.id ?? null;
+          setModerazioneItem(null);
+          setReportingReviewId(id);
+        }}
+        onBlocca={confermaBlocco}
+        onClose={() => setModerazioneItem(null)}
       />
 
       <ReportModal

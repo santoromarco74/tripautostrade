@@ -11,6 +11,7 @@ import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 import { ReviewCard } from '../components/ReviewCard';
 import { ReportModal } from '../components/ReportModal';
+import { ModerationSheet } from '../components/ModerationSheet';
 import { SortFilterBar, SortOption } from '../components/SortFilterBar';
 import { useFavorites } from '../context/FavoritesContext';
 import { CATEGORIE_PAGELLA } from '../constants/pagelle';
@@ -34,6 +35,7 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
   const [isLoading, setIsLoading] = useState(false);
   const [isServicesModalVisible, setIsServicesModalVisible] = useState(false);
   const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
+  const [moderationId, setModerationId] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('recent');
 
   const [localAmenities, setLocalAmenities] = useState({
@@ -84,40 +86,29 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
     }
   }, [reviews, sortOption]);
 
-  // Flag su una recensione altrui → scelta tra segnalare o bloccare l'autore
-  const handleModeration = (reviewId: string) => {
-    const r = reviews.find((x) => x.id === reviewId);
+  // Recensione attualmente in moderazione (per il bottom sheet)
+  const moderazioneReview = reviews.find((x) => x.id === moderationId) ?? null;
+
+  const confermaBlocco = () => {
+    const r = moderazioneReview;
+    setModerationId(null);
+    if (!r?.userId) return;
     Alert.alert(
-      'Modera contenuto',
-      r ? `Recensione di ${r.autore}` : undefined,
+      'Blocca utente',
+      `Non vedrai più le recensioni di ${r.autore}. Puoi sbloccarlo in seguito dal tuo profilo.`,
       [
-        { text: 'Segnala recensione', onPress: () => setReportingReviewId(reviewId) },
+        { text: 'Annulla', style: 'cancel' },
         {
-          text: 'Blocca utente',
+          text: 'Blocca',
           style: 'destructive',
-          onPress: () => {
-            if (!r?.userId) return;
-            Alert.alert(
-              'Blocca utente',
-              `Non vedrai più le recensioni di ${r.autore}. Puoi sbloccarlo in seguito dal tuo profilo.`,
-              [
-                { text: 'Annulla', style: 'cancel' },
-                {
-                  text: 'Blocca',
-                  style: 'destructive',
-                  onPress: async () => {
-                    try {
-                      await blockUser(r.userId!);
-                    } catch {
-                      Alert.alert('Errore', 'Impossibile bloccare l\'utente. Riprova.');
-                    }
-                  },
-                },
-              ]
-            );
+          onPress: async () => {
+            try {
+              await blockUser(r.userId!);
+            } catch {
+              Alert.alert('Errore', 'Impossibile bloccare l\'utente. Riprova.');
+            }
           },
         },
-        { text: 'Annulla', style: 'cancel' },
       ]
     );
   };
@@ -240,7 +231,7 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
             showAuthor
             currentUserId={user?.id}
             onToggleLike={toggleLike}
-            onReport={handleModeration}
+            onReport={(id) => setModerationId(id)}
           />
         )}
       />
@@ -255,6 +246,19 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
           <Ionicons name="create-outline" size={28} color="#fff" />
         </TouchableOpacity>
       )}
+
+      {/* ── BOTTOM SHEET MODERAZIONE (segnala / blocca) ── */}
+      <ModerationSheet
+        visible={moderationId !== null}
+        autore={moderazioneReview?.autore}
+        onSegnala={() => {
+          const id = moderationId;
+          setModerationId(null);
+          setReportingReviewId(id);
+        }}
+        onBlocca={confermaBlocco}
+        onClose={() => setModerationId(null)}
+      />
 
       {/* ── MODAL SEGNALAZIONE ── */}
       <ReportModal

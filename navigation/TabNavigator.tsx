@@ -1,6 +1,7 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { StyleSheet, View } from 'react-native';
 import HomeScreen from '../screens/HomeScreen';
 import ActivityScreen from '../screens/ActivityScreen';
 import ProfileScreen from '../screens/ProfileScreen';
@@ -41,14 +42,16 @@ export default function TabNavigator() {
           shadowOpacity: 0.08,
           shadowRadius: 10,
         },
-        tabBarIcon: ({ color, size, focused }) => {
+        tabBarIcon: ({ focused }) => {
           const icons = TAB_ICONS[route.name as keyof TabParamList];
           return (
-            <Ionicons
-              name={focused ? icons.filled : icons.outline}
-              size={size}
-              color={color}
-            />
+            <View style={[styles.pill, focused && styles.pillActive]}>
+              <Ionicons
+                name={focused ? icons.filled : icons.outline}
+                size={22}
+                color={focused ? Colors.primary : '#94A3B8'}
+              />
+            </View>
           );
         },
       })}
@@ -59,3 +62,17 @@ export default function TabNavigator() {
     </Tab.Navigator>
   );
 }
+
+const styles = StyleSheet.create({
+  // Indicatore Material 3: pillola tenue dietro l'icona della tab attiva
+  pill: {
+    width: 56,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pillActive: {
+    backgroundColor: '#E6F4F1', // primary tint
+  },
+});

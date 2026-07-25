@@ -1,44 +1,45 @@
 # STATUS.md — Stato del progetto e ripartenza
 
 > Documento di handoff per la prossima sessione di sviluppo.
-> Ultimo aggiornamento: 14 luglio 2026. Leggere insieme a `CLAUDE.md` (regole tecniche).
+> Ultimo aggiornamento: 20 luglio 2026. Leggere insieme a `CLAUDE.md` (regole tecniche).
 
 ---
 
-## 0. Ripartenza rapida (agg. 14 luglio 2026)
+## 0. Ripartenza rapida (agg. 20 luglio 2026)
 
-### 🔴 PRIMA COSA: la PR #35 "Pre-lancio" è APERTA, da mergiare e attivare
-Contiene 3 blocchi indipendenti (`tsc` pulito):
-- **A) Fix Advisor Supabase** — `scripts/supabase_advisor_fixes.sql` (search_path su `update_user_points`; `revoke execute` sulle funzioni-trigger; drop policy SELECT "Foto pubbliche" che permetteva l'enumerazione del bucket)
-- **B) Moderazione segnalazioni + blocco utenti** — `scripts/review_moderation.sql` (colonna `reviews.hidden` + trigger auto-nascondi a **3 segnalatori distinti** + RLS), Edge Function `notify-report` (push all'admin), e **blocco utenti** `scripts/blocked_users.sql` (tabella + RLS; le recensioni di chi blocchi spariscono; blocca da flag su recensione, gestione/sblocco in Profilo → "Utenti bloccati"). Chiude il requisito UGC di **Google Play E App Store** (segnala + modera + rimuovi + blocca)
-- **C) Pagelle aree** (differenziazione) — `scripts/review_pagelle.sql` + UI. Voti 1-5 per categoria 🚻 Bagni · ☕ Caffè · 💶 Prezzi · 🧼 Pulizia · 🍽️ Cibo; ogni area mostra le medie. Categorie in `constants/pagelle.ts` (fonte unica)
-- **D) Tip jar** (monetizzazione leggera) — pulsante "Sostieni il progetto" in Profilo (`constants/support.ts` → `SUPPORT_URL`) e nel footer della landing (`docs/index.html`, var `SUPPORT_URL`). Donazione **pura** via link esterno: consentita fuori dalla fatturazione store finché non dà vantaggi in-app. ✅ **ATTIVATO** su `https://ko-fi.com/tripautostrade`. ⚠️ tenerlo donazione pura (nessun vantaggio in-app, altrimenti scatta Play Billing/IAP)
+### 🔴 PR IN CORSO da mergiare (contiene questo report + refresh UI)
+La PR aperta in questa sessione contiene: **refresh grafico** (tab bar Material 3 con pillola, SegmentedControl migliorato, **ModerationSheet** = bottom sheet custom per Segnala/Blocca al posto degli Alert), **firma "by Marco Santoro"** (Profilo + landing), e questo STATUS aggiornato. `tsc` pulito.
+> ⚠️ Nota storica: questo commit UI era rimasto fuori dal merge di #43 (mergiata su un commit precedente) ed è stato recuperato. Alla prossima, **verificare che la PR sia stata mergiata** e che main contenga `components/ModerationSheet.tsx` e il pill in `navigation/TabNavigator.tsx`.
 
-**Checklist attivazione dopo il merge:**
-1. **SQL Editor**: esegui `supabase_advisor_fixes.sql`, `review_moderation.sql`, `review_pagelle.sql`, `blocked_users.sql` → poi **rilancia l'Advisor**
-2. **Edge Functions**: deploy `notify-report`; secrets `ADMIN_USER_ID` (id profilo Marco) + `NOTIFY_REPORT_SECRET`; Database Webhook su INSERT `review_reports` con header `x-webhook-secret`
-3. `eas update --channel preview --platform android` per distribuire pagelle + moderazione + blocco (parte JS)
-4. Tip jar: ✅ già attivato (Ko-fi link impostato in `constants/support.ts` e `docs/index.html`)
-5. **Verifica in app** (già testato ✅ moderazione+blocco): foto recensioni visibili; like assegna punti; la pagella compare; 3 segnalazioni da account diversi nascondono la recensione; blocco utente funziona (serve tabella `blocked_users` creata al punto 1)
+### ✅ TUTTO IL CODICE È IN MAIN (via PR #35, #40, #41, #42, #43 + la PR UI in corso)
+- **Google Play passi 1-2-5**: privacy (`docs/privacy.html`), eliminazione account (`delete-account`), store listing (`assets/store/`), materiali tester (`assets/store/invito-tester.md`) + sezione "Diventa tester" sulla landing
+- **Bug risolti**: like, notifiche push (FCM V1), scelta navigatore Maps/Waze
+- **Sicurezza — pentest 11/11** (`scripts/security_pentest.mjs`): RLS ovunque, `points` non scrivibile, `push_token` non leggibile, storage upload solo autenticati; `notify-like` protetto con secret
+- **Moderazione UGC completa**: segnalazioni + auto-nascondi a 3 segnalatori + notifica admin (`notify-report`) + **blocco/sblocco utenti** (Play E App Store ok)
+- **Pagelle aree** (🚻☕💶🧼🍽️, `constants/pagelle.ts`), **Area della settimana** (`scripts/editorial.sql` + banner Home), **Tip jar Ko-fi** attivo
+- **Deduplica aree**: 3024 → ~2809 (1° passaggio); 2° passaggio "Area di" in `service_areas_dedup.sql` (regex estesa, soglia 1 km)
+- **Dominio**: `docs/CNAME` = tripautostrade.it; link in-app aggiornati
 
-### ✅ Già fatto e LIVE (mergiato in main, config applicata)
-- **Google Play passi 1-2-5**: privacy (`docs/privacy.html`), eliminazione account (`delete-account` deployata), store listing (`assets/store/listing.md` + `feature-graphic.png`), materiali tester (`assets/store/invito-tester.md`) + sezione "Diventa tester" sulla landing
-- **Bug risolti**: like (INSERT/DELETE invertite in ReviewsContext), notifiche push (credenziali FCM V1 su EAS), scelta navigatore Maps/Waze
-- **Sicurezza database COMPLETA — pentest 11/11** (`scripts/security_pentest.mjs`): RLS su reviews/likes/favorites/reports, `points` non scrivibile, `push_token` non leggibile, storage upload solo autenticati. Script eseguiti: `security_rls.sql`, `storage_security.sql`. Trovate+chiuse 2 vuln reali (push_token esposto, upload anonimo storage)
-- **`notify-like`** protetto con secret condiviso (attivato) — endpoint pubblico non più spammabile
-- **Deduplica aree**: 3024 → **2809**, 0 duplicati (`service_areas_dedup.sql`), seed reso idempotente, backup rimosso
-- **Chiave Google Maps ristretta** (package + SHA-1 + solo Maps SDK Android)
+### ⚠️ DA ESEGUIRE / VERIFICARE (dashboard, DNS — fuori dal repo)
+Gli script SQL sono nel repo ma vanno **eseguiti in Supabase SQL Editor** se non già fatto. Stato noto:
+- ✅ eseguiti e verificati: `review_moderation.sql`, `blocked_users.sql`, dedup 1° passaggio
+- ❓ **da confermare/eseguire**: `supabase_advisor_fixes.sql`, `review_pagelle.sql`, `editorial.sql`, `service_areas_dedup.sql` (2° passaggio "Area di"), `security_rls.sql`/`storage_security.sql` (dovrebbero essere già fatti dai test sicurezza)
+- **`notify-report`**: deploy Edge Function + secrets `ADMIN_USER_ID` (id profilo Marco) + `NOTIFY_REPORT_SECRET` + webhook su `review_reports` con header `x-webhook-secret`
+- **Dominio tripautostrade.it** — 3 passi manuali: (1) DNS 4 record A apex → 185.199.108/109/110/111.153; (2) GitHub → Settings → Pages → custom domain + Enforce HTTPS; (3) **Supabase → Auth → Redirect URLs**: aggiungi `https://tripautostrade.it/reset-password.html` (senza questo il reset password si rompe)
+- **`eas update --channel preview --platform android`** per distribuire tutto il JS (UI, pagelle, moderazione, blocco, area settimana, link dominio) agli utenti
+- Impostare la prima "Area della settimana" (istruzioni in `scripts/editorial.sql`)
 
-### ⚠️ Note e limiti
-- **"Leaked password protection"**: richiede piano Supabase **Pro** → non attivabile su free (warning Advisor accettato)
-- **Quando pubblichi su Play**: aggiungi il SHA-1 di **Play App Signing** alle restrizioni della chiave Maps (Google ri-firma l'AAB con chiave diversa)
-- **~1900 aree** hanno nome generico "Area di servizio" (OSM non ne ha di migliori) — vedi §4
+### 🧱 Limiti noti
+- **"Leaked password protection"**: richiede piano Supabase **Pro** (warning Advisor accettato su free)
+- **Su Play**: aggiungere il SHA-1 di **Play App Signing** alle restrizioni chiave Maps (Google ri-firma l'AAB)
+- **~1900 aree** con nome generico "Area di servizio" (limite OSM)
+- **Supabase free**: va in pausa dopo ~1 settimana di inattività → riattivare da dashboard
 
 ### 🎯 Prossimi passi
-1. **Google Play passo 3**: account sviluppatore (25$) + reclutare **12 tester** (materiali pronti in `assets/store/invito-tester.md`) → closed testing 14 giorni. Poi passo 4 (build AAB: `eas build --profile production -p android`) e passo 6 (data safety form + content rating)
-2. **Differenziazione** (roadmap discussa): (a) voce editoriale "area della settimana"/badge ironici con agente `social-content`; (b) feature-wedge post-lancio **"Dove mi fermo?"** — soste migliori lungo una tratta A→B per distanza + qualità community; (c) crowdsourcing moderato di nomi/servizi (tabella proposte + approvazione)
-3. **Monetizzazione** (discussa): ora tip jar Ko-fi (donazione pura, copre i costi). Dopo, a scala: ads discrete (AdMob), premium "Plus" (route planner + no-ads, via Play Billing/RevenueCat), partnership brand/EV, dati B2B aggregati. Patreon valutato e scartato per ora (abbonamenti+perk, commissioni alte, sovradimensionato)
-4. **iOS** (fattibile, rimandato): `app.json` ha già il blocco iOS; serve profilo iOS in `eas.json`, decidere Apple Maps vs Google, credenziali APNs, account Apple 99$/anno, distribuzione via TestFlight. Il "blocca utente" (requisito Apple 1.2) è già fatto
+1. **Google Play passo 3**: account sviluppatore (25$) + **12 tester** (materiali in `assets/store/invito-tester.md`) → closed testing 14 giorni → build AAB (`eas build --profile production -p android`) → data safety + content rating
+2. **Differenziazione**: ✅ pagelle + area della settimana fatte; da fare: **"Dove mi fermo?"** (soste migliori lungo una tratta — decidere routing Google Directions vs OSRM + free/premium); crowdsourcing moderato nomi/servizi
+3. **Monetizzazione**: tip jar Ko-fi attivo. A scala: ads (AdMob), premium "Plus" (route planner + no-ads via Play Billing/RevenueCat), partnership brand/EV, dati B2B
+4. **iOS** (fattibile, rimandato): `app.json` ha già il blocco iOS; serve profilo iOS in `eas.json`, Apple Maps vs Google, APNs, account Apple 99$/anno, TestFlight. Il "blocca utente" (requisito Apple 1.2) è già fatto
 
 ---
 

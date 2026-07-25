@@ -271,6 +271,9 @@ export default function ProfileScreen() {
       >
         <Text style={styles.linkPrivacy}>Privacy Policy</Text>
       </TouchableOpacity>
+
+      {/* Firma */}
+      <Text style={styles.firma}>TripAutostrade · by Marco Santoro</Text>
     </View>
   );
 
@@ -523,6 +526,13 @@ const styles = StyleSheet.create({
     fontSize: 12,
     textDecorationLine: 'underline',
     paddingVertical: 4,
+  },
+  firma: {
+    color: '#B6C2CF',
+    fontSize: 11,
+    fontWeight: '600',
+    marginTop: 10,
+    letterSpacing: 0.3,
   },
   btnSupport: {
     flexDirection: 'row',
