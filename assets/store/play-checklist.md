@@ -172,9 +172,11 @@ in `data-safety.md`.
 
 Il campo Nome in registrazione è stato aggiunto il 25/07/2026. Gli account creati prima hanno
 `profiles.full_name` a `null` e compaiono come "Utente Autostradale" in recensioni e classifica.
-Prima degli screenshot conviene valorizzare a mano almeno i profili visibili:
 
-```sql
--- controlla quanti sono
-select count(*) from profiles where full_name is null;
-```
+→ Esegui **`scripts/backfill_full_name.sql`** nel SQL Editor di Supabase: assegna uno pseudonimo
+neutro e stabile (`Viaggiatore A3F9`) a chi non ha nome. Lo script è idempotente e spiega perché
+**non** deriva il nome dal prefisso dell'email (`full_name` è pubblico, l'email no: lo farebbe
+contraddire la privacy policy).
+
+⚠️ Da fare **prima degli screenshot** della classifica. Il file segnala anche un limite ancora
+aperto: l'utente non ha modo di cambiare il proprio nome dall'app.

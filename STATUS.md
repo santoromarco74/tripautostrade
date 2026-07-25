@@ -22,7 +22,7 @@ Tutta la documentazione per la console è pronta in `assets/store/`, compilata d
 | `listing.md` | Aggiornato: conteggi ri-misurati + correzione del numero di aree |
 
 **Tre problemi reali trovati e risolti nel codice:**
-1. **Campo Nome mancante in registrazione** — `RegisterScreen` inviava solo email e password, il trigger scriveva `full_name = null` e **tutti** gli utenti apparivano come "Utente Autostradale" in recensioni e classifica. Aggiunto il campo, passato nei metadata di signup.
+1. **Campo Nome mancante in registrazione** — `RegisterScreen` inviava solo email e password, il trigger scriveva `full_name = null` e **tutti** gli utenti apparivano come "Utente Autostradale" in recensioni e classifica. Aggiunto il campo, passato nei metadata di signup. Per gli account preesistenti: eseguire `scripts/backfill_full_name.sql` (pseudonimo neutro, **non** il prefisso dell'email che è pubblico e contraddirebbe la privacy). ⚠️ Resta aperto: l'utente non può cambiare il proprio nome dall'app — vedi note nello script.
 2. **Pagina di eliminazione account assente** — Play la esige come URL pubblico per le app con registrazione. Creata `docs/elimina-account.html`, collegata da landing e privacy.
 3. **`app.json` → `name` era `tripautostrade`** minuscolo: è l'etichetta sotto l'icona nel launcher. Corretto in `TripAutostrade` (⚠️ proprietà nativa, richiede una build, non passa da `eas update`).
 
