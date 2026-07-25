@@ -1,17 +1,42 @@
 # STATUS.md — Stato del progetto e ripartenza
 
 > Documento di handoff per la prossima sessione di sviluppo.
-> Ultimo aggiornamento: 20 luglio 2026. Leggere insieme a `CLAUDE.md` (regole tecniche).
+> Ultimo aggiornamento: 25 luglio 2026. Leggere insieme a `CLAUDE.md` (regole tecniche).
 
 ---
 
-## 0. Ripartenza rapida (agg. 20 luglio 2026)
+## 0. Ripartenza rapida (agg. 25 luglio 2026)
 
-### 🔴 PR IN CORSO da mergiare (contiene questo report + refresh UI)
-La PR aperta in questa sessione contiene: **refresh grafico** (tab bar Material 3 con pillola, SegmentedControl migliorato, **ModerationSheet** = bottom sheet custom per Segnala/Blocca al posto degli Alert), **firma "by Marco Santoro"** (Profilo + landing), e questo STATUS aggiornato. `tsc` pulito.
-> ⚠️ Nota storica: questo commit UI era rimasto fuori dal merge di #43 (mergiata su un commit precedente) ed è stato recuperato. Alla prossima, **verificare che la PR sia stata mergiata** e che main contenga `components/ModerationSheet.tsx` e il pill in `navigation/TabNavigator.tsx`.
+### ✅ Verificato: la PR #44 è mergiata
+Main contiene `components/ModerationSheet.tsx`, la pillola M3 in `navigation/TabNavigator.tsx` e `assets/store/`. Il dubbio segnato nel report del 20/07 è chiuso.
 
-### ✅ TUTTO IL CODICE È IN MAIN (via PR #35, #40, #41, #42, #43 + la PR UI in corso)
+### 📦 Sessione 25 luglio — preparazione Google Play passo 3
+Tutta la documentazione per la console è pronta in `assets/store/`, compilata da un **audit del codice** (non a memoria):
+
+| File | Contenuto |
+|---|---|
+| `play-checklist.md` | **Da leggere per primo** — sequenza account → closed testing → produzione, con i 3 errori che bloccano la pubblicazione |
+| `data-safety.md` | Modulo Sicurezza dei dati voce per voce, con il file che giustifica ogni risposta |
+| `content-rating.md` | Questionario IARC completo, con la dichiarazione UGC |
+| `screenshot-guide.md` | Shot list di 6 screenshot, requisiti tecnici, checklist anti-figuraccia |
+| `listing.md` | Aggiornato: conteggi ri-misurati + correzione del numero di aree |
+
+**Tre problemi reali trovati e risolti nel codice:**
+1. **Campo Nome mancante in registrazione** — `RegisterScreen` inviava solo email e password, il trigger scriveva `full_name = null` e **tutti** gli utenti apparivano come "Utente Autostradale" in recensioni e classifica. Aggiunto il campo, passato nei metadata di signup.
+2. **Pagina di eliminazione account assente** — Play la esige come URL pubblico per le app con registrazione. Creata `docs/elimina-account.html`, collegata da landing e privacy.
+3. **`app.json` → `name` era `tripautostrade`** minuscolo: è l'etichetta sotto l'icona nel launcher. Corretto in `TripAutostrade` (⚠️ proprietà nativa, richiede una build, non passa da `eas update`).
+
+**Il listing dichiarava "~637 aree"** contro le ~2809 reali: corretto in "oltre 2.800", ma **da confermare** con `select count(*) from service_areas;` prima di pubblicare.
+
+### 🔴 I due blocchi da non dimenticare per Play (dettagli in `play-checklist.md`)
+1. **Credenziali di test obbligatorie**: l'app è interamente dietro login (`App.tsx:56-64`), il revisore Google non vede nulla senza un account → creare `playreview@…` e compilare *Accesso all'app*, altrimenti la release viene respinta.
+2. **SHA-1 di Play App Signing sulla chiave Maps**: Google ri-firma l'AAB; se la chiave resta limitata al solo SHA-1 del keystore Expo, **in produzione la mappa è grigia per tutti**.
+
+### 🧭 Decisione presa: routing per "Dove mi fermo?"
+Approccio scelto (25/07): **astrazione del provider + OSRM adesso, innesto Google pronto ma non attivo**. Si scrive un'interfaccia `RouteProvider`, si implementa OSRM pubblico (gratuito, nessuna chiave, nessun billing) per validare la feature, e il passaggio a Google Directions resta una riga il giorno in cui servono traffico reale e SLA. **Non ancora implementato** — è il prossimo lavoro di codice.
+> ⚠️ Quando si implementa: partenza e destinazione escono dal dispositivo verso un server terzo, quindi la risposta "Posizione → non raccolta" del modulo Sicurezza dei dati **cambia**. Rileggere `assets/store/data-safety.md` prima di pubblicare quella feature.
+
+### ✅ TUTTO IL CODICE È IN MAIN (via PR #35, #40, #41, #42, #43, #44 + la PR di questa sessione)
 - **Google Play passi 1-2-5**: privacy (`docs/privacy.html`), eliminazione account (`delete-account`), store listing (`assets/store/`), materiali tester (`assets/store/invito-tester.md`) + sezione "Diventa tester" sulla landing
 - **Bug risolti**: like, notifiche push (FCM V1), scelta navigatore Maps/Waze
 - **Sicurezza — pentest 11/11** (`scripts/security_pentest.mjs`): RLS ovunque, `points` non scrivibile, `push_token` non leggibile, storage upload solo autenticati; `notify-like` protetto con secret
@@ -36,8 +61,8 @@ Gli script SQL sono nel repo ma vanno **eseguiti in Supabase SQL Editor** se non
 - **Supabase free**: va in pausa dopo ~1 settimana di inattività → riattivare da dashboard
 
 ### 🎯 Prossimi passi
-1. **Google Play passo 3**: account sviluppatore (25$) + **12 tester** (materiali in `assets/store/invito-tester.md`) → closed testing 14 giorni → build AAB (`eas build --profile production -p android`) → data safety + content rating
-2. **Differenziazione**: ✅ pagelle + area della settimana fatte; da fare: **"Dove mi fermo?"** (soste migliori lungo una tratta — decidere routing Google Directions vs OSRM + free/premium); crowdsourcing moderato nomi/servizi
+1. **Google Play passo 3** — ✅ documentazione pronta, ora è lavoro in console: seguire `assets/store/play-checklist.md` dall'inizio. Il collo di bottiglia è la **verifica identità** (2-7 giorni), da avviare subito; poi 12+ tester per 14 giorni. Gli **screenshot** sono l'unico asset che deve venire dal telefono (`screenshot-guide.md`)
+2. **Differenziazione**: ✅ pagelle + area della settimana fatte; da fare: **"Dove mi fermo?"** (soste migliori lungo una tratta) — ✅ **routing deciso** (astrazione + OSRM ora, Google pronto; vedi §0), resta da implementare
 3. **Monetizzazione**: tip jar Ko-fi attivo. A scala: ads (AdMob), premium "Plus" (route planner + no-ads via Play Billing/RevenueCat), partnership brand/EV, dati B2B
 4. **iOS** (fattibile, rimandato): `app.json` ha già il blocco iOS; serve profilo iOS in `eas.json`, Apple Maps vs Google, APNs, account Apple 99$/anno, TestFlight. Il "blocca utente" (requisito Apple 1.2) è già fatto
 
@@ -79,8 +104,9 @@ Percorso concordato, in ordine:
 2. ✅ **Eliminazione account** — bottone in ProfileScreen con doppia conferma + Edge Function `delete-account` (verifica JWT, poi con service role elimina foto storage, segnalazioni fatte/ricevute, like dati/ricevuti, recensioni, preferiti, profilo, utente auth; poi signOut locale). **Deployata** su Supabase e verificata.
 3. **Account sviluppatore Play** (25 $, verifica identità) — ⚠️ account personali: serve **closed testing con 12+ tester per 14 giorni** prima della produzione; reclutare dai beta tester della landing
 4. **Build AAB**: `eas build --profile production --platform android` (profilo già pronto, autoIncrement attivo)
-5. ✅ **Store listing** — testi pronti in `assets/store/listing.md` (titolo 29/30, breve 72/80, lunga 2271/4000, keyword, categoria Travel & Local); feature graphic 1024×500 in `assets/store/feature-graphic.png` (rigenerabile con `scripts/gen_feature_graphic.py`); icona 512 da `assets/icon.png`. **Mancano solo gli screenshot dal telefono** (min 2, meglio 4-8)
-6. Data safety form + content rating in console; eventuale `eas submit -p android` con service account Play
+5. ✅ **Store listing** — testi pronti in `assets/store/listing.md` (titolo 29/30, breve 72/80, lunga 2215/4000, keyword, categoria Travel & Local); feature graphic 1024×500 in `assets/store/feature-graphic.png` (rigenerabile con `scripts/gen_feature_graphic.py`); icona 512 da `assets/icon.png`. **Mancano solo gli screenshot dal telefono** — shot list e requisiti in `assets/store/screenshot-guide.md`
+6. ✅ **Data safety form + content rating** — risposte pronte in `assets/store/data-safety.md` e `content-rating.md`, da ricopiare in console. Eventuale `eas submit -p android` con service account Play
+7. ✅ **Eliminazione dati via web** — `docs/elimina-account.html` (URL richiesto da Play): `https://tripautostrade.it/elimina-account.html`
 
 ### Checklist sicurezza pre-Play
 - ✅ **`scripts/security_rls.sql` ESEGUITO** (14/07): RLS attivata su `reviews` (era disattivata — chiunque poteva forgiare/modificare recensioni); `points` non più scrivibile dal client (`update_user_points` SECURITY DEFINER, revoke UPDATE su `profiles`, grant solo `push_token`). Verificato.

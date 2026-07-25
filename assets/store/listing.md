@@ -2,6 +2,13 @@
 
 Testi pronti da incollare nella Play Console. Conteggi caratteri verificati.
 
+> Aggiornato il 25 luglio 2026. Il numero di aree nella descrizione lunga diceva "~637": era un
+> residuo di un seed vecchio, corretto in **oltre 2.800** (il DB ne ha ~2809 dopo la deduplica del
+> 14/07, vedi `STATUS.md` §1). ⚠️ **Conferma il numero** con
+> `select count(*) from service_areas;` prima di pubblicare: dichiarare più contenuti di quelli
+> reali è una dichiarazione fuorviante sullo store. I conteggi caratteri qui sopra sono stati
+> ri-misurati sul testo attuale.
+
 ---
 
 ## Titolo app — 29/30
@@ -16,7 +23,7 @@ TripAutostrade: Aree Servizio
 Le aree di servizio in autostrada: mappa, recensioni, filtri e preferiti
 ```
 
-## Descrizione lunga — 2271/4000
+## Descrizione lunga — 2215/4000
 
 ```
 🛣️ TripAutostrade — le aree di servizio dell'autostrada, raccontate da chi viaggia
@@ -24,7 +31,7 @@ Le aree di servizio in autostrada: mappa, recensioni, filtri e preferiti
 Stai per fare una sosta e non sai dove fermarti? TripAutostrade ti aiuta a scegliere l'area di servizio giusta lungo le autostrade italiane, con le informazioni e le recensioni di una community di viaggiatori come te.
 
 🗺️ MAPPA INTERATTIVA
-Esplora ~637 aree di servizio su una mappa chiara con pin e cluster. Tocca un'area e scopri servizi, recensioni e voti in un attimo.
+Esplora oltre 2.800 aree di servizio su una mappa chiara con pin e cluster. Tocca un'area e scopri servizi, recensioni e voti in un attimo.
 
 📍 VICINO A TE
 Attiva il GPS e trova subito le aree di servizio più vicine, ordinate per distanza. Perfetto quando la pausa serve adesso.
@@ -84,7 +91,17 @@ Scarica TripAutostrade, trova la tua prossima area di servizio e racconta com'è
 
 - **Icona:** `assets/icon.png` (1024×1024, Play accetta e ridimensiona a 512)
 - **Feature graphic 1024×500:** `assets/store/feature-graphic.png` (rigenerabile con `scripts/gen_feature_graphic.py`)
-- **Screenshot:** da acquisire dal telefono (min 2, consigliati 4–8): mappa con pin, scheda area, lista recensioni, profilo con punti/livello
+- **Screenshot:** da acquisire dal telefono — shot list, requisiti tecnici e checklist in **`screenshot-guide.md`**
+
+## Altri documenti dello store
+
+| File | Contenuto |
+|---|---|
+| `data-safety.md` | Modulo "Sicurezza dei dati" compilato voce per voce |
+| `content-rating.md` | Risposte al questionario IARC per la classificazione |
+| `screenshot-guide.md` | Shot list e requisiti degli screenshot |
+| `play-checklist.md` | Sequenza operativa in console, dall'account alla produzione |
+| `invito-tester.md` | Materiali per reclutare i 12 tester del closed testing |
 
 ## Nota operativa
 
