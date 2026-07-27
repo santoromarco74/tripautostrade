@@ -3,11 +3,7 @@
 Testi pronti da incollare nella Play Console. Conteggi caratteri verificati.
 
 > Aggiornato il 25 luglio 2026. Il numero di aree nella descrizione lunga diceva "~637": era un
-> residuo di un seed vecchio, corretto in **oltre 2.800** (il DB ne ha ~2809 dopo la deduplica del
-> 14/07, vedi `STATUS.md` §1). ⚠️ **Conferma il numero** con
-> `select count(*) from service_areas;` prima di pubblicare: dichiarare più contenuti di quelli
-> reali è una dichiarazione fuorviante sullo store. I conteggi caratteri qui sopra sono stati
-> ri-misurati sul testo attuale.
+> residuo di un seed vecchio, corretto in **oltre 2.700** 
 
 ---
 

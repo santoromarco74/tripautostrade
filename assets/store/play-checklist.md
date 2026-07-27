@@ -23,20 +23,51 @@ Leggere prima di tutto il resto.
 **non può vedere nulla** dell'app senza un account. Se lasci vuota la sezione *Accesso all'app*, la
 release viene respinta con "we were unable to access the app".
 
-→ Play Console → **Criteri → Contenuti dell'app → Accesso all'app** → *"Alcune o tutte le
+#### Come creare l'account del revisore
+
+⚠️ **Non usare un indirizzo `@tripautostrade.it`**: il dominio punta a GitHub Pages e **non ha
+hosting email**, quindi non riceverebbe la mail di conferma. E senza conferma il login non funziona —
+`RegisterScreen` dopo il signup rimanda a "Controlla la tua email per confermare l'account".
+
+**Opzione A — registrazione dall'app con alias Gmail (consigliata).** Registrati normalmente
+dall'app con `santoromarco+playreview@gmail.com`: Gmail consegna gli indirizzi con `+` nella casella
+normale, quindi la mail di conferma arriva e il link si può cliccare. L'account nasce dal percorso
+di signup reale, quindi il trigger imposta `full_name` correttamente. Il `+` non crea problemi né a
+Supabase né ai revisori, che fanno copia-incolla.
+
+**Opzione B — creazione da dashboard.** Supabase → **Authentication → Users → Add user**, con
+**Auto Confirm User** spuntato (salta la conferma, quindi l'indirizzo può anche non esistere).
+Il nome però va messo a mano, perché il trigger copia i metadata solo al signup:
+
+```sql
+update public.profiles set full_name = 'Revisore Play' where id = '<uuid utente>';
+```
+
+→ Poi Play Console → **Criteri → Contenuti dell'app → Accesso all'app** → *"Alcune o tutte le
 funzionalità sono limitate"* → aggiungi un'istruzione:
 
 ```
 Nome: Accesso completo
-Nome utente: playreview@tripautostrade.it   (crea un account dedicato)
-Password: <password dedicata>
+Nome utente: santoromarco+playreview@gmail.com
+Password: <password dedicata, non riusata altrove>
 Istruzioni: Inserire email e password nella schermata di login iniziale.
             Nessun altro passaggio richiesto. Tutte le funzioni sono
             disponibili subito dopo l'accesso.
 ```
 
-⚠️ Crea un **account dedicato** alla revisione, non usare il tuo. Non va eliminato finché l'app
-resta pubblicata: Google lo riusa a ogni aggiornamento.
+⚠️ Account **dedicato**, non il tuo. **Non eliminarlo** finché l'app resta pubblicata: Google lo
+riusa a ogni aggiornamento. Non serve che scriva recensioni — vede già quelle degli altri utenti, e
+quelle scritte dall'account di revisione sarebbero contenuto pubblico reale.
+
+#### 🔴 Supabase free non deve essere in pausa durante la revisione
+
+Il piano free mette il progetto in pausa dopo **~1 settimana di inattività** (`STATUS.md` §2). Se
+il progetto è in pausa quando Google apre l'app, il revisore vede `Network request failed` su
+schermata vuota e la release viene **respinta** — per una ragione che non c'entra col codice. Lo
+stesso vale nei 14 giorni di closed testing, dove i tester troverebbero l'app rotta.
+
+→ Durante revisione e testing tieni il progetto sveglio: basta aprire l'app o la dashboard ogni
+pochi giorni. È il singolo modo più stupido di perdere un giro di revisione.
 
 ### 2. SHA-1 di Play App Signing sulla chiave Google Maps
 
