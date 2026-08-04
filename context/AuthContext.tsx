@@ -8,7 +8,7 @@ interface AuthContextValue {
   user: User | null;
   isLoading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
 
@@ -48,8 +48,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (error) throw new Error(error.message);
   };
 
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
+  const signUp = async (email: string, password: string, fullName: string) => {
+    // full_name nei metadata: un trigger su auth.users lo copia in profiles.full_name
+    // (il client non puo' scrivere quella colonna — vedi security_rls.sql).
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } },
+    });
     if (error) throw new Error(error.message);
   };
 

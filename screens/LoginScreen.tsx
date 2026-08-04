@@ -12,15 +12,20 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
 import { Colors } from '../constants/Colors';
 import { supabase } from '../lib/supabase';
+import { RootStackParamList } from '../types/navigation';
 
 const RESET_PASSWORD_URL = 'https://tripautostrade.it/reset-password.html';
 
-export default function LoginScreen() {
+type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
+
+export default function LoginScreen({ navigation }: Props) {
   const { signIn, signUp } = useAuth();
   const [isRegistrazione, setIsRegistrazione] = useState(false);
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -54,6 +59,11 @@ export default function LoginScreen() {
 
   const gestisciSubmit = async () => {
     const emailTrimmed = email.trim().toLowerCase();
+    const nomeTrimmed = nome.trim();
+    if (isRegistrazione && !nomeTrimmed) {
+      Alert.alert('Campo mancante', 'Inserisci il tuo nome.');
+      return;
+    }
     if (!emailTrimmed || !password) {
       Alert.alert('Campi mancanti', 'Inserisci email e password.');
       return;
@@ -66,13 +76,15 @@ export default function LoginScreen() {
     setIsLoading(true);
     try {
       if (isRegistrazione) {
-        await signUp(emailTrimmed, password);
+        await signUp(emailTrimmed, password, nomeTrimmed);
         Alert.alert(
           'Registrazione completata',
           "Controlla la tua email per confermare l'account, poi accedi."
         );
+        setIsRegistrazione(false);
       } else {
         await signIn(emailTrimmed, password);
+        if (navigation.canGoBack()) navigation.goBack();
       }
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Errore sconosciuto';
@@ -100,6 +112,20 @@ export default function LoginScreen() {
         </View>
 
         <View style={styles.card}>
+          {isRegistrazione && (
+            <>
+              <Text style={styles.label}>Nome</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Come vuoi essere chiamato"
+                placeholderTextColor="#aaa"
+                value={nome}
+                onChangeText={setNome}
+                autoCapitalize="words"
+              />
+            </>
+          )}
+
           <Text style={styles.label}>Email</Text>
           <TextInput
             style={styles.input}

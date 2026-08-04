@@ -15,6 +15,7 @@ import { ModerationSheet } from '../components/ModerationSheet';
 import { SortFilterBar, SortOption } from '../components/SortFilterBar';
 import { useFavorites } from '../context/FavoritesContext';
 import { CATEGORIE_PAGELLA } from '../constants/pagelle';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 type ServiceAreaScreenProps = NativeStackScreenProps<any, 'ServiceArea'>;
 
@@ -48,6 +49,7 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
   });
 
   const { user } = useAuth();
+  const requireAuth = useRequireAuth();
   const { recensioni, toggleLike, blockUser } = useReviews();
   const { isFavorite, toggleFavorite } = useFavorites();
   const areaIsFavorite = isFavorite(serviceArea.id);
@@ -139,19 +141,17 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
 
       {/* ── 1. HEADER CARD con angoli arrotondati in basso ── */}
       <View style={styles.headerCard}>
-        {user && (
-          <TouchableOpacity
-            style={styles.btnBookmark}
-            onPress={() => toggleFavorite(serviceArea.id)}
-            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-          >
-            <Ionicons
-              name={areaIsFavorite ? 'bookmark' : 'bookmark-outline'}
-              size={24}
-              color={areaIsFavorite ? Colors.accent : Colors.textSecondary}
-            />
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={styles.btnBookmark}
+          onPress={() => { if (requireAuth()) toggleFavorite(serviceArea.id); }}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <Ionicons
+            name={areaIsFavorite ? 'bookmark' : 'bookmark-outline'}
+            size={24}
+            color={areaIsFavorite ? Colors.accent : Colors.textSecondary}
+          />
+        </TouchableOpacity>
         <Text style={styles.areaName}>{serviceArea.name || 'Area di Servizio'}</Text>
 
         {/* ── 2. BADGE SERVIZI in ScrollView orizzontale ── */}
@@ -178,15 +178,13 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
         </ScrollView>
 
         {/* Bottone segnala servizi */}
-        {user && (
-          <TouchableOpacity
-            style={styles.updateButton}
-            onPress={() => setIsServicesModalVisible(true)}
-          >
-            <Ionicons name="pencil-outline" size={15} color={Colors.primary} />
-            <Text style={styles.updateButtonText}>Segnala Servizi</Text>
-          </TouchableOpacity>
-        )}
+        <TouchableOpacity
+          style={styles.updateButton}
+          onPress={() => { if (requireAuth()) setIsServicesModalVisible(true); }}
+        >
+          <Ionicons name="pencil-outline" size={15} color={Colors.primary} />
+          <Text style={styles.updateButtonText}>Segnala Servizi</Text>
+        </TouchableOpacity>
       </View>
 
       {/* ── 3. LISTA RECENSIONI ── */}
@@ -230,22 +228,20 @@ export default function ServiceAreaScreen({ route, navigation }: ServiceAreaScre
             item={item}
             showAuthor
             currentUserId={user?.id}
-            onToggleLike={toggleLike}
-            onReport={(id) => setModerationId(id)}
+            onToggleLike={(id) => { if (requireAuth()) toggleLike(id); }}
+            onReport={(id) => { if (requireAuth()) setModerationId(id); }}
           />
         )}
       />
 
       {/* ── 4. FAB Scrivi Recensione ── */}
-      {user && (
-        <TouchableOpacity
-          style={styles.fab}
-          onPress={() => navigation.navigate('AddReview', { area: serviceArea })}
-          activeOpacity={0.85}
-        >
-          <Ionicons name="create-outline" size={28} color="#fff" />
-        </TouchableOpacity>
-      )}
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => { if (requireAuth()) navigation.navigate('AddReview', { area: serviceArea }); }}
+        activeOpacity={0.85}
+      >
+        <Ionicons name="create-outline" size={28} color="#fff" />
+      </TouchableOpacity>
 
       {/* ── BOTTOM SHEET MODERAZIONE (segnala / blocca) ── */}
       <ModerationSheet

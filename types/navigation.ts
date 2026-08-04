@@ -4,11 +4,6 @@ import { CompositeScreenProps } from '@react-navigation/native';
 import { ServiceArea } from '../data/serviceAreas';
 import { Pagelle } from '../constants/pagelle';
 
-export type AuthStackParamList = {
-  Login: undefined;
-  Register: undefined;
-};
-
 export type RecensioneEsistente = {
   id: string;
   stelle: number;
@@ -39,6 +34,11 @@ export type HomeScreenProps = CompositeScreenProps<
 
 export type ActivityScreenProps = CompositeScreenProps<
   BottomTabScreenProps<TabParamList, 'Attività'>,
+  NativeStackScreenProps<RootStackParamList>
+>;
+
+export type ProfileScreenProps = CompositeScreenProps<
+  BottomTabScreenProps<TabParamList, 'Profilo'>,
   NativeStackScreenProps<RootStackParamList>
 >;
 

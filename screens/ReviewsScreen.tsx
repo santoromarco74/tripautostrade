@@ -10,6 +10,7 @@ import { EmptyState } from '../components/EmptyState';
 import { ReportModal } from '../components/ReportModal';
 import { ModerationSheet } from '../components/ModerationSheet';
 import { SortFilterBar, SortOption } from '../components/SortFilterBar';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 function Stelle({ numero }: { numero: number }) {
   return (
@@ -54,6 +55,7 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
   const { area } = route.params;
   const { recensioni, isLoading, toggleLike, deleteReview, blockUser } = useReviews();
   const { user } = useAuth();
+  const requireAuth = useRequireAuth();
   const [reportingReviewId, setReportingReviewId] = useState<string | null>(null);
   const [moderazioneItem, setModerazioneItem] = useState<Recensione | null>(null);
   const [sortOption, setSortOption] = useState<SortOption>('recent');
@@ -209,7 +211,11 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
               />
             )}
             <View style={styles.cardFooter}>
-              <LikeButton item={item} currentUserId={user?.id} onToggle={toggleLike} />
+              <LikeButton
+                item={item}
+                currentUserId={user?.id}
+                onToggle={(id) => { if (requireAuth()) toggleLike(id); }}
+              />
               {user && item.userId !== user.id && (
                 <TouchableOpacity
                   onPress={() => setModerazioneItem(item)}
@@ -244,7 +250,7 @@ export default function ReviewsScreen({ route, navigation }: ReviewScreenProps) 
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.btnScrivi}
-          onPress={() => navigation.navigate('AddReview', { area })}
+          onPress={() => { if (requireAuth()) navigation.navigate('AddReview', { area }); }}
           activeOpacity={0.8}
         >
           <Ionicons name="create-outline" size={18} color="#fff" style={{ marginRight: 8 }} />

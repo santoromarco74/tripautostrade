@@ -20,8 +20,9 @@ import { ReviewCard } from '../components/ReviewCard';
 import { BlockedUsersModal } from '../components/BlockedUsersModal';
 import { calcolaTitolo } from '../utils/livelli';
 import { SUPPORT_URL } from '../constants/support';
+import { ProfileScreenProps } from '../types/navigation';
 
-export default function ProfileScreen() {
+export default function ProfileScreen({ navigation }: ProfileScreenProps) {
   const { user, signOut } = useAuth();
   const { recensioni, deleteReview, toggleLike } = useReviews();
   const insets = useSafeAreaInsets();
@@ -43,6 +44,33 @@ export default function ProfileScreen() {
         });
     }, [user?.id])
   );
+
+  if (!user) {
+    return (
+      <View style={[styles.loggedOutContainer, { paddingTop: insets.top + 32 }]}>
+        <View style={styles.loggedOutIconCircle}>
+          <Ionicons name="person-outline" size={40} color={Colors.primary} />
+        </View>
+        <Text style={styles.loggedOutTitolo}>Accedi al tuo profilo</Text>
+        <Text style={styles.loggedOutSottotitolo}>
+          Punti, livello, le tue recensioni e le impostazioni dell'account ti aspettano — bastano email e password.
+        </Text>
+        <TouchableOpacity
+          style={styles.btnAccedi}
+          onPress={() => navigation.navigate('Login')}
+          activeOpacity={0.85}
+        >
+          <Text style={styles.btnAccediTesto}>Accedi o registrati</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => Linking.openURL('https://tripautostrade.it/privacy.html')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.linkPrivacy}>Privacy Policy</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   const nomeCompleto = (user?.user_metadata?.full_name as string | undefined)
     ?? user?.email?.split('@')[0]
@@ -345,6 +373,49 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
+  },
+
+  // ── Vista utente non loggato ─────────────────────────────────────────────
+  loggedOutContainer: {
+    flex: 1,
+    backgroundColor: Colors.background,
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    gap: 8,
+  },
+  loggedOutIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#E6F4F1',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  loggedOutTitolo: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: Colors.text,
+    textAlign: 'center',
+  },
+  loggedOutSottotitolo: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  btnAccedi: {
+    backgroundColor: Colors.primary,
+    borderRadius: 28,
+    paddingVertical: 15,
+    paddingHorizontal: 40,
+    marginBottom: 16,
+  },
+  btnAccediTesto: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 15,
   },
   listaContent: {
     paddingHorizontal: 16,
