@@ -57,7 +57,7 @@ export default function OnboardingScreen({ navigation }: Props) {
 
   const handleStart = async () => {
     await AsyncStorage.setItem('hasSeenOnboarding', 'true');
-    navigation.replace('Login');
+    navigation.replace('Main');
   };
 
   const handleNext = () => {

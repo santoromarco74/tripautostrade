@@ -17,23 +17,33 @@ evidenza. I contenuti da incollare sono negli altri file di questa cartella.
 
 Leggere prima di tutto il resto.
 
-### 1. Credenziali di test obbligatorie — l'app è interamente dietro login
+### 1. Credenziali di test comunque necessarie — l'app si naviga senza login, ma scrivere richiede un account
 
-`App.tsx:56-64`: senza sessione l'unica schermata raggiungibile è il Login. Il revisore Google
-**non può vedere nulla** dell'app senza un account. Se lasci vuota la sezione *Accesso all'app*, la
-release viene respinta con "we were unable to access the app".
+Dal 29/07 l'app **non** è più dietro un muro di login: mappa, schede area, recensioni e classifica
+sono visibili a chiunque apra l'app (RLS pubblica lato Supabase — `scripts/security_rls.sql` — non
+cambiata; è cambiato solo `App.tsx`, che prima mostrava *solo* `LoginScreen` senza sessione). Login
+resta necessario solo per le azioni che scrivono dati: scrivere una recensione, mettere like,
+salvare un preferito, segnalare/bloccare un utente, vedere il proprio profilo. Ognuna di queste
+azioni, se tentata senza sessione, ora reindirizza a Login invece di fallire in silenzio
+(`hooks/useRequireAuth.ts`).
+
+Questo **non elimina** il campo *Accesso all'app*: il revisore Google deve comunque poter testare
+scrittura recensioni, like e profilo, quindi serve un account funzionante lo stesso — cambia solo
+il testo delle istruzioni (sotto).
 
 #### Come creare l'account del revisore
 
 ⚠️ **Non usare un indirizzo `@tripautostrade.it`**: il dominio punta a GitHub Pages e **non ha
-hosting email**, quindi non riceverebbe la mail di conferma. E senza conferma il login non funziona —
-`RegisterScreen` dopo il signup rimanda a "Controlla la tua email per confermare l'account".
+hosting email**, quindi non riceverebbe la mail di conferma. Senza conferma il login non funziona —
+dopo la registrazione l'app mostra "Controlla la tua email per confermare l'account".
 
-**Opzione A — registrazione dall'app con alias Gmail (consigliata).** Registrati normalmente
-dall'app con `santoromarco+playreview@gmail.com`: Gmail consegna gli indirizzi con `+` nella casella
-normale, quindi la mail di conferma arriva e il link si può cliccare. L'account nasce dal percorso
-di signup reale, quindi il trigger imposta `full_name` correttamente. Il `+` non crea problemi né a
-Supabase né ai revisori, che fanno copia-incolla.
+**Opzione A — registrazione dall'app con alias Gmail (consigliata).** Apri l'app (non serve più
+attraversare nessun login per arrivarci), vai sulla tab **Profilo** → **Accedi o registrati** →
+passa a "Registrati" e usa `santoromarco+playreview@gmail.com`: Gmail consegna gli indirizzi con
+`+` nella casella normale, quindi la mail di conferma arriva e il link si può cliccare. L'account
+nasce dal percorso di signup reale (che ora chiede anche il Nome), quindi il trigger imposta
+`full_name` correttamente. Il `+` non crea problemi né a Supabase né ai revisori, che fanno
+copia-incolla.
 
 **Opzione B — creazione da dashboard.** Supabase → **Authentication → Users → Add user**, con
 **Auto Confirm User** spuntato (salta la conferma, quindi l'indirizzo può anche non esistere).
@@ -50,9 +60,11 @@ funzionalità sono limitate"* → aggiungi un'istruzione:
 Nome: Accesso completo
 Nome utente: santoromarco+playreview@gmail.com
 Password: <password dedicata, non riusata altrove>
-Istruzioni: Inserire email e password nella schermata di login iniziale.
-            Nessun altro passaggio richiesto. Tutte le funzioni sono
-            disponibili subito dopo l'accesso.
+Istruzioni: L'app è consultabile senza account (mappa, schede area,
+            recensioni, classifica). Per testare scrittura recensioni,
+            like, preferiti e profilo, accedere con le credenziali sopra
+            dalla tab Profilo (o dal prompt che compare toccando una di
+            quelle azioni).
 ```
 
 ⚠️ Account **dedicato**, non il tuo. **Non eliminarlo** finché l'app resta pubblicata: Google lo
@@ -87,6 +99,14 @@ package `com.santoromarco74.tripautostrade`, e restrizione API → solo *Maps SD
 `app.json` → `name` è passato da `tripautostrade` a `TripAutostrade`: è il nome sotto l'icona nel
 launcher. È una proprietà **nativa**, quindi **non** si distribuisce via `eas update` — serve una
 build. Va comunque bene, perché per Play serve l'AAB.
+
+⚠️ **Se hai già caricato un AAB prima del 29/07**: non contiene né questo nome né la navigazione
+senza login né il campo Nome in registrazione (vedi punto 1). Prima di avviare qualunque rollout
+(interno o chiuso), rilancia `eas build --profile production --platform android` e sostituisci
+l'AAB nella release. Le modifiche sono pure JS (nessun modulo nativo nuovo), ma per la primissima
+apertura conviene comunque una build fresca invece di affidarsi all'OTA: gli aggiornamenti
+`expo-updates` si applicano solo dal secondo avvio (`UpdateBanner.tsx`), quindi un tester al primo
+avvio vedrebbe ancora il vecchio comportamento.
 
 ---
 

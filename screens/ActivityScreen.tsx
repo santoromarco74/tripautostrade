@@ -115,11 +115,19 @@ export default function ActivityScreen({ navigation }: ActivityScreenProps) {
           keyExtractor={(item) => String(item.id)}
           contentContainerStyle={styles.lista}
           ListEmptyComponent={
-            <EmptyState
-              icon="bookmark-outline"
-              title="Nessun preferito"
-              subtitle="Salva le aree di servizio che ti interessano dalla mappa o dalla scheda area"
-            />
+            user ? (
+              <EmptyState
+                icon="bookmark-outline"
+                title="Nessun preferito"
+                subtitle="Salva le aree di servizio che ti interessano dalla mappa o dalla scheda area"
+              />
+            ) : (
+              <EmptyState
+                icon="log-in-outline"
+                title="Accedi per salvare i preferiti"
+                subtitle="Vai sulla tab Profilo per accedere o creare un account"
+              />
+            )
           }
           renderItem={({ item }) => {
             const distance = userLocation

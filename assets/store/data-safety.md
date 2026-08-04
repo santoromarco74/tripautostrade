@@ -46,15 +46,19 @@ conta come condivisione).
 | Obbligatorio o facoltativo | **Obbligatorio** (richiesto in registrazione) |
 | Finalità | Funzionalità dell'app · Gestione dell'account |
 
-Il nome è raccolto in registrazione (`screens/RegisterScreen.tsx`), passa nei metadata di signup,
-un trigger su `auth.users` lo copia in `profiles.full_name` (il client non può scrivere quella
-colonna — `scripts/security_rls.sql`) e **viene mostrato pubblicamente** accanto alle recensioni e
-nella classifica (`screens/ActivityScreen.tsx:54-56`). Da segnalare nella privacy policy come
-informazione visibile agli altri utenti — non è un dato privato.
+Il nome è raccolto in registrazione (`screens/LoginScreen.tsx`, toggle "Registrati"), passa nei
+metadata di signup (`context/AuthContext.tsx` → `signUp`), un trigger su `auth.users` lo copia in
+`profiles.full_name` (il client non può scrivere quella colonna — `scripts/security_rls.sql`) e
+**viene mostrato pubblicamente** accanto alle recensioni e nella classifica
+(`screens/ActivityScreen.tsx:54-56`). Da segnalare nella privacy policy come informazione visibile
+agli altri utenti — non è un dato privato.
 
-> Il campo nome è stato aggiunto in questa sessione: prima la registrazione inviava solo email e
-> password, il trigger scriveva `null` e **tutti** gli utenti comparivano come "Utente Autostradale".
-> Gli account creati prima del fix restano senza nome (vedi nota in `play-checklist.md`).
+> Il campo nome è stato aggiunto il 25/07: prima la registrazione inviava solo email e password, il
+> trigger scriveva `null` e **tutti** gli utenti comparivano come "Utente Autostradale". Un primo
+> tentativo di fix aveva toccato `screens/RegisterScreen.tsx` — poi risultato **codice morto, mai
+> collegato alla navigazione** (il flusso vero passava da `LoginScreen`) — e rimosso il 29/07 insieme
+> al fix reale su `LoginScreen`/`AuthContext`. Gli account creati prima del 25/07 restano senza nome
+> (vedi nota in `play-checklist.md` e `scripts/backfill_full_name.sql`).
 
 ### 2. Informazioni personali → Indirizzo email
 

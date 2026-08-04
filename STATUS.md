@@ -1,14 +1,25 @@
 # STATUS.md — Stato del progetto e ripartenza
 
 > Documento di handoff per la prossima sessione di sviluppo.
-> Ultimo aggiornamento: 25 luglio 2026. Leggere insieme a `CLAUDE.md` (regole tecniche).
+> Ultimo aggiornamento: 29 luglio 2026. Leggere insieme a `CLAUDE.md` (regole tecniche).
 
 ---
 
-## 0. Ripartenza rapida (agg. 25 luglio 2026)
+## 0. Ripartenza rapida (agg. 29 luglio 2026)
 
 ### ✅ Verificato: la PR #44 è mergiata
 Main contiene `components/ModerationSheet.tsx`, la pillola M3 in `navigation/TabNavigator.tsx` e `assets/store/`. Il dubbio segnato nel report del 20/07 è chiuso.
+
+### 📦 Sessione 29 luglio — l'app è navigabile senza account
+Cambio architetturale: prima `App.tsx` mostrava **solo** `LoginScreen` senza sessione (mappa, recensioni, tutto invisibile finché non si accedeva). Ora si naviga liberamente — mappa, schede area, recensioni, classifica sono pubbliche lato RLS (`security_rls.sql`, mai cambiata: il blocco era solo client-side). Login resta necessario solo per le azioni che scrivono dati: scrivere recensione, like, preferito, segnala/blocca, profilo. Ognuna di queste, se tentata senza sessione, ora reindirizza a Login invece di fallire in silenzio o restare nascosta (`hooks/useRequireAuth.ts`).
+
+**Perché ora**: nessun rollout era ancora partito (AAB solo caricato in bozza su Play, nessun tester invitato) — la finestra più pulita possibile per un cambio di questa portata, prima che qualcuno formasse una prima impressione dell'app.
+
+**Scoperta importante durante l'implementazione**: il fix "campo Nome in registrazione" della sessione del 25/07 aveva toccato `screens/RegisterScreen.tsx`, che risultava **codice morto — mai collegato a nessun navigator**. Il flusso di registrazione vero passa da `LoginScreen.tsx` (toggle interno) → `AuthContext.signUp`, che non inviava il nome. **Il fix del 25/07 non era mai stato attivo in produzione.** Corretto ora sul flusso reale (`LoginScreen.tsx` + `AuthContext.tsx`), `RegisterScreen.tsx` e il tipo `AuthStackParamList` (mai usati altrove) sono stati rimossi. Se hai già creato l'account revisore Play o fatto backfill prima di questa correzione, va bene lo stesso — il campo nome ora funziona per davvero dal form di Login.
+
+**File toccati**: `App.tsx` (RootNavigator ristrutturato, Login è ora una screen pushata come le altre), `context/AuthContext.tsx`, `screens/LoginScreen.tsx` (campo Nome + `navigation.goBack()` dopo login), `screens/OnboardingScreen.tsx` (porta a `Main`, non più a `Login`), `screens/ServiceAreaScreen.tsx` e `screens/ReviewsScreen.tsx` (bookmark/segnala/FAB/like sempre visibili, redirect a Login su tap se non loggato), `screens/ProfileScreen.tsx` (vista dedicata "Accedi al tuo profilo" quando `!user`), `screens/ActivityScreen.tsx` (empty state Preferiti differenziato), `types/navigation.ts` (`ProfileScreenProps` nuovo, `AuthStackParamList` rimosso), `hooks/useRequireAuth.ts` (nuovo).
+
+⚠️ **Serve una build nuova prima di qualunque rollout**: sono modifiche pure JS (nessun modulo nativo), ma se avevi già caricato un AAB su Play prima di questa sessione non contiene questi cambi né il nome app `TripAutostrade` né il fix vero del campo Nome. `eas build --profile production --platform android` e sostituisci l'AAB prima di avviare test interno o chiuso — vedi `play-checklist.md` punto 3.
 
 ### 📦 Sessione 25 luglio — preparazione Google Play passo 3
 Tutta la documentazione per la console è pronta in `assets/store/`, compilata da un **audit del codice** (non a memoria):
@@ -22,15 +33,16 @@ Tutta la documentazione per la console è pronta in `assets/store/`, compilata d
 | `listing.md` | Aggiornato: conteggi ri-misurati + correzione del numero di aree |
 
 **Tre problemi reali trovati e risolti nel codice:**
-1. **Campo Nome mancante in registrazione** — `RegisterScreen` inviava solo email e password, il trigger scriveva `full_name = null` e **tutti** gli utenti apparivano come "Utente Autostradale" in recensioni e classifica. Aggiunto il campo, passato nei metadata di signup. Per gli account preesistenti: eseguire `scripts/backfill_full_name.sql` (pseudonimo neutro, **non** il prefisso dell'email che è pubblico e contraddirebbe la privacy). ⚠️ Resta aperto: l'utente non può cambiare il proprio nome dall'app — vedi note nello script.
+1. **Campo Nome mancante in registrazione** — vedi però la correzione importante nella sessione del 29/07 sopra: il fix qui descritto non era mai attivo in produzione.
 2. **Pagina di eliminazione account assente** — Play la esige come URL pubblico per le app con registrazione. Creata `docs/elimina-account.html`, collegata da landing e privacy.
 3. **`app.json` → `name` era `tripautostrade`** minuscolo: è l'etichetta sotto l'icona nel launcher. Corretto in `TripAutostrade` (⚠️ proprietà nativa, richiede una build, non passa da `eas update`).
 
 **Il listing dichiarava "~637 aree"** contro le ~2809 reali: corretto in "oltre 2.800", ma **da confermare** con `select count(*) from service_areas;` prima di pubblicare.
 
-### 🔴 I due blocchi da non dimenticare per Play (dettagli in `play-checklist.md`)
-1. **Credenziali di test obbligatorie**: l'app è interamente dietro login (`App.tsx:56-64`), il revisore Google non vede nulla senza un account → creare `playreview@…` e compilare *Accesso all'app*, altrimenti la release viene respinta.
+### 🔴 I blocchi da non dimenticare per Play (dettagli in `play-checklist.md`)
+1. **Credenziali di test comunque necessarie**: l'app si naviga senza login, ma scrivere recensioni/like/preferiti/profilo richiede un account → creare `playreview@…` e compilare *Accesso all'app* con le istruzioni aggiornate (non più "tutte le funzioni richiedono login").
 2. **SHA-1 di Play App Signing sulla chiave Maps**: Google ri-firma l'AAB; se la chiave resta limitata al solo SHA-1 del keystore Expo, **in produzione la mappa è grigia per tutti**.
+3. **Build nuova prima del rollout**: vedi sopra.
 
 ### 🧭 Decisione presa: routing per "Dove mi fermo?"
 Approccio scelto (25/07): **astrazione del provider + OSRM adesso, innesto Google pronto ma non attivo**. Si scrive un'interfaccia `RouteProvider`, si implementa OSRM pubblico (gratuito, nessuna chiave, nessun billing) per validare la feature, e il passaggio a Google Directions resta una riga il giorno in cui servono traffico reale e SLA. **Non ancora implementato** — è il prossimo lavoro di codice.
@@ -82,7 +94,7 @@ L'app è **distribuita e operativa** su dispositivi reali. Tutta la filiera è v
 - **Database**: **2809 aree di servizio** (deduplicate il 14/07, da 3024; seed OpenStreetMap `scripts/seed_service_areas.sql`, idempotente anche per prossimità). ~1900 hanno ancora nome generico "Area di servizio" (OSM non ne ha uno migliore — vedi §4)
 
 ### Feature dell'app oggi
-Mappa con pin e cluster **come immagini PNG native** (mai view custom nei Marker — vedi CLAUDE.md §4, bug snapshot Android), filtri brand/servizi, ricerca con autocomplete, "Vicino a te" (FAB + bottom sheet per distanza), recensioni con foto compresse, like con optimistic update (React Query), preferiti, segnalazioni, gamification punti/livelli via trigger SQL, **classifica top 20** (tab in Attività), modalità offline (banner globale + cache), onboarding, **scelta navigatore (Google Maps / Waze) al tocco di "Naviga"**.
+**Navigabile senza account** (dal 29/07): mappa, schede area, recensioni e classifica visibili a chiunque; login richiesto solo per scrivere/interagire. Mappa con pin e cluster **come immagini PNG native** (mai view custom nei Marker — vedi CLAUDE.md §4, bug snapshot Android), filtri brand/servizi, ricerca con autocomplete, "Vicino a te" (FAB + bottom sheet per distanza), recensioni con foto compresse, like con optimistic update (React Query), preferiti, segnalazioni, gamification punti/livelli via trigger SQL, **classifica top 20** (tab in Attività), modalità offline (banner globale + cache), onboarding, **scelta navigatore (Google Maps / Waze) al tocco di "Naviga"**.
 
 ## 2. Infrastruttura e credenziali (già configurate)
 

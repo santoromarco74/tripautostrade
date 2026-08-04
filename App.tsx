@@ -25,7 +25,7 @@ import { RootStackParamList } from './types/navigation';
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 function RootNavigator() {
-  const { session, isLoading } = useAuth();
+  const { isLoading } = useAuth();
   const [hasSeenOnboarding, setHasSeenOnboarding] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -42,49 +42,36 @@ function RootNavigator() {
     );
   }
 
-  if (!hasSeenOnboarding) {
-    return (
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
-          <Stack.Screen name="Login" component={LoginScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    );
-  }
-
-  if (!session) {
-    return (
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    );
-  }
-
+  // L'app è navigabile senza account (mappa, recensioni, classifica sono
+  // pubbliche lato RLS — vedi security_rls.sql). Login resta una schermata
+  // raggiungibile, non un requisito per vedere l'app: le azioni che scrivono
+  // dati la richiedono singolarmente (vedi useRequireAuth).
   return (
     <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen
-          name="Main"
-          component={TabNavigator}
-          options={{ headerShown: false }}
-        />
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        {!hasSeenOnboarding && (
+          <Stack.Screen name="Onboarding" component={OnboardingScreen} />
+        )}
+        <Stack.Screen name="Main" component={TabNavigator} />
         <Stack.Screen
           name="ServiceArea"
           component={ServiceAreaScreen}
-          options={{ title: 'Area di Servizio' }}
+          options={{ headerShown: true, title: 'Area di Servizio' }}
         />
         <Stack.Screen
           name="Reviews"
           component={ReviewsScreen}
-          options={{ title: 'Recensioni' }}
+          options={{ headerShown: true, title: 'Recensioni' }}
         />
         <Stack.Screen
           name="AddReview"
           component={AddReviewScreen}
-          options={{ title: 'Scrivi una recensione', presentation: 'modal' }}
+          options={{ headerShown: true, title: 'Scrivi una recensione', presentation: 'modal' }}
+        />
+        <Stack.Screen
+          name="Login"
+          component={LoginScreen}
+          options={{ headerShown: true, title: '', presentation: 'modal' }}
         />
       </Stack.Navigator>
     </NavigationContainer>
