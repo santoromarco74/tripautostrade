@@ -175,7 +175,7 @@ ragione forte.
 - [ ] `eas build --profile production --platform android` → produce l'**AAB** (`autoIncrement` attivo)
 - [ ] Crea la traccia **Test chiuso** → carica l'AAB
 - [ ] Note di rilascio in italiano
-- [ ] Crea la lista tester (email Google dei partecipanti) e invia il link di opt-in
+- [ ] Collega la traccia al **Google Group `tripautostrade-testers@googlegroups.com`** invece che a una lista di email: chi entra nel gruppo si abilita da solo (verifica che il gruppo sia aperto alle iscrizioni — dettagli in `invito-tester.md`) e condividi i due link **nell'ordine giusto**, gruppo prima di opt-in
 - [ ] Fai il giro dei SHA-1 → errore 🔴 2, **prima** che i tester provino la mappa
 - [ ] Attendi **14 giorni** con **12+ tester attivi**, poi in console appare *Richiedi l'accesso alla
       produzione*
