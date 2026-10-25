@@ -1,14 +1,43 @@
 # STATUS.md — Stato del progetto e ripartenza
 
 > Documento di handoff per la prossima sessione di sviluppo.
-> Ultimo aggiornamento: 29 luglio 2026. Leggere insieme a `CLAUDE.md` (regole tecniche).
+> Ultimo aggiornamento: 24 ottobre 2026. Leggere insieme a `CLAUDE.md` (regole tecniche).
 
 ---
 
-## 0. Ripartenza rapida (agg. 29 luglio 2026)
+## 0. Ripartenza rapida (agg. 24 ottobre 2026)
 
-### ✅ Verificato: la PR #44 è mergiata
-Main contiene `components/ModerationSheet.tsx`, la pillola M3 in `navigation/TabNavigator.tsx` e `assets/store/`. Il dubbio segnato nel report del 20/07 è chiuso.
+### 📍 Dove siamo: closed testing avviato, fermo a 4 tester su 12
+
+Lo stato verificato oggi direttamente su Supabase e Play:
+
+| Cosa | Stato |
+|---|---|
+| Progetto Supabase `gkyahazhuvtiqersqlmh` | ✅ `ACTIVE_HEALTHY` — **non** è andato in pausa nonostante ~3 mesi di inattività |
+| Aree di servizio | **2720** (conferma definitiva: "oltre 2.700" in `listing.md` è corretto) |
+| Recensioni nel DB | ⚠️ **0** |
+| Profili | 3, tutti con `full_name` valorizzato |
+| Tester closed testing | ⚠️ **4 su 12 richiesti** |
+
+### 🔴 I due problemi che bloccano il lancio
+
+**1. Mancano 8 tester.** Il requisito Google (account personali) è 12 tester iscritti per 14 giorni
+consecutivi, e il conteggio non parte finché non si arriva a 12.
+
+La causa del blocco a 4 era un **imbuto rotto sulla landing**: il bottone "Entra nel programma
+tester" puntava dritto al link di opt-in di Play, che però **funziona solo per chi è già abilitato**.
+Chiunque altro riceveva un errore. Risolto il 24/10: la landing ora presenta i due passaggi nella
+sequenza corretta (prima il gruppo Google, poi l'opt-in), e `invito-tester.md` è allineato.
+
+⚠️ **Da verificare in Google Groups**: il gruppo `tripautostrade-testers` deve avere *Chi può
+iscriversi* impostato su "Chiunque può iscriversi" (o "chiedere di iscriversi"). Se resta su "Solo
+utenti invitati", il bottone sulla landing continua a non servire a nulla.
+
+**2. Il database è vuoto di contenuti.** Zero recensioni significa che il revisore Google aprirebbe
+un'app senza nulla da leggere, e che lo scatto della lista recensioni previsto in
+`screenshot-guide.md` non è realizzabile. I 4 tester attuali hanno installato ma non si sono
+registrati (3 profili) e non hanno recensito. Convincere loro a scrivere qualche recensione vera
+risolve questo problema indipendentemente da quota 12.
 
 ### 📦 Sessione 29 luglio — l'app è navigabile senza account
 Cambio architetturale: prima `App.tsx` mostrava **solo** `LoginScreen` senza sessione (mappa, recensioni, tutto invisibile finché non si accedeva). Ora si naviga liberamente — mappa, schede area, recensioni, classifica sono pubbliche lato RLS (`security_rls.sql`, mai cambiata: il blocco era solo client-side). Login resta necessario solo per le azioni che scrivono dati: scrivere recensione, like, preferito, segnala/blocca, profilo. Ognuna di queste, se tentata senza sessione, ora reindirizza a Login invece di fallire in silenzio o restare nascosta (`hooks/useRequireAuth.ts`).
