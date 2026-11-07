@@ -1,0 +1,29 @@
+name: Supabase keep-alive
+
+# Il piano free di Supabase mette in pausa il progetto dopo 7 giorni di bassa
+# attività. Una query reale al database ogni 3 giorni lo tiene attivo.
+#
+# Il job PREVIENE la pausa, non la annulla: se il progetto è già in pausa la
+# query fallisce, il job diventa rosso (GitHub avvisa via email) e il progetto
+# va riattivato a mano dalla dashboard Supabase.
+on:
+  schedule:
+    - cron: '17 6 */3 * *' # ogni 3 giorni alle 06:17 UTC
+  workflow_dispatch: # avvio manuale dalla tab Actions
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Query su service_areas
+        env:
+          # Chiave publishable: pubblica per design, la stessa di lib/supabase.ts.
+          # La lettura di service_areas è consentita ad anon dalla RLS.
+          SUPABASE_URL: https://gkyahazhuvtiqersqlmh.supabase.co
+          SUPABASE_KEY: sb_publishable_4iee5t_pvQt5ZMGOnkcuWA_CENLTuFZ
+        run: |
+          status=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 \
+            "$SUPABASE_URL/rest/v1/service_areas?select=id&limit=1" \
+            -H "apikey: $SUPABASE_KEY")
+          echo "HTTP $status"
+          test "$status" = "200"

@@ -13,7 +13,7 @@ Lo stato verificato oggi direttamente su Supabase e Play:
 
 | Cosa | Stato |
 |---|---|
-| Progetto Supabase `gkyahazhuvtiqersqlmh` | ✅ `ACTIVE_HEALTHY` — **non** è andato in pausa nonostante ~3 mesi di inattività |
+| Progetto Supabase `gkyahazhuvtiqersqlmh` | `ACTIVE_HEALTHY` al 24/10, ma **va in pausa ogni 7 giorni** di inattività (riattivato a mano da Marco) → keep-alive aggiunto il 07/11, vedi sotto |
 | Aree di servizio | **2720** (conferma definitiva: "oltre 2.700" in `listing.md` è corretto) |
 | Recensioni nel DB | ⚠️ **0** |
 | Profili | 3, tutti con `full_name` valorizzato |
@@ -99,7 +99,7 @@ Gli script SQL sono nel repo ma vanno **eseguiti in Supabase SQL Editor** se non
 - **"Leaked password protection"**: richiede piano Supabase **Pro** (warning Advisor accettato su free)
 - **Su Play**: aggiungere il SHA-1 di **Play App Signing** alle restrizioni chiave Maps (Google ri-firma l'AAB)
 - **~1900 aree** con nome generico "Area di servizio" (limite OSM)
-- **Supabase free**: va in pausa dopo ~1 settimana di inattività → riattivare da dashboard
+- **Supabase free**: va in pausa dopo 7 giorni di bassa attività. Dal 07/11 il workflow `.github/workflows/supabase-keepalive.yml` fa una query reale ogni 3 giorni per prevenirlo. Il job **previene** la pausa ma non la annulla: se è già in pausa il job diventa rosso (email da GitHub) e il progetto va riattivato dalla dashboard. ⚠️ GitHub disattiva i workflow programmati dei repo pubblici dopo 60 giorni senza commit (manda prima un'email): in quel caso basta riattivarlo dalla tab Actions
 
 ### 🎯 Prossimi passi
 1. **Google Play passo 3** — ✅ documentazione pronta, ora è lavoro in console: seguire `assets/store/play-checklist.md` dall'inizio. Il collo di bottiglia è la **verifica identità** (2-7 giorni), da avviare subito; poi 12+ tester per 14 giorni. Gli **screenshot** sono l'unico asset che deve venire dal telefono (`screenshot-guide.md`)
